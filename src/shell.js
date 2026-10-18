@@ -7,7 +7,7 @@ import { switchTab, loadBakeLog } from './app.js';
 const SETTINGS_KEY = 'sourdoughSettings';
 const THEME_KEY = 'sourdoughTheme';
 const LOG_KEY = 'sourdoughLogs';
-const PAGE_COLOURS = { light: '#667eea', dark: '#12141c' };
+const PAGE_COLOURS = { light: '#9E3326', dark: '#30231D' }; // the header colour in each theme
 
 // Add a LinkedIn URL here and it appears in the footer.
 const FOOTER_LINKS = [

@@ -62,6 +62,10 @@ Both rests default to 1 hour but can be set anywhere from 30 to 60 minutes. A bu
 
 Once you've worked out your feed (or told the app when you fed), a **Your timeline** panel under the progress bar lists when each step happens: autolyse, adding the starter, salt, the folds, the end of bulk, shaping, the fridge, oven on, bake and loaf out, with the free time between them. It assumes a 24°C dough and a morning bake at 08:00, and you can change the feed time, dough temperature, bake time and extra fridge days in the panel. Rest lengths come from the steps, and the plan moves if you record your real start and end times. Tapping **Bake** while you are mid-bake asks if you want to go back to the beginning.
 
+## Look and feel
+
+The style comes from a sourdough tea towel: **light mode** is cream with terracotta and rust red, slab-serif headings, double rules and a polka-dot border; **dark mode** (called ember) is warm brown with ember orange. The colours are CSS variables at the top of `src/styles.css`, and the heading font (Alfa Slab One) is bundled so it works offline.
+
 ## Made easy to follow
 
 Every step title and the tricky terms (feeding ratio, dough temperature, target rise and so on) have a small (i) button. Hover over it, tab to it, or tap it to see a plain-English explanation; tap away to close it.

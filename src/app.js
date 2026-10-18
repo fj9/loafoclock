@@ -1197,7 +1197,7 @@ function updateTimerDisplay() {
 
 function playNotification() {
     // Visual notification
-    document.getElementById('timer-display').style.color = '#ffc107';
+    document.getElementById('timer-display').style.color = 'var(--warn)';
     setTimeout(() => {
         document.getElementById('timer-display').style.color = 'white';
     }, 1000);
@@ -1360,7 +1360,7 @@ export function loadBakeLog() {
         let outcomeColor = 'var(--muted)';
         if (log.outcome === 'Excellent') outcomeColor = 'var(--good)';
         else if (log.outcome === 'Good') outcomeColor = 'var(--info)';
-        else if (log.outcome === 'Fair') outcomeColor = '#ffc107';
+        else if (log.outcome === 'Fair') outcomeColor = 'var(--warn)';
         else if (log.outcome === 'Poor') outcomeColor = 'var(--danger)';
         
         return `

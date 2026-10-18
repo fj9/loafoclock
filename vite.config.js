@@ -7,13 +7,14 @@ export default defineConfig({
     plugins: [
         VitePWA({
             registerType: 'prompt', // the app asks the user to reload when a new version is cached
+            workbox: { globPatterns: ['**/*.{js,css,html,woff2}'] }, // include the bundled heading font
             includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
             manifest: {
                 name: 'Sourdough Companion',
                 short_name: 'Sourdough',
                 description: 'Step-by-step sourdough baking guide with timers, calculators and a bake log.',
-                theme_color: '#667eea',
-                background_color: '#667eea',
+                theme_color: '#9E3326',
+                background_color: '#FBF5E9',
                 display: 'standalone',
                 start_url: '.',
                 icons: [

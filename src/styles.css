@@ -1,30 +1,44 @@
-/* Theme: light by default, dark via data-theme or the phone's setting */
+/* Theme: "tea towel" light (cream, terracotta, rust) and "ember" dark (warm brown, ember orange).
+   Light by default; dark via data-theme or the phone's setting. */
 :root {
-    --page: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    --card: #ffffff; --wash: #f8f9fa; --line: #e9ecef; --ink: #333; --label: #495057; --muted: #6c757d;
-    --accent: #667eea; --accent-strong: #667eea; --accent-hover: #5568d3;
-    --danger: #dc3545; --good: #28a745; --good-ink: #155724; --good-bg: #d4edda;
-    --info: #17a2b8; --info-ink: #0c5460; --info-bg: #d1ecf1;
-    --warn: #ffc107; --warn-ink: #856404; --warn-bg: #fff3cd; --calc-bg: #e7f3ff;
+    --page-bg: #F3DDB8; --page-dot: #FBF5E9;
+    --card: #FBF5E9; --wash: #F5EAD2; --line: #E6D2AE; --dot: #D2622B;
+    --ink: #4A2B20; --label: #5E3A2C; --muted: #7A5A4B;
+    --accent: #9E3326; --accent-strong: #B8501F; --accent-hover: #9C4119; --on-accent: #FBF5E9;
+    --header-bg: #9E3326; --header-ink: #FBF5E9; --header-shadow: #4A2B20; --header-rule: #D2622B;
+    --fill-a: #D2622B; --fill-b: #9E3326;
+    --danger: #B3261E; --good: #557A5C; --good-ink: #2F4F36; --good-bg: #E4EADF;
+    --info: #6F8A78; --info-ink: #35493C; --info-bg: #E3EAE0;
+    --warn: #D9A21B; --warn-ink: #7A4B0C; --warn-bg: #FBEBC4; --calc-bg: #F7E3C2;
+    --glow: rgba(210, 98, 43, .28);
+    --font-display: 'Alfa Slab One', Georgia, 'Times New Roman', serif;
     color-scheme: light;
 }
 :root[data-theme="dark"] {
-    --page: linear-gradient(135deg, #12141c 0%, #1d2233 100%);
-    --card: #1e2230; --wash: #262b3b; --line: #343a4e; --ink: #e6e8ef; --label: #c3c8d6; --muted: #9aa1b5;
-    --accent: #9aa7ff; --accent-strong: #5a6ae0; --accent-hover: #4c5bd0;
-    --danger: #ff7b88; --good: #5fd07a; --good-ink: #a6e3b4; --good-bg: #1f3a2a;
-    --info: #4fc3d9; --info-ink: #9fdce8; --info-bg: #1b3540;
-    --warn: #ffca2c; --warn-ink: #f1d98a; --warn-bg: #3d3418; --calc-bg: #1c2a44;
+    --page-bg: #1A110E; --page-dot: #271A15;
+    --card: #231915; --wash: #30231D; --line: #4A372D; --dot: #7A4A33;
+    --ink: #F5E9D3; --label: #E2D2BA; --muted: #C9B5A0;
+    --accent: #E8803F; --accent-strong: #E8803F; --accent-hover: #F09656; --on-accent: #231915;
+    --header-bg: #30231D; --header-ink: #E8803F; --header-shadow: #120B09; --header-rule: #C25A3F;
+    --fill-a: #E8803F; --fill-b: #C25A3F;
+    --danger: #FF8F7A; --good: #8FB89A; --good-ink: #BFD9C4; --good-bg: #26332B;
+    --info: #8FA58F; --info-ink: #C5D5C5; --info-bg: #25302A;
+    --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3A271C;
+    --glow: rgba(232, 128, 63, .3);
     color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-        --page: linear-gradient(135deg, #12141c 0%, #1d2233 100%);
-        --card: #1e2230; --wash: #262b3b; --line: #343a4e; --ink: #e6e8ef; --label: #c3c8d6; --muted: #9aa1b5;
-        --accent: #9aa7ff; --accent-strong: #5a6ae0; --accent-hover: #4c5bd0;
-        --danger: #ff7b88; --good: #5fd07a; --good-ink: #a6e3b4; --good-bg: #1f3a2a;
-        --info: #4fc3d9; --info-ink: #9fdce8; --info-bg: #1b3540;
-        --warn: #ffca2c; --warn-ink: #f1d98a; --warn-bg: #3d3418; --calc-bg: #1c2a44;
+        --page-bg: #1A110E; --page-dot: #271A15;
+        --card: #231915; --wash: #30231D; --line: #4A372D; --dot: #7A4A33;
+        --ink: #F5E9D3; --label: #E2D2BA; --muted: #C9B5A0;
+        --accent: #E8803F; --accent-strong: #E8803F; --accent-hover: #F09656; --on-accent: #231915;
+        --header-bg: #30231D; --header-ink: #E8803F; --header-shadow: #120B09; --header-rule: #C25A3F;
+        --fill-a: #E8803F; --fill-b: #C25A3F;
+        --danger: #FF8F7A; --good: #8FB89A; --good-ink: #BFD9C4; --good-bg: #26332B;
+        --info: #8FA58F; --info-ink: #C5D5C5; --info-bg: #25302A;
+        --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3A271C;
+        --glow: rgba(232, 128, 63, .3);
         color-scheme: dark;
     }
 }
@@ -37,7 +51,9 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: var(--page);
+    background-color: var(--page-bg);
+    background-image: radial-gradient(var(--page-dot) 26%, transparent 28%);
+    background-size: 20px 20px;
     min-height: 100vh;
     padding: 20px;
     color: var(--ink);
@@ -48,20 +64,24 @@ body {
     margin: 0 auto;
     background: var(--card);
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 24px rgba(74, 43, 32, 0.18);
     overflow: hidden;
 }
 
 header {
-    background: linear-gradient(135deg, var(--accent-strong) 0%, #764ba2 100%);
-    color: white;
-    padding: 24px;
+    background: var(--header-bg);
+    color: var(--header-ink);
+    padding: 22px 24px 20px;
     text-align: center;
+    border-bottom: 5px double var(--header-rule);
 }
 
 header h1 {
+    font-family: var(--font-display);
     font-size: 28px;
-    font-weight: 600;
+    font-weight: 400;
+    letter-spacing: .5px;
+    text-shadow: 2px 2px 0 var(--header-shadow);
 }
 
 .tabs {
@@ -156,24 +176,24 @@ header h1 {
 
 .btn-primary {
     background: var(--accent-strong);
-    color: white;
+    color: var(--on-accent);
 }
 
 .btn-primary:hover {
     background: var(--accent-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px var(--glow);
 }
 
 .btn-secondary {
     background: var(--muted);
-    color: white;
+    color: var(--card);
     width: 100%;
     margin-top: 20px;
 }
 
 .btn-secondary:hover {
-    background: #5a6268;
+    background: var(--label);
 }
 
 .btn-small {
@@ -191,7 +211,7 @@ header h1 {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--accent-strong) 0%, #764ba2 100%);
+    background: linear-gradient(90deg, var(--fill-a) 0%, var(--fill-b) 100%);
     transition: width 0.3s;
     width: 0%;
 }
@@ -207,18 +227,21 @@ header h1 {
     color: var(--accent);
     margin-bottom: 12px;
     font-size: 20px;
+    font-family: var(--font-display);
+    font-weight: 400;
 }
 
 .step-card .step-number {
     display: inline-block;
     background: var(--accent-strong);
-    color: white;
+    color: var(--on-accent);
+    font-family: var(--font-display);
     width: 32px;
     height: 32px;
     border-radius: 50%;
     text-align: center;
     line-height: 32px;
-    font-weight: bold;
+    font-weight: 400;
     margin-right: 8px;
 }
 
@@ -230,7 +253,7 @@ header h1 {
 .ingredients-list li,
 .instructions-list li {
     padding: 8px 0;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px dotted var(--dot);
 }
 
 .ingredients-list li:last-child,
@@ -239,7 +262,8 @@ header h1 {
 }
 
 .timer-section {
-    background: linear-gradient(135deg, var(--accent-strong) 0%, #764ba2 100%);
+    background: var(--header-bg);
+    border: 3px double var(--header-rule);
     border-radius: 12px;
     padding: 24px;
     text-align: center;
@@ -248,8 +272,9 @@ header h1 {
 
 .timer-display {
     font-size: 48px;
-    font-weight: bold;
-    color: white;
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--header-ink);
     margin-bottom: 16px;
     font-variant-numeric: tabular-nums;
 }
@@ -334,7 +359,7 @@ header h1 {
     border-radius: 8px;
     padding: 16px;
     margin: 16px 0;
-    border-left: 4px solid #ffc107;
+    border-left: 4px solid var(--warn);
 }
 
 .time-tracker-section h4 {
@@ -351,7 +376,7 @@ header h1 {
 .time-tracker-section input[type="datetime-local"] {
     width: 100%;
     padding: 10px;
-    border: 2px solid #ffc107;
+    border: 2px solid var(--warn);
     border-radius: 6px;
     font-size: 16px;
 }
@@ -492,7 +517,7 @@ input, select, textarea { background: var(--card); color: var(--ink); font-famil
 .seg { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .seg button { flex: 1; min-height: 48px; padding: 0 12px; border-radius: 10px; border: 2px solid var(--line);
     background: var(--card); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
+.seg button[aria-pressed="true"] { background: var(--accent-strong); border-color: var(--accent-strong); color: var(--on-accent); }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .btn-outline { background: var(--card); color: var(--ink); border: 2px solid var(--line); }
 .btn-danger { background: var(--card); color: var(--danger); border: 2px solid var(--danger); }
@@ -543,7 +568,7 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
     background: var(--card); border: 2px solid var(--muted); }
 .tl-item.tl-done { opacity: .6; }
 .tl-item.tl-done::before { background: var(--good); border-color: var(--good); }
-.tl-item.tl-next::before { background: var(--accent-strong); border-color: var(--accent-strong); box-shadow: 0 0 0 4px rgba(102, 126, 234, .25); }
+.tl-item.tl-next::before { background: var(--accent-strong); border-color: var(--accent-strong); box-shadow: 0 0 0 4px var(--glow); }
 .tl-item.tl-next .tl-time { color: var(--accent); }
 .tl-time { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 92px; white-space: nowrap; }
 .tl-label small { color: var(--muted); font-size: 13px; }
@@ -554,3 +579,32 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
 .tl-settings label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 600; }
 .tl-settings input, .tl-settings select { padding: 8px; border: 2px solid var(--line); border-radius: 8px; font-size: 16px; }
 .timeline > .hint { margin: 10px 14px 14px; }
+
+/* Tea towel touches: slab headings with double rules, dotted dividers */
+.tab-content h2, .panel h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--accent);
+    font-size: 20px;
+    border-top: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    padding: 4px 0;
+    margin-bottom: 14px;
+    text-align: center;
+}
+.timeline summary, .calculator-section h4, .time-tracker-section h4, .fold-tracker-section h4 { font-family: var(--font-display); font-weight: 400; letter-spacing: .2px; }
+.tl-item, .tl-gap { border-left-color: var(--dot); }
+.fold-item { border-style: dotted; }
+.site-footer { border-top: 3px double var(--accent); }
+.sheet h2 { border: 0; text-align: left; font-family: var(--font-display); font-weight: 400; color: var(--accent); }
+input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color: var(--accent-strong); }
+
+/* Buttons: plain .btn is an outline button; primary and small action buttons are filled */
+.btn { background: var(--card); color: var(--ink); border: 2px solid var(--line); }
+.btn-primary, .btn-small:not(.btn-outline):not(.btn-danger) { background: var(--accent-strong); color: var(--on-accent); border-color: transparent; }
+.btn-primary:hover, .btn-small:not(.btn-outline):not(.btn-danger):hover { background: var(--accent-hover); }
+.btn-secondary { border-color: transparent; }
+.btn-outline { background: var(--card); color: var(--ink); border: 2px solid var(--line); }
+.timer-controls .btn.btn-small { background: var(--card); color: var(--accent); border-color: transparent; }
+.timer-controls .btn.btn-small:hover { background: var(--wash); }
+.timeline .tl-next { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
