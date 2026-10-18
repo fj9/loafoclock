@@ -16,9 +16,9 @@ export const TIPS = {
         label: 'starter I need',
         text: 'The starter for the dough, plus 30g to keep back in the jar as your next starter. We have filled this in for you.'
     },
-    earliestFeed: {
-        label: 'earliest feed time',
-        text: 'The soonest you could feed your starter. Leave it as it is if you are feeding right now.'
+    feedAt: {
+        label: 'feed time',
+        text: 'When you plan to feed your starter. Slide it to see how the ratio changes.'
     },
     autolyseAt: {
         label: 'autolyse start',

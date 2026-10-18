@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clockAfter, feedAt, findRatio, hoursUntil, planAlreadyFed, planFromAutolyse, planLimitedStarter } from './feeding.js';
+import { clockAfter, feedAt, findRatio, hoursUntil, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding.js';
 
 describe('clock helpers', () => {
     it('adds hours and reports days rolled over', () => {
@@ -56,61 +56,50 @@ describe('planLimitedStarter', () => {
     });
 });
 
-describe('planFromAutolyse', () => {
-    const plan = (earliestFeed, extra = {}) => planFromAutolyse({ need: 230, autolyseAt: '07:00', earliestFeed, ...extra });
+describe('planFeedForAutolyse', () => {
+    const plan = (feedTime, autolyseAt, extra = {}) => planFeedForAutolyse({ need: 180, feedTime, autolyseAt, ...extra });
 
-    it('recommends 1:6:6, fed 8 hours before autolyse, when there is time', () => {
-        const p = plan('21:00');
-        expect(p.recommended.ratio.ratio).toBe('1:6:6');
-        expect(p.recommended.feedTime).toEqual({ time: '23:00', days: -1 });
-        expect(p.quicker).toBe(false);
+    it('feeding at 22:00 for an 08:00 autolyse gives an 11 hour wait and 1:6:6 still fits', () => {
+        const p = plan('22:00', '08:00');
+        expect(p.gapHours).toBe(11);
+        expect(p.best.ratio.ratio).toBe('1:6:6');
     });
-
-    it('starter is at its earliest peak when it is added an hour after autolyse starts', () => {
-        const p = plan('21:00');
-        expect(p.recommended.window.from).toEqual({ time: '08:00', days: 0 });
-        expect(p.recommended.window.to).toEqual({ time: '10:00', days: 0 });
+    it('moves to a slower ratio when the wait is longer', () => {
+        const p = plan('21:00', '08:00'); // 12h: 1:6:6 peaks an hour early
+        expect(p.sixOption.status).toBe('tooFast');
+        expect(p.sixOption.offHours).toBe(1);
+        expect(p.best.ratio.ratio).toBe('1:8:8'); // window centred closest to 12h
     });
-
-    it('feeds as late as possible, not as soon as you can', () => {
-        expect(plan('12:00').recommended.feedTime.time).toBe('23:00');
+    it('moves to a quicker ratio when the wait is shorter', () => {
+        const p = plan('23:30', '08:00'); // 9.5h
+        expect(p.best.ratio.ratio).toBe('1:6:6');
+        const q = plan('01:00', '08:00'); // 8h
+        expect(q.best.ratio.ratio).toBe('1:4:4'); // mid 8 is closest, 1:5:5 and 1:3:3 also fit but are further off
     });
-
-    it('steps down to a quicker ratio when pushed for time', () => {
-        const p = plan('02:00'); // 5h to autolyse + 1h = 6h
-        expect(p.recommended.ratio.ratio).toBe('1:3:3');
-        expect(p.recommended.feedTime).toEqual({ time: '02:00', days: 0 });
-        expect(p.quicker).toBe(true);
+    it('counts the autolyse rest as part of the wait', () => {
+        expect(plan('22:00', '08:00', { autolyseMin: 40 }).gapHours).toBeCloseTo(10.67, 2);
     });
-
-    it('uses 1:1:1 when it is the only thing that fits', () => {
-        const p = plan('04:00');
-        expect(p.recommended.ratio.ratio).toBe('1:1:1');
-        expect(p.recommended.feed.starter).toBe(77);
+    it('every ratio is listed with a status', () => {
+        const p = plan('22:00', '08:00');
+        expect(p.options).toHaveLength(10);
+        expect(p.options.find((o) => o.ratio.ratio === '1:1:1').status).toBe('tooFast');
+        expect(p.options.find((o) => o.ratio.ratio === '1:10:10').status).toBe('tooSlow');
     });
-
-    it('has no recommendation when even 1:1:1 is too slow', () => {
-        const p = plan('05:00');
-        expect(p.recommended).toBeNull();
-        expect(p.shortestHours).toBe(4);
+    it('says when there is too little time, and when to feed by', () => {
+        const p = plan('05:00', '08:00'); // 4h wait including the rest... 3 + 1
+        expect(p.best.ratio.ratio).toBe('1:1:1');
+        const s = plan('06:30', '08:00'); // 2.5h
+        expect(s.best).toBeNull();
+        expect(s.problem).toMatchObject({ kind: 'tooShort', feedBy: '05:00' });
     });
-
-    it('lists every ratio up to 1:6:6, marking which are possible', () => {
-        const p = plan('02:00');
-        expect(p.options.map((o) => [o.ratio.ratio, o.possible])).toEqual([
-            ['1:6:6', false], ['1:5:5', false], ['1:4:4', false], ['1:3:3', true], ['1:2:2', true], ['1:1:1', true]
-        ]);
+    it('says when the wait is longer than any ratio covers, and when to feed from', () => {
+        const p = plan('08:00', '07:00'); // 24h + 1h
+        expect(p.best).toBeNull();
+        expect(p.problem).toMatchObject({ kind: 'tooLong', feedFrom: '16:00' });
     });
-
-    it('treats the same clock time as a full day away', () => {
-        expect(plan('07:00').availableHours).toBe(25);
-    });
-
-    it('warns when the starter you have is not enough for a ratio', () => {
-        const p = plan('21:00', { have: 10 });
-        expect(p.options.find((o) => o.ratio.ratio === '1:6:6').notEnoughStarter).toBe(true);
-        expect(p.options.find((o) => o.ratio.ratio === '1:1:1').notEnoughStarter).toBe(true);
-        expect(plan('21:00', { have: 80 }).options.every((o) => !o.notEnoughStarter)).toBe(true);
+    it('warns when the starter you have is not enough', () => {
+        expect(plan('22:00', '08:00', { have: 10 }).best.notEnoughStarter).toBe(true);  // 1:6:6 needs 14g
+        expect(plan('22:00', '08:00', { have: 20 }).best.notEnoughStarter).toBe(false);
     });
 });
 

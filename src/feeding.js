@@ -75,32 +75,40 @@ export function planLimitedStarter({ have, need, feedTime }) {
 }
 
 /**
- * Plan from autolyse: "I want to start autolyse at `autolyseAt`." The starter goes into the dough
- * an hour later (fermentolyse), so it should be at its earliest peak then: feed `minHours` before
- * that, as late as possible so it is fresh. Prefers 1:6:6; if the earliest you can feed
- * (`earliestFeed`, usually now) is too late for that, steps down through 1:5:5 ... 1:1:1, which
- * peak sooner but need more of your own starter. `have` is optional and only used to warn.
+ * Plan a feed backwards from autolyse: "I'm feeding at `feedTime` and want to start autolyse at
+ * `autolyseAt`." The starter goes into the dough when the autolyse rest ends, so that is how long
+ * it has to rise. Picks the ratio whose rise window contains that time, preferring 1:6:6, then the
+ * one whose window is centred closest to it. Every ratio is returned with how well it fits.
+ * `have` is optional and only used to warn.
  */
-export function planFromAutolyse({ need, autolyseAt, earliestFeed, have }) {
-    const availableHours = hoursUntil(earliestFeed, autolyseAt) + 1;
-    const options = FEEDING_RATIOS.filter((r) => r.n <= ASSUMED_RATIO_N).reverse().map((ratio) => {
-        const feedAt_ = clockAfter(autolyseAt, 1 - ratio.minHours);
+export function planFeedForAutolyse({ need, feedTime, autolyseAt, autolyseMin = 60, have }) {
+    const restHours = autolyseMin / 60;
+    const gapHours = hoursUntil(feedTime, autolyseAt) + restHours;
+    const options = FEEDING_RATIOS.map((ratio) => {
         const feed = feedAt(ratio.n, need);
+        const fits = gapHours >= ratio.minHours && gapHours <= ratio.maxHours;
+        const status = fits ? 'fits' : gapHours < ratio.minHours ? 'tooSlow' : 'tooFast';
+        const offHours = fits ? 0 : status === 'tooSlow' ? ratio.minHours - gapHours : gapHours - ratio.maxHours;
         return {
-            ratio, feed,
-            feedTime: feedAt_,
-            // relative to the autolyse day, so 'next day' never confuses a night-before feed
-            window: { from: clockAfter(autolyseAt, 1), to: clockAfter(autolyseAt, 1 + ratio.maxHours - ratio.minHours) },
-            possible: availableHours >= ratio.minHours,
+            ratio, feed, fits, status, offHours,
+            window: readyWindow(feedTime, ratio),
             notEnoughStarter: have != null && feed.starter > have
         };
     });
-    const recommended = options.find((o) => o.possible) || null;
-    return {
-        availableHours, options, recommended,
-        quicker: recommended !== null && recommended.ratio.n < ASSUMED_RATIO_N,
-        shortestHours: FEEDING_RATIOS[0].minHours
-    };
+    const fitting = options.filter((o) => o.fits);
+    const six = fitting.find((o) => o.ratio.n === ASSUMED_RATIO_N);
+    const mid = (o) => (o.ratio.minHours + o.ratio.maxHours) / 2;
+    const best = six || [...fitting].sort((a, b) => Math.abs(gapHours - mid(a)) - Math.abs(gapHours - mid(b)))[0] || null;
+
+    const shortest = FEEDING_RATIOS[0].minHours;
+    const longest = FEEDING_RATIOS[FEEDING_RATIOS.length - 1].maxHours;
+    let problem = null;
+    if (!best) {
+        problem = gapHours < shortest
+            ? { kind: 'tooShort', feedBy: clockAfter(autolyseAt, restHours - shortest).time, fallback: options[0] }
+            : { kind: 'tooLong', feedFrom: clockAfter(autolyseAt, restHours - longest).time, fallback: options[options.length - 1] };
+    }
+    return { gapHours, options, best, problem, sixOption: options.find((o) => o.ratio.n === ASSUMED_RATIO_N) };
 }
 
 /** Already fed: "I fed at `feedTime` at `ratio`." When will the starter be ready? */

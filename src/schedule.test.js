@@ -45,6 +45,21 @@ describe('buildSchedule with the defaults', () => {
     });
 });
 
+describe('buildSchedule with a planned autolyse', () => {
+    it('uses the autolyse time you chose, and adds the starter when that rest ends', () => {
+        // fed 22:00, autolyse 08:00 next day, 1h rest: starter in at 09:00
+        const s = buildSchedule({ feedTime: '22:00', riseMinHours: 9, plannedAutolyse: '08:00' });
+        const t = times(s);
+        expect(t.autolyse).toEqual({ time: '08:00', days: 1 });
+        expect(t.starterIn).toEqual({ time: '09:00', days: 1 });
+        expect(t.bulkEnd).toEqual({ time: '16:00', days: 1 });
+    });
+    it('follows a shorter autolyse rest', () => {
+        const t = times(buildSchedule({ feedTime: '22:00', riseMinHours: 9, plannedAutolyse: '08:00', autolyseMin: 40 }));
+        expect(t.starterIn).toEqual({ time: '08:40', days: 1 });
+    });
+});
+
 describe('buildSchedule options', () => {
     it('a shorter autolyse moves the autolyse start later', () => {
         expect(times(buildSchedule({ ...base, autolyseMin: 40 })).autolyse).toEqual({ time: '05:20', days: 1 });

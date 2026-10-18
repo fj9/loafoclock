@@ -51,7 +51,7 @@ Step 1 has two calculators, using a chart of ten standard ratios (1:1:1 to 1:10:
 
 - **Limited starter:** enter the starter you have, the amount you need and your feed time. It feeds at 1:6:6 using only as much of your starter as it needs, and shows when it should be ready (9-11 hrs). If you don't have enough for 1:6:6 it dilutes just enough (up to 1:10:10) and says so, and says so again if even that isn't enough.
 - **Already fed:** enter when you fed and the ratio you used. It shows when the starter should be ready and when to start the autolyse, and fills in the timeline.
-- **Plan from autolyse:** enter when you want to start your autolyse, the starter you need, and the earliest you can feed (now, unless you say otherwise). It tells you when to feed, as late as possible so the starter is fresh, using 1:6:6 if there's time. If you're short of time it steps down to 1:5:5, 1:4:4 ... 1:1:1, which peak sooner but use more of your own starter, and it lists every option so you can see the trade-off.
+- **Plan from autolyse:** set two sliders, when you want to start autolyse (say 08:00) and when you're feeding (say 22:00). It picks the ratio that has your starter ready when it goes into the dough, 1:6:6 if that fits, and the result updates live as you slide. A bar shows the feed, the ready window and when the starter goes in, and a list shows how every ratio fits (too fast, too slow, or fits) and how much of your starter each needs. If no ratio can fit, it says when to feed by or from.
 
 The next step then suggests your autolyse time from the feed you planned (an hour before the starter's earliest rise time).
 

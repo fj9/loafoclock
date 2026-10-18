@@ -1,5 +1,5 @@
 // The plan for the whole bake, worked out from when you feed your starter.
-import { clockAfter, parseClock } from './feeding.js';
+import { clockAfter, hoursUntil, parseClock } from './feeding.js';
 
 // Bulk fermentation temperature chart
 export const BULK_FERMENTATION_TEMPS = [
@@ -55,19 +55,21 @@ const nearest = (plannedMinutes, actualClock, feedTime) => {
  * Builds the list of milestones as minutes after the feed. Each has the step it belongs to,
  * whether it needs you there (handsOn), and a clock time (with days after the feed day).
  *
- * `actuals` ({ starterIn, bulkEnd } as "HH:MM") re-anchors the plan to what really happened.
+ * `plannedAutolyse` ("HH:MM") overrides the autolyse start. `actuals` ({ starterIn, bulkEnd } as
+ * "HH:MM") re-anchors the plan to what really happened.
  */
 export function buildSchedule({
     feedTime, riseMinHours, autolyseMin = 60, fermentolyseMin = 60,
     doughTemp = PLAN_DEFAULTS.doughTemp, bakeAt = PLAN_DEFAULTS.bakeAt,
-    extraFridgeDays = 0, bakeMinutes = 50, actuals = {}
+    extraFridgeDays = 0, bakeMinutes = 50, actuals = {}, plannedAutolyse = null
 }) {
     const P = PLAN_DEFAULTS;
     const at = (m) => clockAfter(feedTime, m / 60);
 
     const peak = riseMinHours * 60;                    // earliest the starter is ready
-    const autolyseStart = peak - autolyseMin;
-    let starterIn = peak;
+    // If you planned an autolyse time (see "Plan from autolyse"), the starter goes in when that rest ends
+    const autolyseStart = plannedAutolyse ? hoursUntil(feedTime, plannedAutolyse) * 60 : peak - autolyseMin;
+    let starterIn = autolyseStart + autolyseMin;
     if (actuals.starterIn) starterIn = nearest(starterIn, actuals.starterIn, feedTime);
 
     const bulk = bulkFor(doughTemp);

@@ -613,3 +613,27 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .timeline.tl-empty { background: transparent; border-style: dashed; margin-bottom: 14px; }
 .timeline.tl-empty summary { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 400; font-size: 14px; color: var(--muted); min-height: 36px; padding: 6px 12px; }
 .timeline.tl-empty .tl-next { font-size: 14px; }
+
+/* Feed plan: result chips, the ready-window bar, the ratio list, time sliders */
+.chip { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 8px; margin-right: 6px; font-weight: 600; }
+.chip.ok { background: var(--good-bg); color: var(--good-ink); }
+.chip.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.fp-head { font-size: 17px; margin-bottom: 4px; }
+.time-slider { width: 100%; margin-top: 8px; }
+.fb { margin: 10px 0 12px; }
+.fb-bar { position: relative; height: 30px; background: var(--wash); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.fb-readyband { position: absolute; top: 0; bottom: 0; background: var(--good-bg); border-left: 2px solid var(--good); border-right: 2px solid var(--good); }
+.fb-mk { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1px; }
+.fb-feed { background: var(--ink); }
+.fb-autolyse { background: var(--accent); }
+.fb-in { background: var(--accent-strong); }
+.fb-mk.fb-in { width: 4px; }
+.fb-mk.fb-off { background: var(--danger); }
+.fb-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.fb-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.fb-dot.fb-band { background: var(--good-bg); border: 1px solid var(--good); }
+.fp-ladder { list-style: none; padding: 0; }
+.fp-ladder li { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 5px 8px; border-radius: 6px; }
+.fp-ladder small { opacity: .7; }
+.fp-ladder .fp-best { background: var(--good-bg); color: var(--good-ink); font-weight: 600; }
+.fp-ladder .fp-no { color: var(--muted); }
