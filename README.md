@@ -31,6 +31,7 @@ npm run icons    # re-render the PNG icons from public/favicon.svg
 
 ```text
 src/recipe.js   loaf sizes, hydration and ingredient amounts
+src/feeding.js  starter feeding ratios, rise times and the two feed calculators
 src/app.js      the baking workflow, timers, calculators and bake log
 src/shell.js    theme, welcome cards, settings, help, footer, update prompt
 public/         favicon and app icons
@@ -39,6 +40,15 @@ public/         favicon and app icons
 ## Hosting on GitHub Pages
 
 `.github/workflows/deploy.yml` runs the tests, builds and deploys `dist/` on every push to `main`. In the repository settings, set Pages > Source to "GitHub Actions". The build uses relative paths, so it works under `https://<user>.github.io/<repo>/`.
+
+## Feeding your starter
+
+Step 1 has two calculators, using the rise times from Kanika's Cooking Class starter feeding chart (21-27°C):
+
+- **Limited starter:** enter the starter you have, the amount you need and your feed time. It feeds at 1:6:6 using only as much of your starter as it needs, and shows when it should be ready (10-14 hrs). If you don't have enough for 1:6:6 it dilutes to 1:10:10, and says so if even that isn't enough.
+- **Deadline:** enter when you need the starter and when you'll feed. It suggests the richest ratio whose rise time fits, and how much starter, flour and water to use.
+
+Either way it suggests when to start the autolyse (an hour before the earliest rise time).
 
 ## Your Sourdough Method
 

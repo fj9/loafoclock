@@ -1,18 +1,5 @@
 import { recipeFor, loafDescription } from './recipe.js';
-
-// Feeding ratio reference chart
-const FEEDING_RATIOS = [
-    { ratio: "1:1:1", riseTime: "4-6 hrs" },
-    { ratio: "1:2:2", riseTime: "5-7 hrs" },
-    { ratio: "1:3:3", riseTime: "6-8 hrs" },
-    { ratio: "1:4:4", riseTime: "7-9 hrs" },
-    { ratio: "1:5:5", riseTime: "8-10 hrs" },
-    { ratio: "1:6:6", riseTime: "9-11 hrs" },
-    { ratio: "1:7:7", riseTime: "10-12 hrs" },
-    { ratio: "1:8:8", riseTime: "11-13 hrs" },
-    { ratio: "1:9:9", riseTime: "12-14 hrs" },
-    { ratio: "1:10:10", riseTime: "13-16 hrs" }
-];
+import { clockAfter, findRatio, planDeadline, planLimitedStarter, riseLabel } from './feeding.js';
 
 // Bulk fermentation temperature chart
 const BULK_FERMENTATION_TEMPS = [
@@ -291,48 +278,13 @@ function renderStep() {
     `;
     
     // Add starter calculator if applicable
-    if (step.hasCalculator) {
-        const starterNeeded = recipeFor(currentBake).starter + 30;
-        const currentTime = new Date().toTimeString().slice(0, 5);
-        html += `
-            <div class="calculator-section">
-                <h4>Starter Calculator</h4>
-                <p><strong>Total starter needed:</strong> ${starterNeeded}g (${recipeFor(currentBake).starter}g for dough + 30g carryover)</p>
-                
-                <div class="form-group">
-                    <label>Current starter amount (g):</label>
-                    <input type="number" id="current-starter" value="30" min="1" max="500">
-                </div>
-                
-                <div class="form-group">
-                    <label>What time are you feeding? (optional):</label>
-                    <input type="time" id="feed-time" value="${currentBake.starterFeedTime || currentTime}">
-                </div>
-                
-                <button id="calculate-feed" class="btn btn-small">Calculate Feed</button>
-                
-                <div id="feed-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;">
-                    <p><strong>Feed your starter:</strong></p>
-                    <ul id="feed-amounts"></ul>
-                    <p id="feed-ratio" style="margin-top: 12px;"></p>
-                    <p id="rise-time" style="margin-top: 8px; color: var(--accent); font-weight: 600;"></p>
-                    <p id="autolyse-time" style="display: none; margin-top: 8px; color: var(--good); font-weight: 600;"></p>
-                    <p id="estimated-end" style="display: none; margin-top: 8px; color: var(--muted); font-size: 14px;"></p>
-                </div>
-            </div>
-        `;
-    }
+    if (step.hasCalculator) html += feedCalculatorHtml();
     
     // Show suggested autolyse time
     if (step.showAutolyseTime && currentBake.starterFeedTime && currentBake.starterFeedRatio) {
-        const riseTimeRange = FEEDING_RATIOS.find(r => r.ratio === currentBake.starterFeedRatio)?.riseTime || '6-8 hrs';
-        const riseHours = parseFloat(riseTimeRange.split('-')[0]); // Use lowest time from range
-        const autolyseHours = riseHours - 1;
-        const [hours, minutes] = currentBake.starterFeedTime.split(':').map(Number);
-        const autolyseDate = new Date();
-        autolyseDate.setHours(hours + autolyseHours);
-        autolyseDate.setMinutes(minutes);
-        const autolyseTime = autolyseDate.toTimeString().slice(0, 5);
+        const feedRatio = findRatio(currentBake.starterFeedRatio);
+        const riseTimeRange = feedRatio ? riseLabel(feedRatio) : '6-8 hrs';
+        const autolyseTime = clockAfter(currentBake.starterFeedTime, (feedRatio ? feedRatio.minHours : 6) - 1).time;
         
         html += `
             <div class="time-tracker-section" style="background: var(--good-bg); border-left-color: var(--good);">
@@ -586,7 +538,7 @@ function renderStep() {
     
     // Add calculator event listener if applicable
     if (step.hasCalculator) {
-        document.getElementById('calculate-feed').addEventListener('click', calculateFeed);
+        initFeedCalculator();
     }
     
     // Add temperature calculator event listener if applicable
@@ -656,104 +608,151 @@ function toggleFold(index) {
 }
 
 // Starter Calculator
+// Two ways in: "limited" (I have X g, I need Y g: when will it be ready?) and
+// "deadline" (I need Y g by a time: which ratio, and how much starter?). Maths is in feeding.js.
+const FEED_MODES = {
+    limited: {
+        label: 'Limited starter',
+        hint: 'Tell us how much starter you have and need. We feed at 1:6:6 and tell you when it should be ready.'
+    },
+    deadline: {
+        label: 'Deadline',
+        hint: 'Tell us when you need the starter. We suggest a feeding ratio and how much starter to use.'
+    }
+};
+
+function feedCalculatorHtml() {
+    const recipeStarter = recipeFor(currentBake).starter;
+    const starterNeeded = recipeStarter + 30;
+    const currentTime = new Date().toTimeString().slice(0, 5);
+    const mode = currentBake.feedMode || 'limited';
+    return `
+        <div class="calculator-section">
+            <h4>Starter Calculator</h4>
+            <p><strong>Total starter needed:</strong> ${starterNeeded}g (${recipeStarter}g for dough + 30g carryover)</p>
+
+            <div class="seg" id="feed-mode" role="group" aria-label="Calculator mode">
+                ${Object.entries(FEED_MODES).map(([key, m]) =>
+                    `<button type="button" data-feed-mode="${key}" aria-pressed="${key === mode}">${m.label}</button>`).join('')}
+            </div>
+            <p class="hint" id="feed-mode-hint" style="margin: 8px 0 12px;">${FEED_MODES[mode].hint}</p>
+
+            <div class="form-group">
+                <label for="current-starter">Starter I have now (g)<span id="have-optional"${mode === 'deadline' ? '' : ' hidden'}> (optional)</span>:</label>
+                <input type="number" id="current-starter" value="30" min="1" max="2000">
+            </div>
+
+            <div class="form-group">
+                <label for="needed-starter">Starter I need (g):</label>
+                <input type="number" id="needed-starter" value="${starterNeeded}" min="1" max="2000">
+            </div>
+
+            <div class="form-group" id="need-by-row"${mode === 'deadline' ? '' : ' hidden'}>
+                <label for="need-by-time">Starter needed by:</label>
+                <input type="time" id="need-by-time" value="${currentBake.starterNeededBy || ''}">
+            </div>
+
+            <div class="form-group">
+                <label for="feed-time">What time are you feeding?</label>
+                <input type="time" id="feed-time" value="${currentBake.starterFeedTime || currentTime}">
+            </div>
+
+            <button id="calculate-feed" class="btn btn-small">Calculate Feed</button>
+
+            <div id="feed-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;" role="status"></div>
+            <p class="hint" style="margin-top: 12px; font-size: 13px;">Rise times (at 21–27°C) are from Kanika's Cooking Class starter feeding chart. A warm kitchen is faster, a cool one slower.</p>
+        </div>
+    `;
+}
+
+function initFeedCalculator() {
+    const modeButtons = document.querySelectorAll('[data-feed-mode]');
+    const setMode = (mode) => {
+        currentBake.feedMode = mode;
+        modeButtons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.feedMode === mode)));
+        document.getElementById('feed-mode-hint').textContent = FEED_MODES[mode].hint;
+        document.getElementById('need-by-row').hidden = mode !== 'deadline';
+        document.getElementById('have-optional').hidden = mode !== 'deadline';
+        document.getElementById('feed-result').style.display = 'none';
+    };
+    modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.feedMode)));
+    document.getElementById('calculate-feed').addEventListener('click', calculateFeed);
+}
+
+const dayText = (days) => days === 0 ? '' : days === 1 ? ' (next day)' : ` (+${days} days)`;
+const clockText = (c) => `${c.time}${dayText(c.days)}`;
+const hoursText = (h) => `${Math.floor(h)}h${h % 1 ? ` ${Math.round((h % 1) * 60)}m` : ''}`;
+
+function feedWarning(text) {
+    return `<p style="margin: 8px 0; padding: 8px 12px; border-radius: 6px; background: var(--warn-bg); color: var(--warn-ink);">⚠️ ${text}</p>`;
+}
+
 function calculateFeed() {
-    const currentStarter = parseInt(document.getElementById('current-starter').value);
-    const starterNeeded = recipeFor(currentBake).starter + 30;
-    const toAdd = starterNeeded - currentStarter;
-    
-    if (toAdd <= 0) {
-        alert('You already have enough starter! You may want to discard some to maintain a healthy feeding ratio.');
-        return;
-    }
-    
-    // Calculate flour and water needed (equal amounts)
-    const flourNeeded = Math.round(toAdd / 2);
-    const waterNeeded = Math.round(toAdd / 2);
-    
-    // Calculate ratio
-    const ratioStarter = currentStarter;
-    const ratioFlour = flourNeeded;
-    const ratioWater = waterNeeded;
-    
-    // Simplify ratio by dividing by starter amount
-    const simplifiedFlour = Math.round((ratioFlour / ratioStarter) * 10) / 10;
-    const simplifiedWater = Math.round((ratioWater / ratioStarter) * 10) / 10;
-    const ratioString = `1:${simplifiedFlour}:${simplifiedWater}`;
-    
-    // Find closest feeding ratio and rise time
-    const avgRatio = (simplifiedFlour + simplifiedWater) / 2;
-    let closestRatio = FEEDING_RATIOS[0];
-    let minDiff = Math.abs(parseFloat(FEEDING_RATIOS[0].ratio.split(':')[1]) - avgRatio);
-    
-    FEEDING_RATIOS.forEach(fr => {
-        const frValue = parseFloat(fr.ratio.split(':')[1]);
-        const diff = Math.abs(frValue - avgRatio);
-        // If difference is smaller, or equal but this ratio is larger, use it
-        if (diff < minDiff || (diff === minDiff && frValue > parseFloat(closestRatio.ratio.split(':')[1]))) {
-            minDiff = diff;
-            closestRatio = fr;
-        }
-    });
-    
-    // Get feed time
+    const result = document.getElementById('feed-result');
+    const show = (html) => { result.innerHTML = html; result.style.display = 'block'; };
+    const mode = currentBake.feedMode || 'limited';
+    const have = parseFloat(document.getElementById('current-starter').value);
+    const need = parseFloat(document.getElementById('needed-starter').value);
     const feedTime = document.getElementById('feed-time').value;
-    if (feedTime) {
-        currentBake.starterFeedTime = feedTime;
-        currentBake.starterFeedRatio = closestRatio.ratio;
+    const neededBy = document.getElementById('need-by-time').value;
+
+    if (!(need > 0)) return show(feedWarning('Enter how much starter you need.'));
+    if (!feedTime) return show(feedWarning('Enter the time you are feeding.'));
+    if (mode === 'limited' && !(have > 0)) return show(feedWarning('Enter how much starter you have now.'));
+    if (mode === 'deadline' && !neededBy) return show(feedWarning('Enter the time you need the starter by.'));
+
+    const plan = mode === 'limited'
+        ? planLimitedStarter({ have, need, feedTime })
+        : planDeadline({ need, feedTime, neededBy, have: have > 0 ? have : null });
+
+    let html = '';
+    if (mode === 'limited' && !plan.canReach) {
+        html += feedWarning(`With ${have}g you can make about ${plan.reachable}g at most, even at ${plan.ratio.ratio}. To reach ${need}g in one feed you need at least ${plan.minStarter}g of starter, or you can build it up with two feeds.`);
+        return show(html);
     }
-    
-    // Calculate autolyse time (rise time - 1 hour)
-    const riseHours = parseFloat(closestRatio.riseTime.split('-')[0]); // Use lowest time from range
-    const autolyseHours = riseHours - 1;
-    let autolyseTime = '';
-    if (feedTime) {
-        const [hours, minutes] = feedTime.split(':').map(Number);
-        const autolyseDate = new Date();
-        autolyseDate.setHours(hours + autolyseHours);
-        autolyseDate.setMinutes(minutes);
-        autolyseTime = autolyseDate.toTimeString().slice(0, 5);
+
+    const { ratio, feed } = plan;
+    if (mode === 'limited' && plan.alreadyEnough) {
+        html += `<p class="hint">You already have ${have}g, which is enough. Feeding is only needed to get fresh, active starter.</p>`;
     }
-    
-    // Calculate estimated bake completion (autolyse + 1hr autolyse + 1hr fermentolyse + 6hrs bulk at 25°C + 0.5hr shaping)
-    let estimatedEnd = '';
-    if (autolyseTime) {
-        const [hours, minutes] = autolyseTime.split(':').map(Number);
-        const endDate = new Date();
-        endDate.setHours(hours + 8.5); // 1 + 1 + 6 + 0.5
-        endDate.setMinutes(minutes);
-        estimatedEnd = endDate.toTimeString().slice(0, 5);
+    if (mode === 'limited' && plan.diluted) {
+        html += feedWarning(`You don't have enough starter for 1:6:6, so this uses ${ratio.ratio}, which takes longer to rise.`);
     }
-    
-    // Display results
-    document.getElementById('feed-amounts').innerHTML = `
-        <li><strong>${currentStarter}g</strong> existing starter</li>
-        <li><strong>+ ${flourNeeded}g</strong> flour</li>
-        <li><strong>+ ${waterNeeded}g</strong> water</li>
-        <li style="border-top: 2px solid var(--accent); margin-top: 8px; padding-top: 8px;"><strong>= ${starterNeeded}g</strong> total starter</li>
+    if (mode === 'deadline') {
+        html += `<p><strong>Time until you need it:</strong> ${hoursText(plan.hours)}</p>`;
+        if (plan.tooShort) html += feedWarning(`That's quicker than a ${ratio.ratio} feed usually takes (${riseLabel(ratio)}). It may not be ready in time, so try feeding earlier or allow more time.`);
+        if (plan.tooLong) html += feedWarning(`That's longer than the chart covers. Feeding at ${clockAfter(neededBy, -ratio.maxHours).time} would have it peak closer to when you need it.`);
+        if (plan.notEnoughStarter) html += feedWarning(`This needs ${feed.starter}g of your starter but you only have ${have}g.`);
+    }
+
+    html += `
+        <p><strong>Feed your starter:</strong></p>
+        <ul class="feed-list">
+            <li><strong>${feed.starter}g</strong> of your starter</li>
+            <li><strong>+ ${feed.flour}g</strong> flour</li>
+            <li><strong>+ ${feed.water}g</strong> water</li>
+            <li style="border-top: 2px solid var(--accent); margin-top: 8px; padding-top: 8px;"><strong>= ${feed.total}g</strong> total starter</li>
+        </ul>
+        <p style="margin-top: 12px;"><strong>${mode === 'deadline' ? 'Suggested' : 'Feeding'} Ratio:</strong> ${ratio.ratio}</p>
+        <p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Likely ready:</strong> ${clockText(plan.window.from)} to ${clockText(plan.window.to)} (${riseLabel(ratio)} after feeding)</p>
     `;
-    
-    document.getElementById('feed-ratio').innerHTML = `
-        <strong>Your Feeding Ratio:</strong> ${ratioString}<br>
-        <strong>Closest Standard Ratio:</strong> ${closestRatio.ratio}
+
+    // Save for the autolyse suggestion on the next step
+    currentBake.starterFeedTime = feedTime;
+    currentBake.starterFeedRatio = ratio.ratio;
+    if (mode === 'deadline') currentBake.starterNeededBy = neededBy;
+
+    // Autolyse starts an hour before the starter's earliest peak; the loaf is ready for the
+    // fridge about 8.5 hours later (1h autolyse + 1h fermentolyse + 6h bulk at 25°C + 0.5h shaping)
+    const autolyseHours = ratio.minHours - 1;
+    const autolyse = clockAfter(feedTime, autolyseHours);
+    const ready = clockAfter(autolyse.time, 8.5);
+    const readyDays = autolyse.days + ready.days;
+    html += `
+        <p style="margin-top: 8px; color: var(--good); font-weight: 600;"><strong>Start Autolyse At:</strong> ${clockText(autolyse)} (${autolyseHours} hours after feeding)</p>
+        <p style="margin-top: 8px; color: var(--muted); font-size: 14px;"><strong>Estimated Ready for Fridge:</strong> ~${clockText({ time: ready.time, days: readyDays })} (assuming 25°C dough temp, 6hr bulk fermentation)</p>
     `;
-    
-    document.getElementById('rise-time').innerHTML = `
-        <strong>Expected Rise Time:</strong> ${closestRatio.riseTime} at 21-22°C
-    `;
-    
-    if (autolyseTime) {
-        document.getElementById('autolyse-time').innerHTML = `
-            <strong>Start Autolyse At:</strong> ${autolyseTime} (${autolyseHours} hours after feeding)
-        `;
-        document.getElementById('autolyse-time').style.display = 'block';
-        
-        document.getElementById('estimated-end').innerHTML = `
-            <strong>Estimated Ready for Fridge:</strong> ~${estimatedEnd} (assuming 25°C dough temp, 6hr bulk fermentation)
-        `;
-        document.getElementById('estimated-end').style.display = 'block';
-    }
-    
-    document.getElementById('feed-result').style.display = 'block';
+    show(html);
 }
 
 // Bulk Fermentation Temperature Calculator
