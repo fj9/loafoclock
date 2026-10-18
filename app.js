@@ -53,9 +53,9 @@ const STEPS = [
         duration: "1 hour",
         timerMinutes: 60,
         showAutolyseTime: true,
-        getIngredients: (loaves) => [
-            `${475 * loaves}g flour`,
-            `${275 * loaves}g water`
+        getIngredients: (scale) => [
+            `${amount(475, scale)}g flour`,
+            `${amount(275, scale)}g water`
         ],
         instructions: [
             "Mix flour and water until no dry flour remains",
@@ -68,8 +68,8 @@ const STEPS = [
         duration: "1 hour",
         timerMinutes: 60,
         trackBulkStart: true,
-        getIngredients: (loaves) => [
-            `${150 * loaves}g active starter`
+        getIngredients: (scale) => [
+            `${amount(150, scale)}g active starter`
         ],
         instructions: [
             "Add the active starter to the dough",
@@ -83,10 +83,10 @@ const STEPS = [
         name: "Add Salt & Enrichments",
         duration: "30 minutes rest",
         timerMinutes: 30,
-        getIngredients: (loaves) => [
-            `${10 * loaves}g salt`,
-            `${15 * loaves}g honey`,
-            `${20 * loaves}g extra virgin olive oil`
+        getIngredients: (scale) => [
+            `${amount(10, scale)}g salt`,
+            `${amount(15, scale)}g honey`,
+            `${amount(20, scale)}g extra virgin olive oil`
         ],
         instructions: [
             "Add salt, honey, and olive oil",
@@ -233,10 +233,33 @@ function initializeStartScreen() {
     document.getElementById('start-bake-btn').addEventListener('click', startBake);
 }
 
+// Loaf sizes: regular fits a 25cm oval banneton (~1kg), large a 30cm one (~1.5kg).
+// The recipe quantities are for one regular loaf.
+const LOAF_SIZES = {
+    regular: { label: 'Regular', factor: 1, note: '25cm banneton, ~1kg' },
+    large: { label: 'Large', factor: 1.5, note: '30cm banneton, ~1.5kg' }
+};
+
+function bakeScale() {
+    const size = LOAF_SIZES[currentBake.size] || LOAF_SIZES.regular;
+    return currentBake.loaves * size.factor;
+}
+
+function amount(grams, scale) {
+    return Math.round(grams * scale);
+}
+
+function loafDescription(bake) {
+    const size = LOAF_SIZES[bake.size] || LOAF_SIZES.regular;
+    return `${bake.loaves} × ${size.label} (${size.note})`;
+}
+
 function startBake() {
     const loaves = parseInt(document.querySelector('input[name="loaves"]:checked').value);
+    const size = document.querySelector('input[name="size"]:checked').value;
     currentBake = {
         loaves: loaves,
+        size: size,
         currentStep: 0,
         startTime: new Date().toISOString(),
         stepNotes: {},
@@ -286,12 +309,12 @@ function renderStep() {
     
     // Add starter calculator if applicable
     if (step.hasCalculator) {
-        const starterNeeded = (150 * currentBake.loaves) + 30;
+        const starterNeeded = amount(150, bakeScale()) + 30;
         const currentTime = new Date().toTimeString().slice(0, 5);
         html += `
             <div class="calculator-section">
                 <h4>Starter Calculator</h4>
-                <p><strong>Total starter needed:</strong> ${starterNeeded}g (${150 * currentBake.loaves}g for dough + 30g carryover)</p>
+                <p><strong>Total starter needed:</strong> ${starterNeeded}g (${amount(150, bakeScale())}g for dough + 30g carryover)</p>
                 
                 <div class="form-group">
                     <label>Current starter amount (g):</label>
@@ -546,7 +569,7 @@ function renderStep() {
     
     // Add ingredients if applicable
     if (step.getIngredients) {
-        const ingredients = step.getIngredients(currentBake.loaves);
+        const ingredients = step.getIngredients(bakeScale());
         html += `
             <div class="ingredients-list">
                 <strong>Ingredients:</strong>
@@ -652,7 +675,7 @@ function toggleFold(index) {
 // Starter Calculator
 function calculateFeed() {
     const currentStarter = parseInt(document.getElementById('current-starter').value);
-    const starterNeeded = (150 * currentBake.loaves) + 30;
+    const starterNeeded = amount(150, bakeScale()) + 30;
     const toAdd = starterNeeded - currentStarter;
     
     if (toAdd <= 0) {
@@ -1000,7 +1023,7 @@ function finishBake() {
             <h3 style="color: var(--accent); margin-bottom: 16px;">Review Your Bake</h3>
             
             <div style="margin-bottom: 16px;">
-                <p><strong>Loaves:</strong> ${currentBake.loaves}</p>
+                <p><strong>Loaves:</strong> ${loafDescription(currentBake)}</p>
                 <p><strong>Bulk Fermentation:</strong> ${bulkDuration}</p>
                 <p><strong>Cold Retardation:</strong> ${retardDuration}</p>
             </div>
@@ -1074,6 +1097,7 @@ function saveFinalBakeLog() {
     const bakeRecord = {
         date: new Date().toISOString(),
         loaves: currentBake.loaves,
+        size: currentBake.size,
         outcome: outcome,
         notes: notes || '',
         temperature: finalTemp || currentBake.doughTemp || '',
@@ -1132,7 +1156,7 @@ function loadBakeLog() {
                 <h3>Bake #${logs.length - index}</h3>
                 <div class="log-meta">${dateStr}</div>
                 <div class="log-details">
-                    <p><strong>Loaves:</strong> ${log.loaves}</p>
+                    <p><strong>Loaves:</strong> ${loafDescription(log)}</p>
                     ${log.outcome ? `<p><strong>Outcome:</strong> <span style="color: ${outcomeColor}; font-weight: 600;">${log.outcome}</span></p>` : ''}
                     ${log.temperature ? `<p><strong>Dough Temperature:</strong> ${log.temperature}°C</p>` : ''}
                     ${log.bulkDuration ? `<p><strong>Bulk Fermentation:</strong> ${log.bulkDuration}</p>` : ''}

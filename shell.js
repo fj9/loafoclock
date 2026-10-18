@@ -165,7 +165,23 @@ function renderFooter() {
     });
 }
 
+// Tap-to-show tooltips for touch screens (hover and focus are handled in CSS)
+function initTooltips() {
+    document.addEventListener('click', e => {
+        const wrap = e.target.closest('.tip-wrap');
+        document.querySelectorAll('.tip-wrap.open').forEach(w => { if (w !== wrap) w.classList.remove('open'); });
+        if (wrap && e.target.closest('.info-btn')) {
+            e.preventDefault();
+            wrap.classList.toggle('open');
+        }
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.tip-wrap.open').forEach(w => w.classList.remove('open'));
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    initTooltips();
     initSettings();
     renderHelp();
     renderFooter();

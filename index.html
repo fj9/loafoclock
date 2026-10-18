@@ -35,6 +35,25 @@
                         <label><input type="radio" name="loaves" value="2"> 2 Loaves</label>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>Loaf Size:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="size" value="regular" checked> Regular
+                            <span class="tip-wrap">
+                                <button type="button" class="info-btn" aria-label="What does Regular mean?" aria-describedby="tip-regular">i</button>
+                                <span class="tip" role="tooltip" id="tip-regular">Fits a 25cm oval banneton. About a 1kg loaf.</span>
+                            </span>
+                        </label>
+                        <label>
+                            <input type="radio" name="size" value="large"> Large
+                            <span class="tip-wrap">
+                                <button type="button" class="info-btn" aria-label="What does Large mean?" aria-describedby="tip-large">i</button>
+                                <span class="tip" role="tooltip" id="tip-large">Fits a 30cm oval banneton. About a 1.5kg loaf.</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
                 <button id="start-bake-btn" class="btn btn-primary">Start Baking</button>
             </div>
 
