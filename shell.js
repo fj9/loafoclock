@@ -8,7 +8,7 @@ const PAGE_COLOURS = { light: '#667eea', dark: '#12141c' };
 
 // Add a LinkedIn URL here and it appears in the footer.
 const FOOTER_LINKS = [
-    { label: 'LinkedIn', url: '' },
+    { label: 'LinkedIn', url: 'https://www.linkedin.com/in/frankiej9/' },
     { label: 'GitHub', url: 'https://github.com/fj9' },
     { label: 'Tip me on Ko-fi', url: 'https://ko-fi.com/fjnine' }
 ];
