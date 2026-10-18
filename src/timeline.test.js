@@ -19,11 +19,18 @@ describe('dayLabel / durationText', () => {
 });
 
 describe('timelineHtml', () => {
-    it('asks for a feed time when there is no schedule yet, and lets you say when you fed', () => {
+    it('is a single closed line with no form on step 1, where the calculator has Already fed', () => {
         const html = timelineHtml({ schedule: null, currentStepId: 1, plan, today, defaultFeedTime: '17:40' });
-        expect(html).toContain('appear here');
+        expect(html).toContain('add your feed time to see it');
+        expect(html).not.toContain(' open');
+        expect(html).not.toContain('tl-fed-time');
+        expect(html).toContain('Already fed');
+    });
+    it('offers a quick I-fed form on later steps, still collapsed', () => {
+        const html = timelineHtml({ schedule: null, currentStepId: 3, plan, today, defaultFeedTime: '17:40' });
         expect(html).toContain('id="tl-fed-time" value="17:40"');
         expect(html).toContain('<option value="1:6:6" selected>');
+        expect(html).not.toMatch(/<details[^>]* open/);
     });
     it('lists the milestones with weekday times and marks the next one', () => {
         const html = timelineHtml({ schedule, currentStepId: 2, plan, today });

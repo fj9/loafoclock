@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clockAfter, feedAt, findRatio, hoursUntil, planFromAutolyse, planLimitedStarter } from './feeding.js';
+import { clockAfter, feedAt, findRatio, hoursUntil, planAlreadyFed, planFromAutolyse, planLimitedStarter } from './feeding.js';
 
 describe('clock helpers', () => {
     it('adds hours and reports days rolled over', () => {
@@ -119,5 +119,16 @@ describe('chart', () => {
         expect(findRatio('1:4:4')).toMatchObject({ minHours: 7, maxHours: 9 });
         expect(findRatio('1:6:6')).toMatchObject({ minHours: 9, maxHours: 11 });
         expect(findRatio('1:10:10')).toMatchObject({ minHours: 13, maxHours: 16 });
+    });
+});
+
+describe('planAlreadyFed', () => {
+    it('gives the ready window from the feed time and ratio', () => {
+        const p = planAlreadyFed({ feedTime: '17:00', ratio: '1:6:6' });
+        expect(p.window.from).toEqual({ time: '02:00', days: 1 });
+        expect(p.window.to).toEqual({ time: '04:00', days: 1 });
+    });
+    it('rejects a ratio that is not in the chart', () => {
+        expect(() => planAlreadyFed({ feedTime: '17:00', ratio: '1:7:8' })).toThrow();
     });
 });

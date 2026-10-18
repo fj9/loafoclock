@@ -50,6 +50,7 @@ public/         favicon and app icons
 Step 1 has two calculators, using a chart of ten standard ratios (1:1:1 to 1:10:10) and their rise times at about 21-22°C. The chart is the list at the top of `src/feeding.js`:
 
 - **Limited starter:** enter the starter you have, the amount you need and your feed time. It feeds at 1:6:6 using only as much of your starter as it needs, and shows when it should be ready (9-11 hrs). If you don't have enough for 1:6:6 it dilutes just enough (up to 1:10:10) and says so, and says so again if even that isn't enough.
+- **Already fed:** enter when you fed and the ratio you used. It shows when the starter should be ready and when to start the autolyse, and fills in the timeline.
 - **Plan from autolyse:** enter when you want to start your autolyse, the starter you need, and the earliest you can feed (now, unless you say otherwise). It tells you when to feed, as late as possible so the starter is fresh, using 1:6:6 if there's time. If you're short of time it steps down to 1:5:5, 1:4:4 ... 1:1:1, which peak sooner but use more of your own starter, and it lists every option so you can see the trade-off.
 
 The next step then suggests your autolyse time from the feed you planned (an hour before the starter's earliest rise time).
@@ -60,7 +61,7 @@ Both rests default to 1 hour but can be set anywhere from 30 to 60 minutes. A bu
 
 ## Your timeline
 
-Once you've worked out your feed (or told the app when you fed), a **Your timeline** panel under the progress bar lists when each step happens: autolyse, adding the starter, salt, the folds, the end of bulk, shaping, the fridge, oven on, bake and loaf out, with the free time between them. It assumes a 24°C dough and a morning bake at 08:00, and you can change the feed time, dough temperature, bake time and extra fridge days in the panel. Rest lengths come from the steps, and the plan moves if you record your real start and end times. Tapping **Bake** while you are mid-bake asks if you want to go back to the beginning.
+Until you've worked out your feed (or told the app when you fed) the timeline is just one quiet line under the progress bar. After that a **Your timeline** panel under the progress bar lists when each step happens: autolyse, adding the starter, salt, the folds, the end of bulk, shaping, the fridge, oven on, bake and loaf out, with the free time between them. It assumes a 24°C dough and a morning bake at 08:00, and you can change the feed time, dough temperature, bake time and extra fridge days in the panel. Rest lengths come from the steps, and the plan moves if you record your real start and end times. Tapping **Bake** while you are mid-bake asks if you want to go back to the beginning.
 
 ## Look and feel
 

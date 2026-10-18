@@ -102,3 +102,10 @@ export function planFromAutolyse({ need, autolyseAt, earliestFeed, have }) {
         shortestHours: FEEDING_RATIOS[0].minHours
     };
 }
+
+/** Already fed: "I fed at `feedTime` at `ratio`." When will the starter be ready? */
+export function planAlreadyFed({ feedTime, ratio }) {
+    const r = findRatio(ratio);
+    if (!r) throw new Error(`Unknown ratio: ${ratio}`);
+    return { ratio: r, window: readyWindow(feedTime, r) };
+}

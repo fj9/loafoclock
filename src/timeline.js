@@ -25,14 +25,20 @@ const GAP_SHOWN_MIN = 90;
 
 export function timelineHtml({ schedule, currentStepId, plan, open, today, defaultFeedTime = '' }) {
     if (!schedule) {
-        return `<div class="timeline tl-empty">
-            <p class="hint" style="margin: 0 0 8px;">Work out your feed in step 1 and your timeline will appear here. Already fed your starter? Tell us when:</p>
+        // One quiet line until there is something to show; the quick form is only for later steps,
+        // since step 1 has the "Already fed" mode in the calculator.
+        const form = currentStepId > 1 ? `
+            <p class="hint" style="margin: 0 0 8px;">Already fed your starter? Tell us when:</p>
             <div class="tl-settings" style="padding: 0;">
                 <label>I fed at <input type="time" id="tl-fed-time" value="${defaultFeedTime}"></label>
                 <label>Ratio <select id="tl-fed-ratio">${FEEDING_RATIOS.map((r) => `<option value="${r.ratio}"${r.n === 6 ? ' selected' : ''}>${r.ratio}</option>`).join('')}</select></label>
             </div>
-            <button type="button" id="tl-fed-go" class="btn btn-small" style="margin-top: 10px;">Show my timeline</button>
-        </div>`;
+            <button type="button" id="tl-fed-go" class="btn btn-small" style="margin-top: 10px;">Show my timeline</button>` : `
+            <p class="hint" style="margin: 0;">Work out your feed in the Starter Calculator below (or pick Already fed) and your timeline will appear here.</p>`;
+        return `<details class="timeline tl-empty" id="timeline-details-empty">
+            <summary>🕒 Your timeline<span class="tl-next"> · add your feed time to see it</span></summary>
+            <div style="padding: 0 14px 14px;">${form}</div>
+        </details>`;
     }
     const events = schedule.events;
     const nextIndex = events.findIndex((e) => e.stepId >= currentStepId);
