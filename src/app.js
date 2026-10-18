@@ -189,6 +189,7 @@ let timerRunning = false;
 document.addEventListener('DOMContentLoaded', () => {
     initializeTabs();
     initializeStartScreen();
+    initializeBakingScreen(); // bound once; the buttons are reused by every bake
     loadBakeLog();
 });
 
@@ -247,7 +248,6 @@ function startBake() {
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('baking-screen').style.display = 'block';
     
-    initializeBakingScreen();
     renderStep();
 }
 
@@ -576,7 +576,7 @@ function renderStep() {
     }
     
     // Update navigation buttons
-    document.getElementById('prev-step-btn').disabled = currentBake.currentStep === 0;
+    document.getElementById('prev-step-btn').textContent = currentBake.currentStep === 0 ? '← Change loaves' : '← Previous';
     
     if (currentBake.currentStep === STEPS.length - 1) {
         document.getElementById('next-step-btn').style.display = 'none';
@@ -591,7 +591,17 @@ function previousStep() {
     if (currentBake.currentStep > 0) {
         currentBake.currentStep--;
         renderStep();
+    } else {
+        backToSetup();
     }
+}
+
+// From the first step, go back to choosing loaves, size and hydration. The choices are still
+// selected, and starting again begins a fresh bake with the new amounts.
+function backToSetup() {
+    stopTimer();
+    document.getElementById('baking-screen').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'block';
 }
 
 function nextStep() {
