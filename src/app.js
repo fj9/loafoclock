@@ -660,7 +660,7 @@ function feedCalculatorHtml() {
             <button id="calculate-feed" class="btn btn-small">Calculate Feed</button>
 
             <div id="feed-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;" role="status"></div>
-            <p class="hint" style="margin-top: 12px; font-size: 13px;">Rise times (at 21–27°C) are from Kanika's Cooking Class starter feeding chart. A warm kitchen is faster, a cool one slower.</p>
+            <p class="hint" style="margin-top: 12px; font-size: 13px;">Rise times are for a kitchen around 21–22°C. A warmer kitchen is faster, a cooler one slower.</p>
         </div>
     `;
 }

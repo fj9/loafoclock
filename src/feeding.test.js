@@ -34,14 +34,14 @@ describe('planLimitedStarter', () => {
         const p = planLimitedStarter({ have: 50, need: 230, feedTime: '21:00' });
         expect(p.ratio.ratio).toBe('1:6:6');
         expect(p.feed.starter).toBe(18);
-        expect(p.window.from).toEqual({ time: '07:00', days: 1 });
-        expect(p.window.to).toEqual({ time: '11:00', days: 1 });
+        expect(p.window.from).toEqual({ time: '06:00', days: 1 });
+        expect(p.window.to).toEqual({ time: '08:00', days: 1 });
     });
-    it('dilutes to 1:10:10 when there is too little starter for 1:6:6', () => {
+    it('dilutes just enough when there is too little starter for 1:6:6', () => {
         const p = planLimitedStarter({ have: 30, need: 460, feedTime: '08:00' });
         expect(p.canReach).toBe(true);
         expect(p.diluted).toBe(true);
-        expect(p.ratio.ratio).toBe('1:10:10');
+        expect(p.ratio.ratio).toBe('1:8:8');
         expect(p.feed.starter).toBeLessThanOrEqual(30);
         expect(p.feed.total).toBeGreaterThanOrEqual(460);
     });
@@ -60,14 +60,14 @@ describe('planDeadline', () => {
     it('picks a richer ratio the more time there is', () => {
         const pick = (h) => planDeadline({ need: 230, feedTime: '08:00', neededBy: clockAfter('08:00', h).time }).ratio.ratio;
         expect(pick(5)).toBe('1:1:1');
-        expect(pick(8)).toBe('1:3:3');
-        expect(pick(12)).toBe('1:6:6');
-        expect(pick(14)).toBe('1:10:10');
+        expect(pick(8)).toBe('1:4:4');
+        expect(pick(12)).toBe('1:8:8');
+        expect(pick(15)).toBe('1:10:10');
     });
     it('uses the next day when the deadline clock time is earlier than the feed time', () => {
         const p = planDeadline({ need: 230, feedTime: '21:00', neededBy: '07:00' });
         expect(p.hours).toBe(10);
-        expect(p.ratio.ratio).toBe('1:5:5');
+        expect(p.ratio.ratio).toBe('1:6:6');
     });
     it('flags a deadline that is too soon, or beyond the chart', () => {
         expect(planDeadline({ need: 230, feedTime: '08:00', neededBy: '10:00' }).tooShort).toBe(true);
@@ -81,8 +81,9 @@ describe('planDeadline', () => {
 });
 
 describe('chart', () => {
-    it('matches the published rise times', () => {
-        expect(findRatio('1:4:4')).toMatchObject({ minHours: 7, maxHours: 10 });
-        expect(findRatio('1:10:10')).toMatchObject({ minHours: 12, maxHours: 16 });
+    it('keeps the agreed rise times', () => {
+        expect(findRatio('1:4:4')).toMatchObject({ minHours: 7, maxHours: 9 });
+        expect(findRatio('1:6:6')).toMatchObject({ minHours: 9, maxHours: 11 });
+        expect(findRatio('1:10:10')).toMatchObject({ minHours: 13, maxHours: 16 });
     });
 });

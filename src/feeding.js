@@ -1,13 +1,16 @@
 // Starter feeding maths. Ratios are starter : flour : water by weight, e.g. 1:6:6.
-// Rise times (hours to peak at 21-27°C) are from Kanika's Cooking Class feeding chart.
+// Rise times are hours to peak at about 21-22°C.
 export const FEEDING_RATIOS = [
     { n: 1, ratio: '1:1:1', minHours: 4, maxHours: 6 },
     { n: 2, ratio: '1:2:2', minHours: 5, maxHours: 7 },
     { n: 3, ratio: '1:3:3', minHours: 6, maxHours: 8 },
-    { n: 4, ratio: '1:4:4', minHours: 7, maxHours: 10 },
-    { n: 5, ratio: '1:5:5', minHours: 8, maxHours: 12 },
-    { n: 6, ratio: '1:6:6', minHours: 10, maxHours: 14 },
-    { n: 10, ratio: '1:10:10', minHours: 12, maxHours: 16 }
+    { n: 4, ratio: '1:4:4', minHours: 7, maxHours: 9 },
+    { n: 5, ratio: '1:5:5', minHours: 8, maxHours: 10 },
+    { n: 6, ratio: '1:6:6', minHours: 9, maxHours: 11 },
+    { n: 7, ratio: '1:7:7', minHours: 10, maxHours: 12 },
+    { n: 8, ratio: '1:8:8', minHours: 11, maxHours: 13 },
+    { n: 9, ratio: '1:9:9', minHours: 12, maxHours: 14 },
+    { n: 10, ratio: '1:10:10', minHours: 13, maxHours: 16 }
 ];
 
 // Limited-starter mode assumes this ratio, the most common stretch for a small amount of starter
@@ -51,7 +54,7 @@ function readyWindow(feedTime, r) {
 /**
  * Limited starter: "I have `have` g and need `need` g." Feeds at 1:6:6 using only as much
  * starter as needed, so the rest of the jar is untouched. If even that needs more starter than
- * there is, dilutes further (1:10:10, a longer rise); if that still is not enough, says how far off.
+ * there is, dilutes further (1:7:7 up to 1:10:10, longer rises); if that still is not enough, says how far off.
  */
 export function planLimitedStarter({ have, need, feedTime }) {
     const alreadyEnough = have >= need;

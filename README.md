@@ -43,9 +43,9 @@ public/         favicon and app icons
 
 ## Feeding your starter
 
-Step 1 has two calculators, using the rise times from Kanika's Cooking Class starter feeding chart (21-27°C):
+Step 1 has two calculators, using a chart of ten standard ratios (1:1:1 to 1:10:10) and their rise times at about 21-22°C. The chart is the list at the top of `src/feeding.js`:
 
-- **Limited starter:** enter the starter you have, the amount you need and your feed time. It feeds at 1:6:6 using only as much of your starter as it needs, and shows when it should be ready (10-14 hrs). If you don't have enough for 1:6:6 it dilutes to 1:10:10, and says so if even that isn't enough.
+- **Limited starter:** enter the starter you have, the amount you need and your feed time. It feeds at 1:6:6 using only as much of your starter as it needs, and shows when it should be ready (9-11 hrs). If you don't have enough for 1:6:6 it dilutes just enough (up to 1:10:10) and says so, and says so again if even that isn't enough.
 - **Deadline:** enter when you need the starter and when you'll feed. It suggests the richest ratio whose rise time fits, and how much starter, flour and water to use.
 
 Either way it suggests when to start the autolyse (an hour before the earliest rise time).
