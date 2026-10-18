@@ -698,6 +698,11 @@ function initFeedCalculator() {
 
 const dayText = (days) => days === 0 ? '' : days === 1 ? ' (next day)' : ` (+${days} days)`;
 const clockText = (c) => `${c.time}${dayText(c.days)}`;
+// "05:30 to 07:30 (next day)": say the day once when both ends fall on the same day
+const rangeText = (from, to, dayFn = dayText) =>
+    from.days === to.days
+        ? `${from.time} to ${to.time}${dayFn(to.days)}`
+        : `${from.time}${dayFn(from.days)} to ${to.time}${dayFn(to.days)}`;
 const hoursText = (h) => `${Math.floor(h)}h${h % 1 ? ` ${Math.round((h % 1) * 60)}m` : ''}`;
 
 function feedWarning(text) {
@@ -735,7 +740,7 @@ function calculateFeed() {
         html += feedWarning(`You don't have enough starter for 1:6:6, so this uses ${ratio.ratio}, which takes longer to rise.`);
     }
     html += feedAmountsHtml(feed, 'Feeding Ratio', ratio);
-    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Likely ready:</strong> ${clockText(plan.window.from)} to ${clockText(plan.window.to)} (${riseLabel(ratio)} after feeding)</p>`;
+    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Likely ready:</strong> ${rangeText(plan.window.from, plan.window.to)} (${riseLabel(ratio)} after feeding)</p>`;
 
     // Save for the autolyse suggestion on the next step
     currentBake.starterFeedTime = feedTime;
@@ -792,7 +797,7 @@ function renderAutolysePlan({ need, have, feedTime, neededBy }) {
     }
     html += `<p style="font-size: 18px; font-weight: 600; color: var(--accent);">Feed at ${planClock(best.feedTime)}</p>`;
     html += feedAmountsHtml(best.feed, 'Suggested Ratio', best.ratio);
-    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Starter ready for the dough:</strong> ${planClock(best.window.from)} to ${planClock(best.window.to)} (${riseLabel(best.ratio)} after feeding)</p>`;
+    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Starter ready for the dough:</strong> ${rangeText(best.window.from, best.window.to, planDayText)} (${riseLabel(best.ratio)} after feeding)</p>`;
     html += autolyseSummaryHtml({ time: neededBy, days: 0 }, `feeding ${best.ratio.minHours - 1} hours earlier`);
 
     html += `<h4 style="margin-top: 16px;">All options</h4>
