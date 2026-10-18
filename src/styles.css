@@ -531,3 +531,26 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
 .seg button small { font-weight: 400; opacity: .85; }
 .calculator-section h4 .tip-wrap, .time-tracker-section h4 .tip-wrap, .step-card h3 .tip-wrap { margin-left: 8px; }
 .step-card h3 .info-btn { width: 28px; height: 28px; }
+
+/* Timeline under the progress bar */
+.timeline { background: var(--wash); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 20px; }
+.timeline summary { padding: 12px 14px; cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.timeline .tl-next { font-weight: 400; color: var(--muted); font-size: 14px; }
+.tl-empty { margin: 0 0 16px; }
+.tl-list { list-style: none; margin: 0; padding: 4px 14px 8px 14px; border-left: 0; }
+.tl-item { position: relative; display: flex; gap: 12px; padding: 6px 0 6px 20px; border-left: 2px solid var(--line); margin-left: 6px; }
+.tl-item::before { content: ''; position: absolute; left: -7px; top: 12px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--card); border: 2px solid var(--muted); }
+.tl-item.tl-done { opacity: .6; }
+.tl-item.tl-done::before { background: var(--good); border-color: var(--good); }
+.tl-item.tl-next::before { background: var(--accent-strong); border-color: var(--accent-strong); box-shadow: 0 0 0 4px rgba(102, 126, 234, .25); }
+.tl-item.tl-next .tl-time { color: var(--accent); }
+.tl-time { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 92px; white-space: nowrap; }
+.tl-label small { color: var(--muted); font-size: 13px; }
+.tl-gap { margin: 0 0 0 6px; padding: 2px 0 2px 20px; border-left: 2px dashed var(--line); color: var(--muted); font-size: 13px; }
+.tl-warn { margin: 8px 14px; padding: 8px 12px; border-radius: 6px; background: var(--warn-bg); color: var(--warn-ink); }
+.timeline h4 { margin: 8px 14px; font-size: 15px; }
+.tl-settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 0 14px; }
+.tl-settings label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 600; }
+.tl-settings input, .tl-settings select { padding: 8px; border: 2px solid var(--line); border-radius: 8px; font-size: 16px; }
+.timeline > .hint { margin: 10px 14px 14px; }

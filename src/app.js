@@ -1,27 +1,9 @@
 import { bakePlan, recipeFor, loafDescription } from './recipe.js';
 import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, REST_MAX, REST_MIN, restEnd, restText, tidyRest } from './timing.js';
 import { STEP_TIPS, tipHtml } from './tips.js';
+import { BULK_FERMENTATION_TEMPS, PLAN_DEFAULTS, buildSchedule } from './schedule.js';
+import { progressLabel, timelineHtml } from './timeline.js';
 import { clockAfter, findRatio, planFromAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
-
-// Bulk fermentation temperature chart
-const BULK_FERMENTATION_TEMPS = [
-    { temp: 27, hours: 5.5, rise: 30 },
-    { temp: 26, hours: 5.5, rise: 30 },
-    { temp: 25.5, hours: 6, rise: 40 },
-    { temp: 25, hours: 6, rise: 40 },
-    { temp: 24.5, hours: 7, rise: 50 },
-    { temp: 24, hours: 7, rise: 50 },
-    { temp: 23, hours: 8, rise: 55 },
-    { temp: 22.5, hours: 9, rise: 60 },
-    { temp: 22, hours: 10, rise: 65 },
-    { temp: 21.5, hours: 11, rise: 70 },
-    { temp: 21, hours: 12, rise: 75 },
-    { temp: 20.5, hours: 13, rise: 80 },
-    { temp: 20, hours: 14, rise: 85 },
-    { temp: 19.5, hours: 15, rise: 90 },
-    { temp: 19, hours: 16, rise: 95 },
-    { temp: 18, hours: 16, rise: 100 }
-];
 
 // Sourdough Baking Steps
 const STEPS = [
@@ -208,6 +190,11 @@ function initializeTabs() {
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabName = btn.dataset.tab;
+            // Tapping Bake while you are already on it takes you back to the beginning
+            if (tabName === 'bake' && btn.classList.contains('active') && bakeInProgress()) {
+                if (confirm('Go back to the start? This clears the bake you are working on.')) backToSetup();
+                return;
+            }
             switchTab(tabName);
         });
     });
@@ -582,6 +569,8 @@ function renderStep() {
         stopTimer();
     }
     
+    refreshTimeline();
+    
     // Update navigation buttons
     document.getElementById('prev-step-btn').textContent = currentBake.currentStep === 0 ? '← Change loaves' : '← Previous';
     
@@ -624,6 +613,74 @@ function toggleFold(index) {
     renderStep();
 }
 
+// ---- Timeline under the progress bar ----
+let timelineOpen = false;
+
+const bakeInProgress = () => document.getElementById('baking-screen').style.display === 'block';
+
+// The plan follows what you tell the app. Until the feed is worked out there is nothing to plan from.
+function currentPlan() {
+    return {
+        feedTime: currentBake.starterFeedTime,
+        temp: currentBake.planTemp ?? PLAN_DEFAULTS.doughTemp,
+        bakeAt: currentBake.planBakeAt || PLAN_DEFAULTS.bakeAt,
+        extraFridgeDays: currentBake.planExtraFridgeDays || 0
+    };
+}
+
+function currentSchedule() {
+    const ratio = findRatio(currentBake.starterFeedRatio);
+    if (!currentBake.starterFeedTime || !ratio) return null;
+    const plan = currentPlan();
+    return buildSchedule({
+        feedTime: plan.feedTime,
+        riseMinHours: ratio.minHours,
+        autolyseMin: restMinutes(STEPS[1]),
+        fermentolyseMin: restMinutes(STEPS[2]),
+        doughTemp: plan.temp,
+        bakeAt: plan.bakeAt,
+        extraFridgeDays: plan.extraFridgeDays,
+        bakeMinutes: bakePlan(currentBake).totalMinutes,
+        actuals: { starterIn: currentBake.bulkFermentStart, bulkEnd: currentBake.bulkFermentEnd }
+    });
+}
+
+function refreshTimeline() {
+    const container = document.getElementById('timeline');
+    if (!container) return;
+    const existing = document.getElementById('timeline-details');
+    if (existing) timelineOpen = existing.open; // keep it open across updates
+    const schedule = currentSchedule();
+    const step = STEPS[currentBake.currentStep];
+    container.innerHTML = timelineHtml({ schedule, currentStepId: step.id, plan: currentPlan(), open: timelineOpen, defaultFeedTime: nowClock() });
+    document.getElementById('progress-label').textContent =
+        progressLabel({ schedule, currentStepId: step.id, totalSteps: STEPS.length });
+    if (!schedule) {
+        document.getElementById('tl-fed-go').addEventListener('click', () => {
+            const time = document.getElementById('tl-fed-time').value;
+            if (!time) return;
+            currentBake.starterFeedTime = time;
+            currentBake.starterFeedRatio = document.getElementById('tl-fed-ratio').value;
+            const suggestion = document.getElementById('autolyse-suggestion');
+            if (suggestion) suggestion.outerHTML = autolyseSuggestionHtml();
+            refreshTimeline();
+        });
+        return;
+    }
+
+    document.getElementById('timeline-details').addEventListener('toggle', e => { timelineOpen = e.target.open; });
+    const bind = (id, apply) => document.getElementById(id).addEventListener('change', e => { apply(e.target.value); refreshTimeline(); });
+    bind('tl-feed', v => {
+        if (!v) return;
+        currentBake.starterFeedTime = v;
+        const suggestion = document.getElementById('autolyse-suggestion');
+        if (suggestion) suggestion.outerHTML = autolyseSuggestionHtml();
+    });
+    bind('tl-temp', v => { currentBake.planTemp = parseFloat(v); });
+    bind('tl-bake', v => { if (v) currentBake.planBakeAt = v; });
+    bind('tl-extra', v => { currentBake.planExtraFridgeDays = parseInt(v); });
+}
+
 // ---- Rest length for autolyse and fermentolyse (30-60 min) ----
 const restMinutes = (step) => clampRest(currentBake[step.restKey] ?? REST_DEFAULT);
 const timerMinutesFor = (step) => (step.restKey ? restMinutes(step) : step.timerMinutes);
@@ -663,6 +720,7 @@ function initRestPicker(step) {
         });
         const suggestion = document.getElementById('autolyse-suggestion');
         if (suggestion) suggestion.outerHTML = autolyseSuggestionHtml();
+        refreshTimeline();
         if (!timerInterval) { stopTimer(); resetTimer(); }
     };
     const set = (minutes) => {
@@ -809,7 +867,11 @@ function calculateFeed() {
     if (mode === 'limited' && !(have > 0)) return show(feedWarning('Enter how much starter you have now.'));
     if (mode === 'deadline' && !neededBy) return show(feedWarning('Enter the time you want to start your autolyse.'));
 
-    if (mode === 'deadline') return show(renderAutolysePlan({ need, have, feedTime, neededBy }));
+    if (mode === 'deadline') {
+        show(renderAutolysePlan({ need, have, feedTime, neededBy }));
+        refreshTimeline();
+        return;
+    }
 
     const plan = planLimitedStarter({ have, need, feedTime });
     let html = '';
@@ -836,6 +898,7 @@ function calculateFeed() {
     const autolyseHours = ratio.minHours - 1;
     html += autolyseSummaryHtml(clockAfter(feedTime, autolyseHours), `${autolyseHours} hours after feeding`);
     show(html);
+    refreshTimeline();
 }
 
 function feedAmountsHtml(feed, ratioLabel, ratio) {
@@ -928,6 +991,7 @@ function calculateBulkTime() {
     
     // Save the temperature
     currentBake.doughTemp = doughTemp;
+    currentBake.planTemp = doughTemp; // the timeline plans with your reading
     
     // Find closest temperature match
     let closestTemp = BULK_FERMENTATION_TEMPS[0];
@@ -970,6 +1034,7 @@ function calculateBulkTime() {
 function saveBulkStart() {
     const startTime = document.getElementById('bulk-start-time').value;
     currentBake.bulkFermentStart = startTime;
+    refreshTimeline();
     
     // Calculate predicted end time based on 25°C (6 hours)
     const defaultBulkHours = 6;
@@ -997,6 +1062,7 @@ function saveBulkStart() {
 function saveBulkEnd() {
     const endTime = document.getElementById('bulk-end-time').value;
     currentBake.bulkFermentEnd = endTime;
+    refreshTimeline();
     
     if (currentBake.bulkFermentStart) {
         const duration = calculateTimeDifference(currentBake.bulkFermentStart, endTime);

@@ -45,14 +45,15 @@ export function loafDescription(bake) {
 
 // Bake times: the large loaf needs longer in the pot than the regular one
 const BAKE_TIMES = {
-    regular: { lidOn: '20', lidOff: '20-25', total: '40-45 minutes total' },
-    large: { lidOn: '25', lidOff: '25', total: '50 minutes total' }
+    regular: { lidOn: '20', lidOff: '20-25', total: '40-45 minutes total', minutes: 45 },
+    large: { lidOn: '25', lidOff: '25', total: '50 minutes total', minutes: 50 }
 };
 
 export function bakePlan(bake) {
     const t = BAKE_TIMES[bake.size] || BAKE_TIMES.regular;
     return {
         duration: t.total,
+        totalMinutes: t.minutes, // the longer end, for planning
         instructions: [
             'Preheat oven and Dutch oven to 240°C',
             'Place dough directly from fridge into hot Dutch oven',

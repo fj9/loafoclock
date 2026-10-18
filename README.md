@@ -32,6 +32,8 @@ npm run icons    # re-render the PNG icons from public/favicon.svg
 ```text
 src/recipe.js   loaf sizes, hydration and ingredient amounts
 src/feeding.js  starter feeding ratios, rise times and the two feed calculators
+src/schedule.js the whole-bake plan: when each step happens, from your feed time
+src/timeline.js the timeline shown under the progress bar
 src/timing.js   autolyse and fermentolyse rest lengths (30-60 min) and the tidy-time suggestion
 src/tips.js     plain-English tooltip text for the jargon (edit the wording here)
 src/app.js      the baking workflow, timers, calculators and bake log
@@ -55,6 +57,10 @@ The next step then suggests your autolyse time from the feed you planned (an hou
 ## Autolyse and fermentolyse length
 
 Both rests default to 1 hour but can be set anywhere from 30 to 60 minutes. A button suggests the longest rest that ends on the hour or half hour if you start now (for example, starting at 10:20 suggests 40 minutes, ending at 11:00) so the steps after it land on tidy times. The timer, the suggested autolyse start, the fold times and the remaining bulk time all follow the length you choose.
+
+## Your timeline
+
+Once you've worked out your feed (or told the app when you fed), a **Your timeline** panel under the progress bar lists when each step happens: autolyse, adding the starter, salt, the folds, the end of bulk, shaping, the fridge, oven on, bake and loaf out, with the free time between them. It assumes a 24°C dough and a morning bake at 08:00, and you can change the feed time, dough temperature, bake time and extra fridge days in the panel. Rest lengths come from the steps, and the plan moves if you record your real start and end times. Tapping **Bake** while you are mid-bake asks if you want to go back to the beginning.
 
 ## Made easy to follow
 
