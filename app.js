@@ -53,9 +53,9 @@ const STEPS = [
         duration: "1 hour",
         timerMinutes: 60,
         showAutolyseTime: true,
-        getIngredients: (scale) => [
-            `${amount(475, scale)}g flour`,
-            `${amount(275, scale)}g water`
+        getIngredients: (r) => [
+            `${r.flour}g flour`,
+            `${r.water}g water`
         ],
         instructions: [
             "Mix flour and water until no dry flour remains",
@@ -68,8 +68,8 @@ const STEPS = [
         duration: "1 hour",
         timerMinutes: 60,
         trackBulkStart: true,
-        getIngredients: (scale) => [
-            `${amount(150, scale)}g active starter`
+        getIngredients: (r) => [
+            `${r.starter}g active starter`
         ],
         instructions: [
             "Add the active starter to the dough",
@@ -83,10 +83,10 @@ const STEPS = [
         name: "Add Salt & Enrichments",
         duration: "30 minutes rest",
         timerMinutes: 30,
-        getIngredients: (scale) => [
-            `${amount(10, scale)}g salt`,
-            `${amount(15, scale)}g honey`,
-            `${amount(20, scale)}g extra virgin olive oil`
+        getIngredients: (r) => [
+            `${r.salt}g salt`,
+            `${r.honey}g honey`,
+            `${r.oil}g extra virgin olive oil`
         ],
         instructions: [
             "Add salt, honey, and olive oil",
@@ -234,19 +234,35 @@ function initializeStartScreen() {
 }
 
 // Loaf sizes: regular fits a 25cm oval banneton (~1kg), large a 30cm one (~1.5kg).
-// The recipe quantities are for one regular loaf.
+// Flour and starter are fixed per loaf; hydration only changes the water.
 const LOAF_SIZES = {
-    regular: { label: 'Regular', factor: 1, note: '25cm banneton, ~1kg' },
-    large: { label: 'Large', factor: 1.5, note: '30cm banneton, ~1.5kg' }
+    regular: { label: 'Regular', flour: 450, starter: 150, note: '25cm banneton, ~1kg' },
+    large: { label: 'Large', flour: 600, starter: 200, note: '30cm banneton, ~1.5kg' }
 };
 
-function bakeScale() {
-    const size = LOAF_SIZES[currentBake.size] || LOAF_SIZES.regular;
-    return currentBake.loaves * size.factor;
-}
+// Total hydration counts the starter as half flour, half water (100% hydration starter)
+const HYDRATIONS = [60, 65, 70, 75, 80];
+const DEFAULT_HYDRATION = 70;
+const WATER_ROUNDING_G = 5;
 
-function amount(grams, scale) {
-    return Math.round(grams * scale);
+// Salt, honey and oil as a share of the flour
+const SALT_PCT = 0.02, HONEY_PCT = 0.03, OIL_PCT = 0.04;
+
+function recipeFor(bake) {
+    const size = LOAF_SIZES[bake.size] || LOAF_SIZES.regular;
+    const hydration = (bake.hydration || DEFAULT_HYDRATION) / 100;
+    const totalFlour = size.flour + size.starter / 2;
+    const exactWater = hydration * totalFlour - size.starter / 2;
+    const water = Math.round(exactWater / WATER_ROUNDING_G) * WATER_ROUNDING_G;
+    const n = bake.loaves;
+    return {
+        flour: size.flour * n,
+        water: water * n,
+        starter: size.starter * n,
+        salt: Math.round(size.flour * SALT_PCT) * n,
+        honey: Math.round(size.flour * HONEY_PCT) * n,
+        oil: Math.round(size.flour * OIL_PCT) * n
+    };
 }
 
 function loafDescription(bake) {
@@ -257,9 +273,11 @@ function loafDescription(bake) {
 function startBake() {
     const loaves = parseInt(document.querySelector('input[name="loaves"]:checked').value);
     const size = document.querySelector('input[name="size"]:checked').value;
+    const hydration = parseInt(document.getElementById('hydration').value);
     currentBake = {
         loaves: loaves,
         size: size,
+        hydration: hydration,
         currentStep: 0,
         startTime: new Date().toISOString(),
         stepNotes: {},
@@ -309,12 +327,12 @@ function renderStep() {
     
     // Add starter calculator if applicable
     if (step.hasCalculator) {
-        const starterNeeded = amount(150, bakeScale()) + 30;
+        const starterNeeded = recipeFor(currentBake).starter + 30;
         const currentTime = new Date().toTimeString().slice(0, 5);
         html += `
             <div class="calculator-section">
                 <h4>Starter Calculator</h4>
-                <p><strong>Total starter needed:</strong> ${starterNeeded}g (${amount(150, bakeScale())}g for dough + 30g carryover)</p>
+                <p><strong>Total starter needed:</strong> ${starterNeeded}g (${recipeFor(currentBake).starter}g for dough + 30g carryover)</p>
                 
                 <div class="form-group">
                     <label>Current starter amount (g):</label>
@@ -569,7 +587,7 @@ function renderStep() {
     
     // Add ingredients if applicable
     if (step.getIngredients) {
-        const ingredients = step.getIngredients(bakeScale());
+        const ingredients = step.getIngredients(recipeFor(currentBake));
         html += `
             <div class="ingredients-list">
                 <strong>Ingredients:</strong>
@@ -675,7 +693,7 @@ function toggleFold(index) {
 // Starter Calculator
 function calculateFeed() {
     const currentStarter = parseInt(document.getElementById('current-starter').value);
-    const starterNeeded = amount(150, bakeScale()) + 30;
+    const starterNeeded = recipeFor(currentBake).starter + 30;
     const toAdd = starterNeeded - currentStarter;
     
     if (toAdd <= 0) {
@@ -1024,6 +1042,7 @@ function finishBake() {
             
             <div style="margin-bottom: 16px;">
                 <p><strong>Loaves:</strong> ${loafDescription(currentBake)}</p>
+                <p><strong>Hydration:</strong> ${currentBake.hydration}%</p>
                 <p><strong>Bulk Fermentation:</strong> ${bulkDuration}</p>
                 <p><strong>Cold Retardation:</strong> ${retardDuration}</p>
             </div>
@@ -1098,6 +1117,7 @@ function saveFinalBakeLog() {
         date: new Date().toISOString(),
         loaves: currentBake.loaves,
         size: currentBake.size,
+        hydration: currentBake.hydration,
         outcome: outcome,
         notes: notes || '',
         temperature: finalTemp || currentBake.doughTemp || '',
@@ -1157,6 +1177,7 @@ function loadBakeLog() {
                 <div class="log-meta">${dateStr}</div>
                 <div class="log-details">
                     <p><strong>Loaves:</strong> ${loafDescription(log)}</p>
+                    ${log.hydration ? `<p><strong>Hydration:</strong> ${log.hydration}%</p>` : ''}
                     ${log.outcome ? `<p><strong>Outcome:</strong> <span style="color: ${outcomeColor}; font-weight: 600;">${log.outcome}</span></p>` : ''}
                     ${log.temperature ? `<p><strong>Dough Temperature:</strong> ${log.temperature}°C</p>` : ''}
                     ${log.bulkDuration ? `<p><strong>Bulk Fermentation:</strong> ${log.bulkDuration}</p>` : ''}

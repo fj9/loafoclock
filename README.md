@@ -38,16 +38,16 @@ The app follows your weekly workflow:
 9. **Cold Retardation** (8-72 hours)
 10. **Baking** (240°C → 230°C, 50 min total)
 
-## Recipe (1 Loaf)
+## Recipe
 
-- 475g flour
-- 275g water
-- 150g active starter
-- 10g salt
-- 15g honey
-- 20g olive oil
+Flour and starter are fixed per loaf; the hydration you choose (60-80%, default 70%) only changes the water. Hydration counts the starter as half flour, half water, and water is rounded to the nearest 5g.
 
-For 2 loaves, all quantities double automatically.
+| Loaf | Flour | Starter | Water at 70% |
+| --- | --- | --- | --- |
+| Regular (25cm banneton, ~1kg) | 450g | 150g | 295g |
+| Large (30cm banneton, ~1.5kg) | 600g | 200g | 390g |
+
+Salt, honey and olive oil are 2%, 3% and 4% of the flour. Two loaves double everything.
 
 ## Tips for Your Mum
 

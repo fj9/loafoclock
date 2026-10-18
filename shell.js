@@ -157,7 +157,7 @@ function renderFooter() {
         .map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer">${l.label}</a>`);
     links.unshift('<a href="#about" id="footer-about">About</a>');
     document.getElementById('site-footer').innerHTML =
-        `<div>Made by Freya'd Knot</div><div class="links">${links.join('')}</div>`;
+        `<div>Made by fj9</div><div class="links">${links.join('')}</div>`;
     document.getElementById('footer-about').addEventListener('click', e => {
         e.preventDefault();
         switchTab('help');
