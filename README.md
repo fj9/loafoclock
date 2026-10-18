@@ -10,6 +10,8 @@ A mobile-friendly web app to guide you through sourdough baking and track your b
 - **Bake Logging**: Track variations, temperatures, and outcomes
 - **Offline Support**: Works without internet once loaded
 - **Mobile-Friendly**: Responsive design for phone, tablet, or desktop
+- **Light and dark mode**: choose in Settings, or follow your phone
+- **First-run welcome cards**, a Help tab, and back up / restore for your bake log
 
 ## How to Use
 

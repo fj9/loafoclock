@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%9E%3C/text%3E%3C/svg%3E">
+    <script>
+        try { var t = localStorage.getItem('sourdoughTheme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+    </script>
     <title>Sourdough Companion</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,8 +18,10 @@
         </header>
 
         <nav class="tabs">
-            <button class="tab-btn active" data-tab="bake">Active Bake</button>
-            <button class="tab-btn" data-tab="log">Bake Log</button>
+            <button class="tab-btn active" data-tab="bake">Bake</button>
+            <button class="tab-btn" data-tab="log">Log</button>
+            <button class="tab-btn" data-tab="settings">Settings</button>
+            <button class="tab-btn" data-tab="help">Help</button>
         </nav>
 
         <!-- Active Bake Tab -->
@@ -61,8 +68,54 @@
             <h2>Bake History</h2>
             <div id="bake-log-list"></div>
         </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <section class="panel">
+                <h2>Appearance</h2>
+                <div class="seg" id="theme-seg">
+                    <button data-theme-mode="light">Light</button>
+                    <button data-theme-mode="dark">Dark</button>
+                    <button data-theme-mode="system">Follow my phone</button>
+                </div>
+            </section>
+            <section class="panel">
+                <h2>Timer alerts</h2>
+                <p class="hint" id="notify-status"></p>
+                <div class="btn-row"><button id="notify-btn" class="btn btn-outline">Turn on notifications</button></div>
+            </section>
+            <section class="panel">
+                <h2>Your bake log</h2>
+                <p class="hint">Saved only in this browser. Back it up to move it to another device.</p>
+                <div class="btn-row">
+                    <button id="backup-btn" class="btn btn-outline">Back up</button>
+                    <button id="restore-btn" class="btn btn-outline">Restore</button>
+                    <button id="clear-log-btn" class="btn btn-danger">Delete all</button>
+                </div>
+                <input type="file" id="restore-file" accept="application/json" hidden>
+                <p class="hint" id="backup-msg" role="status"></p>
+            </section>
+        </div>
+
+        <!-- Help Tab -->
+        <div id="help-tab" class="tab-content">
+            <section class="panel">
+                <h2>Getting started</h2>
+                <ol id="tutorial-list" style="padding-left: 20px;"></ol>
+                <div class="btn-row"><button id="replay-tutorial-btn" class="btn btn-outline">Show the welcome cards again</button></div>
+            </section>
+            <section class="panel" id="faq"></section>
+            <section class="panel" id="about">
+                <h2>About</h2>
+                <p>Hi, I'm Freya, or Freya'd Knot. I made this to keep track of my own sourdough, and it's just for fun.</p>
+                <p>Everything you log stays on your device. There's no account and nothing is sent anywhere.</p>
+            </section>
+        </div>
+
+        <footer class="site-footer" id="site-footer"></footer>
     </div>
 
+    <script src="shell.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

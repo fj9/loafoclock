@@ -1,3 +1,34 @@
+/* Theme: light by default, dark via data-theme or the phone's setting */
+:root {
+    --page: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --card: #ffffff; --wash: #f8f9fa; --line: #e9ecef; --ink: #333; --label: #495057; --muted: #6c757d;
+    --accent: #667eea; --accent-strong: #667eea; --accent-hover: #5568d3;
+    --danger: #dc3545; --good: #28a745; --good-ink: #155724; --good-bg: #d4edda;
+    --info: #17a2b8; --info-ink: #0c5460; --info-bg: #d1ecf1;
+    --warn: #ffc107; --warn-ink: #856404; --warn-bg: #fff3cd; --calc-bg: #e7f3ff;
+    color-scheme: light;
+}
+:root[data-theme="dark"] {
+    --page: linear-gradient(135deg, #12141c 0%, #1d2233 100%);
+    --card: #1e2230; --wash: #262b3b; --line: #343a4e; --ink: #e6e8ef; --label: #c3c8d6; --muted: #9aa1b5;
+    --accent: #9aa7ff; --accent-strong: #5a6ae0; --accent-hover: #4c5bd0;
+    --danger: #ff7b88; --good: #5fd07a; --good-ink: #a6e3b4; --good-bg: #1f3a2a;
+    --info: #4fc3d9; --info-ink: #9fdce8; --info-bg: #1b3540;
+    --warn: #ffca2c; --warn-ink: #f1d98a; --warn-bg: #3d3418; --calc-bg: #1c2a44;
+    color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --page: linear-gradient(135deg, #12141c 0%, #1d2233 100%);
+        --card: #1e2230; --wash: #262b3b; --line: #343a4e; --ink: #e6e8ef; --label: #c3c8d6; --muted: #9aa1b5;
+        --accent: #9aa7ff; --accent-strong: #5a6ae0; --accent-hover: #4c5bd0;
+        --danger: #ff7b88; --good: #5fd07a; --good-ink: #a6e3b4; --good-bg: #1f3a2a;
+        --info: #4fc3d9; --info-ink: #9fdce8; --info-bg: #1b3540;
+        --warn: #ffca2c; --warn-ink: #f1d98a; --warn-bg: #3d3418; --calc-bg: #1c2a44;
+        color-scheme: dark;
+    }
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,23 +37,23 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: var(--page);
     min-height: 100vh;
     padding: 20px;
-    color: #333;
+    color: var(--ink);
 }
 
 .container {
     max-width: 600px;
     margin: 0 auto;
-    background: white;
+    background: var(--card);
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     overflow: hidden;
 }
 
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--accent-strong) 0%, #764ba2 100%);
     color: white;
     padding: 24px;
     text-align: center;
@@ -35,8 +66,8 @@ header h1 {
 
 .tabs {
     display: flex;
-    background: #f8f9fa;
-    border-bottom: 2px solid #e9ecef;
+    background: var(--wash);
+    border-bottom: 2px solid var(--line);
 }
 
 .tab-btn {
@@ -46,15 +77,15 @@ header h1 {
     border: none;
     font-size: 16px;
     font-weight: 500;
-    color: #6c757d;
+    color: var(--muted);
     cursor: pointer;
     transition: all 0.3s;
 }
 
 .tab-btn.active {
-    color: #667eea;
-    background: white;
-    border-bottom: 3px solid #667eea;
+    color: var(--accent);
+    background: var(--card);
+    border-bottom: 3px solid var(--accent);
 }
 
 .tab-content {
@@ -74,7 +105,7 @@ header h1 {
     display: block;
     font-weight: 600;
     margin-bottom: 8px;
-    color: #495057;
+    color: var(--label);
 }
 
 .form-group input[type="text"],
@@ -83,7 +114,7 @@ header h1 {
 .form-group select {
     width: 100%;
     padding: 12px;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--line);
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s;
@@ -93,7 +124,7 @@ header h1 {
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--accent);
 }
 
 .form-group textarea {
@@ -124,18 +155,18 @@ header h1 {
 }
 
 .btn-primary {
-    background: #667eea;
+    background: var(--accent-strong);
     color: white;
 }
 
 .btn-primary:hover {
-    background: #5568d3;
+    background: var(--accent-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: var(--muted);
     color: white;
     width: 100%;
     margin-top: 20px;
@@ -152,7 +183,7 @@ header h1 {
 
 .progress-bar {
     height: 8px;
-    background: #e9ecef;
+    background: var(--line);
     border-radius: 4px;
     margin-bottom: 24px;
     overflow: hidden;
@@ -160,27 +191,27 @@ header h1 {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(90deg, var(--accent-strong) 0%, #764ba2 100%);
     transition: width 0.3s;
     width: 0%;
 }
 
 .step-card {
-    background: #f8f9fa;
+    background: var(--wash);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
 }
 
 .step-card h3 {
-    color: #667eea;
+    color: var(--accent);
     margin-bottom: 12px;
     font-size: 20px;
 }
 
 .step-card .step-number {
     display: inline-block;
-    background: #667eea;
+    background: var(--accent-strong);
     color: white;
     width: 32px;
     height: 32px;
@@ -199,7 +230,7 @@ header h1 {
 .ingredients-list li,
 .instructions-list li {
     padding: 8px 0;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--line);
 }
 
 .ingredients-list li:last-child,
@@ -208,7 +239,7 @@ header h1 {
 }
 
 .timer-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--accent-strong) 0%, #764ba2 100%);
     border-radius: 12px;
     padding: 24px;
     text-align: center;
@@ -230,12 +261,12 @@ header h1 {
 }
 
 .timer-controls .btn {
-    background: white;
-    color: #667eea;
+    background: var(--card);
+    color: var(--accent);
 }
 
 .timer-controls .btn:hover {
-    background: #f8f9fa;
+    background: var(--wash);
 }
 
 .action-buttons {
@@ -251,23 +282,23 @@ header h1 {
 .note-section {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 2px solid #e9ecef;
+    border-top: 2px solid var(--line);
 }
 
 .note-section strong {
-    color: #dc3545;
+    color: var(--danger);
 }
 
 .calculator-section {
-    background: #e7f3ff;
+    background: var(--calc-bg);
     border-radius: 8px;
     padding: 16px;
     margin: 16px 0;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--accent);
 }
 
 .calculator-section h4 {
-    color: #667eea;
+    color: var(--accent);
     margin-bottom: 12px;
     font-size: 18px;
 }
@@ -279,14 +310,14 @@ header h1 {
 .calculator-section input[type="number"] {
     width: 100%;
     padding: 10px;
-    border: 2px solid #667eea;
+    border: 2px solid var(--accent);
     border-radius: 6px;
     font-size: 16px;
 }
 
 .calculator-section #feed-result {
-    background: white;
-    border: 2px solid #667eea;
+    background: var(--card);
+    border: 2px solid var(--accent);
 }
 
 .calculator-section #feed-result ul {
@@ -299,7 +330,7 @@ header h1 {
 }
 
 .time-tracker-section {
-    background: #fff3cd;
+    background: var(--warn-bg);
     border-radius: 8px;
     padding: 16px;
     margin: 16px 0;
@@ -307,7 +338,7 @@ header h1 {
 }
 
 .time-tracker-section h4 {
-    color: #856404;
+    color: var(--warn-ink);
     margin-bottom: 12px;
     font-size: 18px;
 }
@@ -326,14 +357,14 @@ header h1 {
 }
 
 .fold-tracker-section {
-    background: #f8f9fa;
+    background: var(--wash);
     border-radius: 12px;
     padding: 20px;
     margin: 16px 0;
 }
 
 .fold-tracker-section h4 {
-    color: #667eea;
+    color: var(--accent);
     margin-bottom: 12px;
     font-size: 18px;
 }
@@ -343,8 +374,8 @@ header h1 {
 }
 
 .fold-item {
-    background: white;
-    border: 2px solid #e9ecef;
+    background: var(--card);
+    border: 2px solid var(--line);
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 12px;
@@ -352,8 +383,8 @@ header h1 {
 }
 
 .fold-item.completed {
-    background: #d4edda;
-    border-color: #28a745;
+    background: var(--good-bg);
+    border-color: var(--good);
 }
 
 .fold-checkbox {
@@ -378,33 +409,33 @@ header h1 {
 }
 
 .fold-time {
-    color: #667eea;
+    color: var(--accent);
     font-weight: 600;
     font-size: 14px;
 }
 
 .fold-timer-section {
-    border-top: 2px solid #e9ecef;
+    border-top: 2px solid var(--line);
     padding-top: 16px;
     margin-top: 16px;
 }
 
 .bake-log-item {
-    background: #f8f9fa;
+    background: var(--wash);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--accent);
 }
 
 .bake-log-item h3 {
-    color: #667eea;
+    color: var(--accent);
     margin-bottom: 8px;
 }
 
 .bake-log-item .log-meta {
     font-size: 14px;
-    color: #6c757d;
+    color: var(--muted);
     margin-bottom: 12px;
 }
 
@@ -419,7 +450,7 @@ header h1 {
 .empty-state {
     text-align: center;
     padding: 40px 20px;
-    color: #6c757d;
+    color: var(--muted);
 }
 
 .empty-state p {
@@ -444,3 +475,41 @@ header h1 {
         font-size: 40px;
     }
 }
+
+/* Form controls follow the theme */
+input, select, textarea { background: var(--card); color: var(--ink); font-family: inherit; }
+.form-group input, .form-group select, .form-group textarea { border-color: var(--line); }
+
+/* Header actions + tabs */
+.tab-btn { padding: 14px 4px; font-size: 15px; }
+.tab-btn.active { background: var(--card); }
+
+/* Settings, help, footer */
+.panel { margin-bottom: 24px; }
+.panel h2 { margin-bottom: 8px; }
+.panel p, .panel li { margin-bottom: 8px; line-height: 1.45; }
+.panel .hint { color: var(--muted); font-size: 14px; }
+.seg { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.seg button { flex: 1; min-height: 48px; padding: 0 12px; border-radius: 10px; border: 2px solid var(--line);
+    background: var(--card); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.btn-outline { background: var(--card); color: var(--ink); border: 2px solid var(--line); }
+.btn-danger { background: var(--card); color: var(--danger); border: 2px solid var(--danger); }
+details.faq { border-top: 1px solid var(--line); padding: 10px 0; }
+details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+.site-footer { margin: 0; padding: 16px 24px 24px; border-top: 2px dashed var(--line); text-align: center;
+    color: var(--muted); font-size: 14px; }
+.site-footer .links { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; }
+.site-footer a { color: var(--accent); font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; }
+:focus-visible { outline: 3px solid var(--warn); outline-offset: 2px; }
+
+/* First-run tutorial */
+.overlay { position: fixed; inset: 0; background: rgba(10, 12, 20, .55); display: flex; align-items: flex-end;
+    justify-content: center; z-index: 20; }
+.sheet { background: var(--card); color: var(--ink); width: 100%; max-width: 600px; border-radius: 18px 18px 0 0;
+    padding: 20px 24px calc(20px + env(safe-area-inset-bottom)); }
+.sheet h2 { margin: 4px 0 8px; }
+.sheet p { margin-bottom: 16px; line-height: 1.45; }
+.sheet .muted { color: var(--muted); font-size: 14px; }
+.sheet .btn-row { justify-content: space-between; flex-wrap: nowrap; }

@@ -305,13 +305,13 @@ function renderStep() {
                 
                 <button id="calculate-feed" class="btn btn-small">Calculate Feed</button>
                 
-                <div id="feed-result" style="display: none; margin-top: 16px; padding: 16px; background: white; border-radius: 8px;">
+                <div id="feed-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;">
                     <p><strong>Feed your starter:</strong></p>
                     <ul id="feed-amounts"></ul>
                     <p id="feed-ratio" style="margin-top: 12px;"></p>
-                    <p id="rise-time" style="margin-top: 8px; color: #667eea; font-weight: 600;"></p>
-                    <p id="autolyse-time" style="display: none; margin-top: 8px; color: #28a745; font-weight: 600;"></p>
-                    <p id="estimated-end" style="display: none; margin-top: 8px; color: #6c757d; font-size: 14px;"></p>
+                    <p id="rise-time" style="margin-top: 8px; color: var(--accent); font-weight: 600;"></p>
+                    <p id="autolyse-time" style="display: none; margin-top: 8px; color: var(--good); font-weight: 600;"></p>
+                    <p id="estimated-end" style="display: none; margin-top: 8px; color: var(--muted); font-size: 14px;"></p>
                 </div>
             </div>
         `;
@@ -329,11 +329,11 @@ function renderStep() {
         const autolyseTime = autolyseDate.toTimeString().slice(0, 5);
         
         html += `
-            <div class="time-tracker-section" style="background: #d4edda; border-left-color: #28a745;">
+            <div class="time-tracker-section" style="background: var(--good-bg); border-left-color: var(--good);">
                 <h4>⏰ Suggested Timing</h4>
                 <p><strong>You fed your starter at:</strong> ${currentBake.starterFeedTime}</p>
                 <p><strong>Suggested autolyse start:</strong> ${autolyseTime}</p>
-                <p style="font-size: 14px; color: #155724; margin-top: 8px;">This is based on your feeding ratio (${currentBake.starterFeedRatio}) rise time of ${riseTimeRange}, minus 1 hour.</p>
+                <p style="font-size: 14px; color: var(--good-ink); margin-top: 8px;">This is based on your feeding ratio (${currentBake.starterFeedRatio}) rise time of ${riseTimeRange}, minus 1 hour.</p>
             </div>
         `;
     }
@@ -352,10 +352,10 @@ function renderStep() {
                 
                 <button id="calculate-bulk" class="btn btn-small">Calculate Time</button>
                 
-                <div id="bulk-result" style="display: none; margin-top: 16px; padding: 16px; background: white; border-radius: 8px;">
-                    <p id="bulk-time" style="font-size: 18px; color: #667eea; font-weight: 600; margin-bottom: 8px;"></p>
+                <div id="bulk-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;">
+                    <p id="bulk-time" style="font-size: 18px; color: var(--accent); font-weight: 600; margin-bottom: 8px;"></p>
                     <p id="bulk-rise" style="font-size: 16px; margin-bottom: 12px;"></p>
-                    <p style="font-size: 14px; color: #6c757d;"><em>Note: This is the total bulk fermentation time from when you added the starter (including fermentolyse, salt addition, and folds).</em></p>
+                    <p style="font-size: 14px; color: var(--muted);"><em>Note: This is the total bulk fermentation time from when you added the starter (including fermentolyse, salt addition, and folds).</em></p>
                 </div>
             </div>
         `;
@@ -373,7 +373,7 @@ function renderStep() {
                     <input type="time" id="bulk-start-time" value="${currentBake.bulkFermentStart || currentTime}">
                 </div>
                 <button id="save-bulk-start" class="btn btn-small">Save Start Time</button>
-                <div id="bulk-start-prediction" style="display: none; margin-top: 12px; padding: 12px; background: white; border-radius: 6px;"></div>
+                <div id="bulk-start-prediction" style="display: none; margin-top: 12px; padding: 12px; background: var(--card); border-radius: 6px;"></div>
             </div>
         `;
     }
@@ -384,13 +384,13 @@ function renderStep() {
         html += `
             <div class="time-tracker-section">
                 <h4>⏱️ Track Bulk Fermentation End</h4>
-                ${currentBake.bulkFermentStart ? `<p><strong>Started at:</strong> ${currentBake.bulkFermentStart}</p>` : '<p style="color: #dc3545;">⚠️ Start time not recorded</p>'}
+                ${currentBake.bulkFermentStart ? `<p><strong>Started at:</strong> ${currentBake.bulkFermentStart}</p>` : '<p style="color: var(--danger);">⚠️ Start time not recorded</p>'}
                 <div class="form-group">
                     <label>End time:</label>
                     <input type="time" id="bulk-end-time" value="${currentBake.bulkFermentEnd || currentTime}">
                 </div>
                 <button id="save-bulk-end" class="btn btn-small">Save End Time</button>
-                <div id="bulk-duration" style="display: none; margin-top: 12px; padding: 12px; background: white; border-radius: 6px; font-weight: 600; color: #667eea;"></div>
+                <div id="bulk-duration" style="display: none; margin-top: 12px; padding: 12px; background: var(--card); border-radius: 6px; font-weight: 600; color: var(--accent);"></div>
             </div>
         `;
     }
@@ -421,10 +421,10 @@ function renderStep() {
             const predictedTime = predictedDate.toTimeString().slice(0, 5);
             
             html += `
-                <div class="time-tracker-section" style="background: #d1ecf1; border-left-color: #17a2b8;">
+                <div class="time-tracker-section" style="background: var(--info-bg); border-left-color: var(--info);">
                     <h4>🔮 Predicted End Time</h4>
                     <p><strong>Based on ${currentBake.doughTemp}°C:</strong> ~${predictedTime}</p>
-                    <p style="font-size: 14px; color: #0c5460; margin-top: 8px;">Estimated ${bulkData.hours} hours from start (${bulkData.rise}% rise target)</p>
+                    <p style="font-size: 14px; color: var(--info-ink); margin-top: 8px;">Estimated ${bulkData.hours} hours from start (${bulkData.rise}% rise target)</p>
                 </div>
             `;
         }
@@ -446,7 +446,7 @@ function renderStep() {
                     <input type="datetime-local" id="retard-end-time" value="${currentBake.retardationEnd || ''}">
                 </div>
                 <button id="save-retard-times" class="btn btn-small">Calculate Duration</button>
-                <div id="retard-duration" style="display: none; margin-top: 12px; padding: 12px; background: white; border-radius: 6px; font-weight: 600; color: #667eea;"></div>
+                <div id="retard-duration" style="display: none; margin-top: 12px; padding: 12px; background: var(--card); border-radius: 6px; font-weight: 600; color: var(--accent);"></div>
             </div>
         `;
     }
@@ -483,8 +483,8 @@ function renderStep() {
                 
                 <button id="calculate-bake-time" class="btn btn-small">Calculate Bake Time</button>
                 
-                <div id="bake-time-result" style="display: none; margin-top: 16px; padding: 16px; background: white; border-radius: 8px;">
-                    <p id="bake-time-display" style="font-size: 18px; color: #667eea; font-weight: 600;"></p>
+                <div id="bake-time-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;">
+                    <p id="bake-time-display" style="font-size: 18px; color: var(--accent); font-weight: 600;"></p>
                 </div>
             </div>
         `;
@@ -511,8 +511,8 @@ function renderStep() {
             <div class="fold-tracker-section">
                 <h4>Fold Checklist</h4>
                 ${currentBake.bulkFermentStart ? 
-                    `<p style="margin-bottom: 16px; color: #6c757d;">Started bulk fermentation at ${currentBake.bulkFermentStart}</p>` : 
-                    `<p style="margin-bottom: 16px; color: #dc3545;">⚠️ Bulk fermentation start time not recorded</p>`
+                    `<p style="margin-bottom: 16px; color: var(--muted);">Started bulk fermentation at ${currentBake.bulkFermentStart}</p>` : 
+                    `<p style="margin-bottom: 16px; color: var(--danger);">⚠️ Bulk fermentation start time not recorded</p>`
                 }
                 
                 <div class="fold-list">
@@ -528,17 +528,17 @@ function renderStep() {
                                     ${foldTimes[index] ? `<span class="fold-time">~${foldTimes[index]}</span>` : ''}
                                 </span>
                             </label>
-                            ${foldNum === 4 ? '<p style="font-size: 12px; color: #6c757d; margin: 4px 0 0 28px;">Add inclusions before this fold if using</p>' : ''}
+                            ${foldNum === 4 ? '<p style="font-size: 12px; color: var(--muted); margin: 4px 0 0 28px;">Add inclusions before this fold if using</p>' : ''}
                         </div>
                     `).join('')}
                 </div>
-                <p style="font-size: 13px; color: #6c757d; margin-top: 12px; font-style: italic;">
+                <p style="font-size: 13px; color: var(--muted); margin-top: 12px; font-style: italic;">
                     Folds start 1.5 hours after fermentolyse (1hr fermentolyse + 30min salt rest)
                 </p>
                 
                 <div class="fold-timer-section">
                     <h4 style="margin-top: 20px;">30-Minute Timer</h4>
-                    <p style="font-size: 14px; color: #6c757d; margin-bottom: 12px;">Use this timer between folds</p>
+                    <p style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Use this timer between folds</p>
                 </div>
             </div>
         `;
@@ -723,7 +723,7 @@ function calculateFeed() {
         <li><strong>${currentStarter}g</strong> existing starter</li>
         <li><strong>+ ${flourNeeded}g</strong> flour</li>
         <li><strong>+ ${waterNeeded}g</strong> water</li>
-        <li style="border-top: 2px solid #667eea; margin-top: 8px; padding-top: 8px;"><strong>= ${starterNeeded}g</strong> total starter</li>
+        <li style="border-top: 2px solid var(--accent); margin-top: 8px; padding-top: 8px;"><strong>= ${starterNeeded}g</strong> total starter</li>
     `;
     
     document.getElementById('feed-ratio').innerHTML = `
@@ -816,8 +816,8 @@ function saveBulkStart() {
     const predictionDiv = document.getElementById('bulk-start-prediction');
     if (predictionDiv) {
         predictionDiv.innerHTML = `
-            <p style="color: #667eea; font-weight: 600;">✓ Start time saved: ${startTime}</p>
-            <p style="color: #6c757d; font-size: 14px; margin-top: 8px;">
+            <p style="color: var(--accent); font-weight: 600;">✓ Start time saved: ${startTime}</p>
+            <p style="color: var(--muted); font-size: 14px; margin-top: 8px;">
                 <strong>Predicted end time:</strong> ~${predictedTime} (assuming 25°C, 6 hours bulk)
             </p>
         `;
@@ -996,8 +996,8 @@ function finishBake() {
     
     // Show review screen
     const reviewHtml = `
-        <div style="background: white; padding: 24px; border-radius: 12px; margin: 20px 0;">
-            <h3 style="color: #667eea; margin-bottom: 16px;">Review Your Bake</h3>
+        <div style="background: var(--card); padding: 24px; border-radius: 12px; margin: 20px 0;">
+            <h3 style="color: var(--accent); margin-bottom: 16px;">Review Your Bake</h3>
             
             <div style="margin-bottom: 16px;">
                 <p><strong>Loaves:</strong> ${currentBake.loaves}</p>
@@ -1121,11 +1121,11 @@ function loadBakeLog() {
         const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
         
         // Color code outcome
-        let outcomeColor = '#6c757d';
-        if (log.outcome === 'Excellent') outcomeColor = '#28a745';
-        else if (log.outcome === 'Good') outcomeColor = '#17a2b8';
+        let outcomeColor = 'var(--muted)';
+        if (log.outcome === 'Excellent') outcomeColor = 'var(--good)';
+        else if (log.outcome === 'Good') outcomeColor = 'var(--info)';
         else if (log.outcome === 'Fair') outcomeColor = '#ffc107';
-        else if (log.outcome === 'Poor') outcomeColor = '#dc3545';
+        else if (log.outcome === 'Poor') outcomeColor = 'var(--danger)';
         
         return `
             <div class="bake-log-item">
@@ -1144,7 +1144,4 @@ function loadBakeLog() {
     }).join('');
 }
 
-// Request notification permission on load
-if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-}
+// Notification permission is requested from the Settings tab (see shell.js)
