@@ -47,7 +47,7 @@ Flour and starter are fixed per loaf; the hydration you choose (60-80%, default 
 | Regular (25cm banneton, ~1kg) | 450g | 150g | 295g |
 | Large (30cm banneton, ~1.5kg) | 600g | 200g | 390g |
 
-Salt, honey and olive oil are 2%, 3% and 4% of the flour. Two loaves double everything.
+Salt, honey and olive oil are 10g, 15g and 20g for a regular loaf, and the same proportion of the flour for a large one (13g, 20g and 27g). Two loaves double everything.
 
 ## Tips for Your Mum
 

@@ -245,8 +245,10 @@ const HYDRATIONS = [60, 65, 70, 75, 80];
 const DEFAULT_HYDRATION = 70;
 const WATER_ROUNDING_G = 5;
 
-// Salt, honey and oil as a share of the flour
-const SALT_PCT = 0.02, HONEY_PCT = 0.03, OIL_PCT = 0.04;
+// Salt, honey and oil for a regular loaf (450g flour); other sizes keep the same proportion to the flour
+const REGULAR_FLOUR = 450;
+const EXTRAS = { salt: 10, honey: 15, oil: 20 };
+const extra = (grams, size) => Math.round(grams * size.flour / REGULAR_FLOUR);
 
 function recipeFor(bake) {
     const size = LOAF_SIZES[bake.size] || LOAF_SIZES.regular;
@@ -259,9 +261,9 @@ function recipeFor(bake) {
         flour: size.flour * n,
         water: water * n,
         starter: size.starter * n,
-        salt: Math.round(size.flour * SALT_PCT) * n,
-        honey: Math.round(size.flour * HONEY_PCT) * n,
-        oil: Math.round(size.flour * OIL_PCT) * n
+        salt: extra(EXTRAS.salt, size) * n,
+        honey: extra(EXTRAS.honey, size) * n,
+        oil: extra(EXTRAS.oil, size) * n
     };
 }
 
