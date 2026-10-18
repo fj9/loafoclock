@@ -15,7 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - run: mkdir _site && cp index.html styles.css shell.js app.js _site/
+      - name: Assemble site (version asset URLs so browsers never mix old and new files)
+        run: |
+          mkdir _site && cp index.html styles.css shell.js app.js _site/
+          sed -i "s#\(styles.css\|shell.js\|app.js\)\"#\1?v=${GITHUB_SHA::7}\"#" _site/index.html
+          grep -n "?v=" _site/index.html
       - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
