@@ -34,6 +34,8 @@ src/recipe.js   loaf sizes, hydration and ingredient amounts
 src/feeding.js  starter feeding ratios, rise times and the two feed calculators
 src/schedule.js the whole-bake plan: when each step happens, from your feed time
 src/timeline.js the timeline shown under the progress bar
+src/clock.js    12-hour (default) or 24-hour time display
+src/timepicker.js  the quick-picks, big readout and slider used to choose a time
 src/timing.js   autolyse and fermentolyse rest lengths (30-60 min) and the tidy-time suggestion
 src/tips.js     plain-English tooltip text for the jargon (edit the wording here)
 src/app.js      the baking workflow, timers, calculators and bake log
@@ -68,6 +70,10 @@ Until you've worked out your feed (or told the app when you fed) the timeline is
 ## Look and feel
 
 The style comes from a sourdough tea towel: **light mode** is cream with terracotta and rust red, slab-serif headings, double rules and a polka-dot border; **dark mode** (called ember) is warm brown with ember orange. The colours are CSS variables at the top of `src/styles.css`, and the heading font (Alfa Slab One) is bundled so it works offline.
+
+## Choosing times
+
+Feed and autolyse times are picked with quick-pick buttons (Now, 7 am, 8 am, 6 pm...), a large readout and a slider in 15 minute steps, and shown as "7:30 am". Settings has a 12-hour or 24-hour clock choice. Other places that record a time (bulk start and end, the fridge planner and the timeline settings) still use the browser's own time box.
 
 ## Made easy to follow
 

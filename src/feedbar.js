@@ -1,17 +1,20 @@
 // A small bar showing what a feed does over time: when you feed, when the starter is ready
 // (the green band), and when you start autolyse and add the starter to the dough.
+import { fmtTime } from './clock.js';
 import { clockAfter } from './feeding.js';
 
 const dayText = (days) => (days === 0 ? '' : days === 1 ? ' (next day)' : ` (+${days} days)`);
 const clock = (feedTime, hours) => {
     const c = clockAfter(feedTime, hours);
-    return `${c.time}${dayText(c.days)}`;
+    return `${fmtTime(c.time)}${dayText(c.days)}`;
 };
 // "04:20 to 06:20 (next day)": say the day once when both ends fall on the same day
 const clockRange = (feedTime, fromHours, toHours) => {
     const a = clockAfter(feedTime, fromHours);
     const b = clockAfter(feedTime, toHours);
-    return a.days === b.days ? `${a.time} to ${b.time}${dayText(b.days)}` : `${a.time}${dayText(a.days)} to ${b.time}${dayText(b.days)}`;
+    return a.days === b.days
+        ? `${fmtTime(a.time)} to ${fmtTime(b.time)}${dayText(b.days)}`
+        : `${fmtTime(a.time)}${dayText(a.days)} to ${fmtTime(b.time)}${dayText(b.days)}`;
 };
 const pct = (hours, end) => `${Math.max(0, Math.min(100, (hours / end) * 100)).toFixed(1)}%`;
 

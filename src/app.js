@@ -3,8 +3,10 @@ import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, RE
 import { STEP_TIPS, tipHtml } from './tips.js';
 import { BULK_FERMENTATION_TEMPS, PLAN_DEFAULTS, buildSchedule } from './schedule.js';
 import { progressLabel, timelineHtml } from './timeline.js';
-import { FEEDING_RATIOS, clockAfter, defaultAutolyseFor, feedStyle, findRatio, isAwkwardHour, parseClock, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
+import { FEEDING_RATIOS, clockAfter, defaultAutolyseFor, feedStyle, findRatio, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
 import { feedBarHtml } from './feedbar.js';
+import { fmtTime } from './clock.js';
+import { AUTOLYSE_CHIPS, FEED_CHIPS, bindTimePicker, nearestQuarter, setTimePicker, timePickerHtml } from './timepicker.js';
 
 // Sourdough Baking Steps
 const STEPS = [
@@ -453,7 +455,7 @@ function renderStep() {
                 const foldDate = new Date();
                 foldDate.setHours(startHours);
                 foldDate.setMinutes(startMinutes + firstFoldMinutes(restMinutes(STEPS[2])) + (30 * i)); // first fold, then 30 min intervals
-                foldTimes.push(foldDate.toTimeString().slice(0, 5));
+                foldTimes.push(fmtTime(foldDate.toTimeString().slice(0, 5)));
             }
         }
         
@@ -647,7 +649,7 @@ function currentSchedule() {
     });
 }
 
-function refreshTimeline() {
+export function refreshTimeline() {
     const container = document.getElementById('timeline');
     if (!container) return;
     const existing = document.getElementById('timeline-details');
@@ -752,8 +754,8 @@ function autolyseSuggestionHtml() {
         return `
         <div id="autolyse-suggestion" class="time-tracker-section" style="background: var(--good-bg); border-left-color: var(--good);">
             <h4>⏰ Suggested Timing</h4>
-            <p><strong>You fed your starter at:</strong> ${currentBake.starterFeedTime}</p>
-            <p><strong>You planned to start autolyse at:</strong> ${currentBake.plannedAutolyse}</p>
+            <p><strong>You fed your starter at:</strong> ${fmtTime(currentBake.starterFeedTime)}</p>
+            <p><strong>You planned to start autolyse at:</strong> ${fmtTime(currentBake.plannedAutolyse)}</p>
             <p style="font-size: 14px; color: var(--good-ink); margin-top: 8px;">Your starter (${currentBake.starterFeedRatio}) should be ready when the ${restText(rest)} autolyse ends.</p>
         </div>
     `;
@@ -762,8 +764,8 @@ function autolyseSuggestionHtml() {
     return `
         <div id="autolyse-suggestion" class="time-tracker-section" style="background: var(--good-bg); border-left-color: var(--good);">
             <h4>⏰ Suggested Timing</h4>
-            <p><strong>You fed your starter at:</strong> ${currentBake.starterFeedTime}</p>
-            <p><strong>Suggested autolyse start:</strong> ${start}</p>
+            <p><strong>You fed your starter at:</strong> ${fmtTime(currentBake.starterFeedTime)}</p>
+            <p><strong>Suggested autolyse start:</strong> ${fmtTime(start)}</p>
             <p style="font-size: 14px; color: var(--good-ink); margin-top: 8px;">This is based on your feeding ratio (${currentBake.starterFeedRatio}) rise time of ${riseTimeRange}, minus your ${restText(rest)} autolyse.</p>
         </div>
     `;
@@ -794,21 +796,6 @@ const FEED_MODES = {
 const DEFAULT_STARTER_HAVE = 100;      // grams in a typical jar; plenty for even two large loaves
 const DEFAULT_PLAN_FEED_TIME = '22:00'; // a bedtime feed, for the advanced plan
 
-// The sliders cover the whole day in 15 minute steps; the time boxes take any time.
-// Autolyse is always the next time it comes round after the feed.
-const SLIDERS = {
-    feed: { base: 5 * 60, max: 23 * 60 + 45 },      // 05:00 round to 04:45, so morning and evening feeds both fit
-    autolyse: { base: 4 * 60, max: 23 * 60 + 45 }   // 04:00 round to 03:45
-};
-const sliderToClock = (key, value) => {
-    const m = (SLIDERS[key].base + Number(value)) % 1440;
-    return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-};
-const clockToSlider = (key, time) => {
-    const offset = (parseClock(time) - SLIDERS[key].base + 1440) % 1440;
-    return Math.min(SLIDERS[key].max, offset);
-};
-
 const FEED_TIME_LABELS = {
     limited: () => 'What time are you feeding?',
     deadline: () => `I'm feeding at:${tipHtml('feedAt')}`,
@@ -816,7 +803,7 @@ const FEED_TIME_LABELS = {
 };
 
 const starterNeededTotal = () => recipeFor(currentBake).starter + 30;
-const nowTime = () => new Date().toTimeString().slice(0, 5);
+const nowTime = () => nearestQuarter();
 
 function feedCalculatorHtml() {
     const recipeStarter = recipeFor(currentBake).starter;
@@ -842,18 +829,9 @@ function feedCalculatorHtml() {
             </div>`}
             <p class="hint" style="margin: 8px 0 12px;">${FEED_MODES[mode].hint}</p>
 
-            ${adv ? `
-            <div class="form-group">
-                <label for="need-by-time">I want to start autolyse at:${tipHtml('autolyseAt')}</label>
-                <input type="time" id="need-by-time" value="${autolyseDefault}">
-                <input type="range" id="autolyse-slider" class="time-slider" min="0" max="${SLIDERS.autolyse.max}" step="15" value="${clockToSlider('autolyse', autolyseDefault)}" aria-label="Autolyse time">
-            </div>` : ''}
+            ${adv ? timePickerHtml({ id: 'need-by-time', key: 'autolyse', label: `I want to start autolyse at:${tipHtml('autolyseAt')}`, value: autolyseDefault, chips: AUTOLYSE_CHIPS }) : ''}
 
-            <div class="form-group">
-                <label for="feed-time">${FEED_TIME_LABELS[mode]()}</label>
-                <input type="time" id="feed-time" value="${feedDefault}">
-                ${adv ? `<input type="range" id="feed-slider" class="time-slider" min="0" max="${SLIDERS.feed.max}" step="15" value="${clockToSlider('feed', feedDefault)}" aria-label="Feed time">` : ''}
-            </div>
+            ${timePickerHtml({ id: 'feed-time', key: 'feed', label: FEED_TIME_LABELS[mode](), value: feedDefault, chips: FEED_CHIPS })}
 
             ${fed ? `
             <div class="form-group">
@@ -895,10 +873,6 @@ function switchFeedMode(mode) {
 function initFeedCalculator() {
     const $ = (id) => document.getElementById(id);
     const mode = currentBake.feedMode || 'limited';
-    const feedTime = $('feed-time');
-    const feedSlider = $('feed-slider');
-    const autolyseTime = $('need-by-time');
-    const autolyseSlider = $('autolyse-slider');
     // Show the result again after the step is re-opened, and keep it live once it has been shown
     const live = () => { if (mode === 'deadline' || currentBake.feedShown) calculateFeed(); };
 
@@ -911,30 +885,16 @@ function initFeedCalculator() {
         if (go) switchFeedMode(go.dataset.feedGo);
     });
 
-    const setFeed = (value) => {
+    // The time pickers: chips and a slider. Until you choose an autolyse time yourself it follows the feed.
+    bindTimePicker('feed-time', 'feed', (value) => {
         currentBake.feedTouched = true;
         currentBake.feedDraft = value;
-        if (autolyseTime && !currentBake.autolyseDraft && value) { // keep the untouched autolyse time sensible
-            autolyseTime.value = defaultAutolyseFor(value);
-            autolyseSlider.value = clockToSlider('autolyse', autolyseTime.value);
-        }
-    };
-    feedTime.addEventListener('input', () => {
-        setFeed(feedTime.value);
-        if (feedSlider && feedTime.value) feedSlider.value = clockToSlider('feed', feedTime.value);
+        if ($('need-by-time') && !currentBake.autolyseDraft) setTimePicker('need-by-time', 'autolyse', defaultAutolyseFor(value));
         live();
     });
-    feedSlider?.addEventListener('input', () => { feedTime.value = sliderToClock('feed', feedSlider.value); setFeed(feedTime.value); live(); });
-    autolyseTime?.addEventListener('input', () => {
-        if (autolyseTime.value) autolyseSlider.value = clockToSlider('autolyse', autolyseTime.value);
-        currentBake.autolyseDraft = autolyseTime.value;
-        live();
-    });
-    autolyseSlider?.addEventListener('input', () => {
-        autolyseTime.value = sliderToClock('autolyse', autolyseSlider.value);
-        currentBake.autolyseDraft = autolyseTime.value;
-        live();
-    });
+    if ($('need-by-time')) {
+        bindTimePicker('need-by-time', 'autolyse', (value) => { currentBake.autolyseDraft = value; live(); });
+    }
     $('fed-ratio')?.addEventListener('change', live);
 
     // Starter amounts live in a closed box in Advanced; keep its summary in step
@@ -953,12 +913,12 @@ function initFeedCalculator() {
 }
 
 const dayText = (days) => days === 0 ? '' : days === 1 ? ' (next day)' : ` (+${days} days)`;
-const clockText = (c) => `${c.time}${dayText(c.days)}`;
+const clockText = (c) => `${fmtTime(c.time)}${dayText(c.days)}`;
 // "05:30 to 07:30 (next day)": say the day once when both ends fall on the same day
 const rangeText = (from, to, dayFn = dayText) =>
     from.days === to.days
-        ? `${from.time} to ${to.time}${dayFn(to.days)}`
-        : `${from.time}${dayFn(from.days)} to ${to.time}${dayFn(to.days)}`;
+        ? `${fmtTime(from.time)} to ${fmtTime(to.time)}${dayFn(to.days)}`
+        : `${fmtTime(from.time)}${dayFn(from.days)} to ${fmtTime(to.time)}${dayFn(to.days)}`;
 const hoursText = (h) => {
     const hh = Math.floor(h);
     const mm = Math.round((h - hh) * 60);
@@ -976,7 +936,7 @@ const betweenText = (from, to) => rangeText(from, to).replace(' to ', ' and ');
 function awkwardCallout({ feedTime, autolyse }) {
     const reasons = [];
     if (isAwkwardHour(autolyse.time)) reasons.push(`start your autolyse at ${clockText(autolyse)}`);
-    if (isAwkwardHour(feedTime)) reasons.push(`feed at ${feedTime}`);
+    if (isAwkwardHour(feedTime)) reasons.push(`feed at ${fmtTime(feedTime)}`);
     if (!reasons.length) return '';
     return `<div class="fp-callout"><span aria-hidden="true">ⓘ</span><div>That means you would ${reasons.join(' and ')}, which is in the middle of the night.
         <button type="button" class="link-btn" data-feed-go="deadline">Try Advanced</button> to pick the times that suit you.</div></div>`;
@@ -985,9 +945,9 @@ function awkwardCallout({ feedTime, autolyse }) {
 // The answer, in plain words
 function answerHtml({ feedTime, feed, window, autolyse }) {
     return `
-        <p class="fp-answer">Feed your starter at <strong>${feedTime}</strong>. Mix <strong>${feed.starter}g</strong> of your starter with <strong>${feed.flour}g</strong> flour and <strong>${feed.water}g</strong> water.</p>
+        <p class="fp-answer">Feed your starter at <strong>${fmtTime(feedTime)}</strong>. Mix <strong>${feed.starter}g</strong> of your starter with <strong>${feed.flour}g</strong> flour and <strong>${feed.water}g</strong> water.</p>
         <p class="fp-sub">It will be ready between <strong>${betweenText(window.from, window.to)}</strong>. Start your autolyse at <strong>${clockText(autolyse)}</strong>.</p>
-        <p class="fp-next">Next: set a reminder for ${feedTime}, then come back at ${autolyse.time} and tap Next.</p>
+        <p class="fp-next">Next: set a reminder for ${fmtTime(feedTime)}, then come back at ${fmtTime(autolyse.time)} and tap Next.</p>
     `;
 }
 
@@ -1019,9 +979,9 @@ function calculateFeed() {
         currentBake.starterFeedRatio = plan.ratio.ratio;
         currentBake.plannedAutolyse = null;
         show(`
-            <p class="fp-answer">You fed at <strong>${feedTime}</strong>.</p>
+            <p class="fp-answer">You fed at <strong>${fmtTime(feedTime)}</strong>.</p>
             <p class="fp-sub">Your starter should be ready between <strong>${betweenText(plan.window.from, plan.window.to)}</strong>. Start your autolyse at <strong>${clockText(autolyse)}</strong>.</p>
-            <p class="fp-next">Next: come back at ${autolyse.time} and tap Next.</p>
+            <p class="fp-next">Next: come back at ${fmtTime(autolyse.time)} and tap Next.</p>
             ${feedDetailsHtml({ feedTime, ratio: plan.ratio, autolyseHours, starterInHours: plan.ratio.minHours, autolyse })}
         `);
         refreshTimeline();
@@ -1076,8 +1036,8 @@ function renderFeedPlan({ need, have, feedTime, neededBy }) {
 
     if (!best) {
         html += problem.kind === 'tooShort'
-            ? feedWarning(`That's only ${hoursText(plan.gapHours)} between feeding and adding the starter. Even the quickest feed needs about ${shown.ratio.minHours} hours. Feed by ${problem.feedBy}, or start your autolyse later.`)
-            : feedWarning(`That's ${hoursText(plan.gapHours)} between feeding and adding the starter, longer than any feed lasts (up to ${shown.ratio.maxHours} hours). Feed from ${problem.feedFrom}, or start your autolyse earlier.`);
+            ? feedWarning(`That's only ${hoursText(plan.gapHours)} between feeding and adding the starter. Even the quickest feed needs about ${shown.ratio.minHours} hours. Feed by ${fmtTime(problem.feedBy)}, or start your autolyse later.`)
+            : feedWarning(`That's ${hoursText(plan.gapHours)} between feeding and adding the starter, longer than any feed lasts (up to ${shown.ratio.maxHours} hours). Feed from ${fmtTime(problem.feedFrom)}, or start your autolyse earlier.`);
     } else {
         const six = plan.sixOption;
         if (best.ratio.n !== six.ratio.n) {

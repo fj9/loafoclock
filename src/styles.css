@@ -649,3 +649,11 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .amounts { margin: 4px 0 12px; border: 1px dashed var(--line); border-radius: 8px; padding: 0 12px; }
 .amounts summary { cursor: pointer; font-size: 14px; color: var(--muted); min-height: 40px; display: flex; align-items: center; }
 .amounts .form-group { margin: 8px 0; }
+
+/* Time picker: quick picks, big readout, slider */
+.tp-label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--label); }
+.tp-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.tp-chip { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--line); background: var(--card);
+    color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.tp-chip[aria-pressed="true"] { background: var(--accent-strong); border-color: var(--accent-strong); color: var(--on-accent); }
+.tp-readout { font-family: var(--font-display); font-size: 30px; line-height: 1.2; color: var(--accent); font-variant-numeric: tabular-nums; }

@@ -1,4 +1,5 @@
 // HTML for the timeline shown under the progress bar. Pure: takes a schedule from schedule.js.
+import { fmtTime } from './clock.js';
 import { FEEDING_RATIOS } from './feeding.js';
 import { PLAN_DEFAULTS } from './schedule.js';
 
@@ -12,7 +13,7 @@ const TEMP_CHOICES = [
 export function dayLabel(clock, today = new Date()) {
     const d = new Date(today);
     d.setDate(d.getDate() + clock.days);
-    return `${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${clock.time}`;
+    return `${d.toLocaleDateString('en-GB', { weekday: 'short' })} ${fmtTime(clock.time)}`;
 }
 
 export function durationText(minutes) {
@@ -54,7 +55,7 @@ export function timelineHtml({ schedule, currentStepId, plan, open, today, defau
         }
         items += `<li class="tl-item tl-${state}">
             <span class="tl-time">${when(e.clock)}</span>
-            <span class="tl-label">${e.label}${e.until ? `<small> until ${e.until.time}</small>` : ''}${e.note ? `<small> · ${e.note}</small>` : ''}</span>
+            <span class="tl-label">${e.label}${e.until ? `<small> until ${fmtTime(e.until.time)}</small>` : ''}${e.note ? `<small> · ${e.note}</small>` : ''}</span>
         </li>`;
     });
 

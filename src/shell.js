@@ -1,5 +1,6 @@
 import { registerSW } from 'virtual:pwa-register';
-import { switchTab, loadBakeLog } from './app.js';
+import { setClock12 } from './clock.js';
+import { loadBakeLog, refreshTimeline, switchTab } from './app.js';
 
 // App shell: theme, first-run tutorial, help, settings and footer.
 // Kept apart from app.js (the baking workflow) so each file does one job.
@@ -97,7 +98,22 @@ function renderHelp() {
 }
 
 // ---- Settings ----
+function initClockSetting() {
+    const apply = (twelve) => {
+        setClock12(twelve);
+        document.querySelectorAll('[data-clock]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.clock === '12') === twelve)));
+    };
+    apply(loadSettings().clock12 !== false); // 12-hour unless you choose otherwise
+    document.querySelectorAll('[data-clock]').forEach(b => b.addEventListener('click', () => {
+        const twelve = b.dataset.clock === '12';
+        saveSettings({ clock12: twelve });
+        apply(twelve);
+        refreshTimeline();
+    }));
+}
+
 function initSettings() {
+    initClockSetting();
     document.querySelectorAll('[data-theme-mode]').forEach(b =>
         b.addEventListener('click', () => applyTheme(b.dataset.themeMode)));
     applyTheme(currentTheme());
