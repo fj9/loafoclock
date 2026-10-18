@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sourdough Companion</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍞 Sourdough Companion</h1>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="bake">Active Bake</button>
+            <button class="tab-btn" data-tab="log">Bake Log</button>
+        </nav>
+
+        <!-- Active Bake Tab -->
+        <div id="bake-tab" class="tab-content active">
+            <div id="start-screen">
+                <h2>Start a New Bake</h2>
+                <div class="form-group">
+                    <label>Number of Loaves:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="loaves" value="1" checked> 1 Loaf</label>
+                        <label><input type="radio" name="loaves" value="2"> 2 Loaves</label>
+                    </div>
+                </div>
+                <button id="start-bake-btn" class="btn btn-primary">Start Baking</button>
+            </div>
+
+            <div id="baking-screen" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                
+                <div id="current-step" class="step-card"></div>
+                
+                <div class="timer-section" id="timer-section" style="display: none;">
+                    <div class="timer-display" id="timer-display">00:00</div>
+                    <div class="timer-controls">
+                        <button id="timer-start" class="btn btn-small">Start</button>
+                        <button id="timer-pause" class="btn btn-small" style="display: none;">Pause</button>
+                        <button id="timer-reset" class="btn btn-small">Reset</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="prev-step-btn" class="btn">← Previous</button>
+                    <button id="next-step-btn" class="btn btn-primary">Next →</button>
+                </div>
+
+                <button id="finish-bake-btn" class="btn btn-secondary" style="display: none;">Finish & Log Bake</button>
+            </div>
+        </div>
+
+        <!-- Bake Log Tab -->
+        <div id="log-tab" class="tab-content">
+            <h2>Bake History</h2>
+            <div id="bake-log-list"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
