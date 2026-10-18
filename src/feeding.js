@@ -117,3 +117,16 @@ export function planAlreadyFed({ feedTime, ratio }) {
     if (!r) throw new Error(`Unknown ratio: ${ratio}`);
     return { ratio: r, window: readyWindow(feedTime, r) };
 }
+
+// Hours when most people would rather be asleep: 23:00 up to (not including) 06:00
+export const AWKWARD_FROM = 23 * 60;
+export const AWKWARD_TO = 6 * 60;
+export function isAwkwardHour(time) {
+    const m = parseClock(time);
+    return m >= AWKWARD_FROM || m < AWKWARD_TO;
+}
+
+/** Plain-English name for a ratio, so the main text need not talk in ratios. */
+export function feedStyle(ratio) {
+    return ratio.n <= 3 ? 'quick' : ratio.n <= 6 ? 'standard' : 'slow';
+}

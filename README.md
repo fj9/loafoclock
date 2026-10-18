@@ -47,11 +47,13 @@ public/         favicon and app icons
 
 ## Feeding your starter
 
-Step 1 has two calculators, using a chart of ten standard ratios (1:1:1 to 1:10:10) and their rise times at about 21-22°C. The chart is the list at the top of `src/feeding.js`:
+Step 1 has a starter calculator with two modes, using a chart of ten standard feeds (1:1:1 to 1:10:10) and their rise times at about 21-22°C. The chart is the list at the top of `src/feeding.js`.
 
-- **Limited starter:** enter the starter you have, the amount you need and your feed time. It feeds at 1:6:6 using only as much of your starter as it needs, and shows when it should be ready (9-11 hrs). If you don't have enough for 1:6:6 it dilutes just enough (up to 1:10:10) and says so, and says so again if even that isn't enough.
-- **Already fed:** enter when you fed and the ratio you used. It shows when the starter should be ready and when to start the autolyse, and fills in the timeline.
-- **Plan from autolyse:** set two sliders, when you want to start autolyse (say 08:00) and when you're feeding (say 22:00). It picks the ratio that has your starter ready when it goes into the dough, 1:6:6 if that fits, and the result updates live as you slide. A bar shows the feed, the ready window and when the starter goes in, and a list shows how every ratio fits (too fast, too slow, or fits) and how much of your starter each needs. If no ratio can fit, it says when to feed by or from.
+- **Simple** (the default): tell it when you're feeding. It gives a standard feed (1:6:6) using only as much of your starter as it needs, when it will be ready, and when to start your autolyse. If that lands in the middle of the night (23:00 to 06:00) a note points you to Advanced.
+- **Advanced:** two sliders, when you want to start autolyse and when you're feeding. It picks the feed that has your starter ready in time, 1:6:6 if it fits, and updates live. The starter amounts (100g in your jar, 180g needed) are tucked into a closed box you can open and change. If no feed can fit, it says when to feed by or from.
+- **Already fed?** a link under the calculator: enter when you fed and which feed you used, and it works out when the starter will be ready.
+
+The answer comes first, in plain words, with "See how this works" underneath for the bar showing the feed, the ready window and when the starter goes in, and (in Advanced) how every feed fits.
 
 The next step then suggests your autolyse time from the feed you planned (an hour before the starter's earliest rise time).
 

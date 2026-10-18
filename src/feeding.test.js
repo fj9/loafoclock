@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clockAfter, feedAt, findRatio, hoursUntil, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding.js';
+import { clockAfter, feedAt, feedStyle, findRatio, hoursUntil, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding.js';
 
 describe('clock helpers', () => {
     it('adds hours and reports days rolled over', () => {
@@ -119,5 +119,22 @@ describe('planAlreadyFed', () => {
     });
     it('rejects a ratio that is not in the chart', () => {
         expect(() => planAlreadyFed({ feedTime: '17:00', ratio: '1:7:8' })).toThrow();
+    });
+});
+
+describe('plain language helpers', () => {
+    it('flags the small hours as awkward for planning a start', () => {
+        expect(isAwkwardHour('23:00')).toBe(true);
+        expect(isAwkwardHour('22:59')).toBe(false);
+        expect(isAwkwardHour('03:30')).toBe(true);
+        expect(isAwkwardHour('05:59')).toBe(true);
+        expect(isAwkwardHour('06:00')).toBe(false);
+        expect(isAwkwardHour('08:00')).toBe(false);
+    });
+    it('calls ratios quick, standard or slow', () => {
+        expect(feedStyle(findRatio('1:1:1'))).toBe('quick');
+        expect(feedStyle(findRatio('1:3:3'))).toBe('quick');
+        expect(feedStyle(findRatio('1:6:6'))).toBe('standard');
+        expect(feedStyle(findRatio('1:8:8'))).toBe('slow');
     });
 });
