@@ -75,19 +75,30 @@ export function planLimitedStarter({ have, need, feedTime }) {
 }
 
 /**
- * Deadline: "I need `need` g by `neededBy`, feeding at `feedTime`." Picks the richest ratio
- * whose mid-point rise time fits the hours available, so it is ready around the deadline
- * rather than long before it. `have` is optional and only used to warn.
+ * Plan from autolyse: "I want to start autolyse at `autolyseAt`." The starter goes into the dough
+ * an hour later (fermentolyse), so it should be at its earliest peak then: feed `minHours` before
+ * that, as late as possible so it is fresh. Prefers 1:6:6; if the earliest you can feed
+ * (`earliestFeed`, usually now) is too late for that, steps down through 1:5:5 ... 1:1:1, which
+ * peak sooner but need more of your own starter. `have` is optional and only used to warn.
  */
-export function planDeadline({ need, feedTime, neededBy, have }) {
-    const hours = hoursUntil(feedTime, neededBy);
-    const fits = FEEDING_RATIOS.filter((r) => (r.minHours + r.maxHours) / 2 <= hours);
-    const r = fits.length ? fits[fits.length - 1] : FEEDING_RATIOS[0];
-    const feed = feedAt(r.n, need);
+export function planFromAutolyse({ need, autolyseAt, earliestFeed, have }) {
+    const availableHours = hoursUntil(earliestFeed, autolyseAt) + 1;
+    const options = FEEDING_RATIOS.filter((r) => r.n <= ASSUMED_RATIO_N).reverse().map((ratio) => {
+        const feedAt_ = clockAfter(autolyseAt, 1 - ratio.minHours);
+        const feed = feedAt(ratio.n, need);
+        return {
+            ratio, feed,
+            feedTime: feedAt_,
+            // relative to the autolyse day, so 'next day' never confuses a night-before feed
+            window: { from: clockAfter(autolyseAt, 1), to: clockAfter(autolyseAt, 1 + ratio.maxHours - ratio.minHours) },
+            possible: availableHours >= ratio.minHours,
+            notEnoughStarter: have != null && feed.starter > have
+        };
+    });
+    const recommended = options.find((o) => o.possible) || null;
     return {
-        hours, ratio: r, feed, window: readyWindow(feedTime, r),
-        tooShort: hours < r.minHours,           // can't be ready in time even at 1:1:1
-        tooLong: hours > FEEDING_RATIOS[FEEDING_RATIOS.length - 1].maxHours, // longer than the chart covers
-        notEnoughStarter: have != null && feed.starter > have
+        availableHours, options, recommended,
+        quicker: recommended !== null && recommended.ratio.n < ASSUMED_RATIO_N,
+        shortestHours: FEEDING_RATIOS[0].minHours
     };
 }

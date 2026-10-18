@@ -1,5 +1,5 @@
 import { recipeFor, loafDescription } from './recipe.js';
-import { clockAfter, findRatio, planDeadline, planLimitedStarter, riseLabel } from './feeding.js';
+import { clockAfter, findRatio, planFromAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
 
 // Bulk fermentation temperature chart
 const BULK_FERMENTATION_TEMPS = [
@@ -609,16 +609,22 @@ function toggleFold(index) {
 
 // Starter Calculator
 // Two ways in: "limited" (I have X g, I need Y g: when will it be ready?) and
-// "deadline" (I need Y g by a time: which ratio, and how much starter?). Maths is in feeding.js.
+// "deadline" (I want to start autolyse at a time: when should I feed, and at what ratio?).
+// Maths is in feeding.js.
 const FEED_MODES = {
     limited: {
         label: 'Limited starter',
         hint: 'Tell us how much starter you have and need. We feed at 1:6:6 and tell you when it should be ready.'
     },
     deadline: {
-        label: 'Deadline',
-        hint: 'Tell us when you need the starter. We suggest a feeding ratio and how much starter to use.'
+        label: 'Plan from autolyse',
+        hint: "Tell us when you want to start your autolyse. We'll say when to feed, using 1:6:6 if there's time and a quicker ratio if you're short of it."
     }
+};
+
+const FEED_TIME_LABELS = {
+    limited: 'What time are you feeding?',
+    deadline: 'Earliest I can feed (now, unless you say otherwise):'
 };
 
 function feedCalculatorHtml() {
@@ -648,12 +654,12 @@ function feedCalculatorHtml() {
             </div>
 
             <div class="form-group" id="need-by-row"${mode === 'deadline' ? '' : ' hidden'}>
-                <label for="need-by-time">Starter needed by:</label>
+                <label for="need-by-time">I want to start autolyse at:</label>
                 <input type="time" id="need-by-time" value="${currentBake.starterNeededBy || ''}">
             </div>
 
             <div class="form-group">
-                <label for="feed-time">What time are you feeding?</label>
+                <label for="feed-time" id="feed-time-label">${mode === 'deadline' ? FEED_TIME_LABELS.deadline : FEED_TIME_LABELS.limited}</label>
                 <input type="time" id="feed-time" value="${currentBake.starterFeedTime || currentTime}">
             </div>
 
@@ -673,6 +679,7 @@ function initFeedCalculator() {
         document.getElementById('feed-mode-hint').textContent = FEED_MODES[mode].hint;
         document.getElementById('need-by-row').hidden = mode !== 'deadline';
         document.getElementById('have-optional').hidden = mode !== 'deadline';
+        document.getElementById('feed-time-label').textContent = FEED_TIME_LABELS[mode];
         document.getElementById('feed-result').style.display = 'none';
     };
     modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.feedMode)));
@@ -699,33 +706,39 @@ function calculateFeed() {
     if (!(need > 0)) return show(feedWarning('Enter how much starter you need.'));
     if (!feedTime) return show(feedWarning('Enter the time you are feeding.'));
     if (mode === 'limited' && !(have > 0)) return show(feedWarning('Enter how much starter you have now.'));
-    if (mode === 'deadline' && !neededBy) return show(feedWarning('Enter the time you need the starter by.'));
+    if (mode === 'deadline' && !neededBy) return show(feedWarning('Enter the time you want to start your autolyse.'));
 
-    const plan = mode === 'limited'
-        ? planLimitedStarter({ have, need, feedTime })
-        : planDeadline({ need, feedTime, neededBy, have: have > 0 ? have : null });
+    if (mode === 'deadline') return show(renderAutolysePlan({ need, have, feedTime, neededBy }));
 
+    const plan = planLimitedStarter({ have, need, feedTime });
     let html = '';
-    if (mode === 'limited' && !plan.canReach) {
+    if (!plan.canReach) {
         html += feedWarning(`With ${have}g you can make about ${plan.reachable}g at most, even at ${plan.ratio.ratio}. To reach ${need}g in one feed you need at least ${plan.minStarter}g of starter, or you can build it up with two feeds.`);
         return show(html);
     }
 
     const { ratio, feed } = plan;
-    if (mode === 'limited' && plan.alreadyEnough) {
+    if (plan.alreadyEnough) {
         html += `<p class="hint">You already have ${have}g, which is enough. Feeding is only needed to get fresh, active starter.</p>`;
     }
-    if (mode === 'limited' && plan.diluted) {
+    if (plan.diluted) {
         html += feedWarning(`You don't have enough starter for 1:6:6, so this uses ${ratio.ratio}, which takes longer to rise.`);
     }
-    if (mode === 'deadline') {
-        html += `<p><strong>Time until you need it:</strong> ${hoursText(plan.hours)}</p>`;
-        if (plan.tooShort) html += feedWarning(`That's quicker than a ${ratio.ratio} feed usually takes (${riseLabel(ratio)}). It may not be ready in time, so try feeding earlier or allow more time.`);
-        if (plan.tooLong) html += feedWarning(`That's longer than the chart covers. Feeding at ${clockAfter(neededBy, -ratio.maxHours).time} would have it peak closer to when you need it.`);
-        if (plan.notEnoughStarter) html += feedWarning(`This needs ${feed.starter}g of your starter but you only have ${have}g.`);
-    }
+    html += feedAmountsHtml(feed, 'Feeding Ratio', ratio);
+    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Likely ready:</strong> ${clockText(plan.window.from)} to ${clockText(plan.window.to)} (${riseLabel(ratio)} after feeding)</p>`;
 
-    html += `
+    // Save for the autolyse suggestion on the next step
+    currentBake.starterFeedTime = feedTime;
+    currentBake.starterFeedRatio = ratio.ratio;
+
+    // Autolyse starts an hour before the starter's earliest peak
+    const autolyseHours = ratio.minHours - 1;
+    html += autolyseSummaryHtml(clockAfter(feedTime, autolyseHours), `${autolyseHours} hours after feeding`);
+    show(html);
+}
+
+function feedAmountsHtml(feed, ratioLabel, ratio) {
+    return `
         <p><strong>Feed your starter:</strong></p>
         <ul class="feed-list">
             <li><strong>${feed.starter}g</strong> of your starter</li>
@@ -733,26 +746,60 @@ function calculateFeed() {
             <li><strong>+ ${feed.water}g</strong> water</li>
             <li style="border-top: 2px solid var(--accent); margin-top: 8px; padding-top: 8px;"><strong>= ${feed.total}g</strong> total starter</li>
         </ul>
-        <p style="margin-top: 12px;"><strong>${mode === 'deadline' ? 'Suggested' : 'Feeding'} Ratio:</strong> ${ratio.ratio}</p>
-        <p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Likely ready:</strong> ${clockText(plan.window.from)} to ${clockText(plan.window.to)} (${riseLabel(ratio)} after feeding)</p>
+        <p style="margin-top: 12px;"><strong>${ratioLabel}:</strong> ${ratio.ratio}</p>
     `;
+}
+
+// The loaf is ready for the fridge about 8.5 hours after autolyse starts
+// (1h autolyse + 1h fermentolyse + 6h bulk at 25°C + 0.5h shaping)
+function autolyseSummaryHtml(autolyse, how) {
+    const ready = clockAfter(autolyse.time, 8.5);
+    return `
+        <p style="margin-top: 8px; color: var(--good); font-weight: 600;"><strong>Start Autolyse At:</strong> ${clockText(autolyse)} (${how})</p>
+        <p style="margin-top: 8px; color: var(--muted); font-size: 14px;"><strong>Estimated Ready for Fridge:</strong> ~${clockText({ time: ready.time, days: autolyse.days + ready.days })} (assuming 25°C dough temp, 6hr bulk fermentation)</p>
+    `;
+}
+
+// Days are shown relative to the autolyse day, so a feed the evening before reads "(day before)"
+const planDayText = (days) => days === 0 ? '' : days === -1 ? ' (day before)' : days < 0 ? ` (${-days} days before)` : dayText(days);
+const planClock = (c) => `${c.time}${planDayText(c.days)}`;
+
+function renderAutolysePlan({ need, have, feedTime, neededBy }) {
+    const plan = planFromAutolyse({ need, autolyseAt: neededBy, earliestFeed: feedTime, have: have > 0 ? have : null });
+    const best = plan.recommended;
+    let html = '';
+
+    if (!best) {
+        html += feedWarning(`There are only ${plan.availableHours - 1} hours between ${feedTime} and your autolyse, and even a 1:1:1 feed needs about ${plan.shortestHours} hours to be ready for the dough an hour later. Start your autolyse later, or use starter that is already active.`);
+        return html;
+    }
+
+    if (plan.quicker) {
+        html += feedWarning(`There isn't time for the usual 1:6:6, so this uses a quicker ${best.ratio.ratio}. Quicker ratios need more of your own starter, but peak sooner.`);
+    }
+    if (best.notEnoughStarter) {
+        html += feedWarning(`This needs ${best.feed.starter}g of your starter but you only have ${have}g. Pick a ratio below that needs less, or feed a bit earlier.`);
+    }
+    html += `<p style="font-size: 18px; font-weight: 600; color: var(--accent);">Feed at ${planClock(best.feedTime)}</p>`;
+    html += feedAmountsHtml(best.feed, 'Suggested Ratio', best.ratio);
+    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Starter ready for the dough:</strong> ${planClock(best.window.from)} to ${planClock(best.window.to)} (${riseLabel(best.ratio)} after feeding)</p>`;
+    html += autolyseSummaryHtml({ time: neededBy, days: 0 }, `feeding ${best.ratio.minHours - 1} hours earlier`);
+
+    html += `<h4 style="margin-top: 16px;">All options</h4>
+        <p class="hint" style="margin-bottom: 8px;">Feed as late as each ratio allows. Quicker ratios use more of your starter.</p>
+        <ul class="feed-list">`;
+    for (const o of plan.options) {
+        const note = !o.possible ? 'too slow for your time'
+            : o.notEnoughStarter ? `needs ${o.feed.starter}g, more than you have` : `use ${o.feed.starter}g starter`;
+        html += `<li style="${o.possible ? '' : 'opacity: .55;'}${o === best ? ' font-weight: 600;' : ''}">${o === best ? '✓ ' : ''}${o.ratio.ratio}: ${o.possible ? `feed at ${planClock(o.feedTime)}, ` : ''}${note}</li>`;
+    }
+    html += '</ul>';
 
     // Save for the autolyse suggestion on the next step
-    currentBake.starterFeedTime = feedTime;
-    currentBake.starterFeedRatio = ratio.ratio;
-    if (mode === 'deadline') currentBake.starterNeededBy = neededBy;
-
-    // Autolyse starts an hour before the starter's earliest peak; the loaf is ready for the
-    // fridge about 8.5 hours later (1h autolyse + 1h fermentolyse + 6h bulk at 25°C + 0.5h shaping)
-    const autolyseHours = ratio.minHours - 1;
-    const autolyse = clockAfter(feedTime, autolyseHours);
-    const ready = clockAfter(autolyse.time, 8.5);
-    const readyDays = autolyse.days + ready.days;
-    html += `
-        <p style="margin-top: 8px; color: var(--good); font-weight: 600;"><strong>Start Autolyse At:</strong> ${clockText(autolyse)} (${autolyseHours} hours after feeding)</p>
-        <p style="margin-top: 8px; color: var(--muted); font-size: 14px;"><strong>Estimated Ready for Fridge:</strong> ~${clockText({ time: ready.time, days: readyDays })} (assuming 25°C dough temp, 6hr bulk fermentation)</p>
-    `;
-    show(html);
+    currentBake.starterFeedTime = best.feedTime.time;
+    currentBake.starterFeedRatio = best.ratio.ratio;
+    currentBake.starterNeededBy = neededBy;
+    return html;
 }
 
 // Bulk Fermentation Temperature Calculator
