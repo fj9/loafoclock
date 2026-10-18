@@ -30,7 +30,7 @@ const STEPS = [
         timerMinutes: null,
         hasCalculator: true,
         instructions: [
-            "Use the calculator below to determine feeding amounts",
+            "Use the calculator above to determine feeding amounts",
             "Feed starter in the evening",
             "Let ferment until active, bubbly, and at peak"
         ],
@@ -91,7 +91,7 @@ const STEPS = [
         isFoldScreen: true,
         instructions: [
             "Perform 4 stretch and folds, 30 minutes apart",
-            "Use the timer and checklist below to track your progress",
+            "Use the checklist above and the timer below to track your progress",
             "If adding bulky inclusions (cheese, fruit, chocolate), add before fold 4"
         ],
         notes: "Total bulk fermentation: 6-16 hours from adding starter (temperature dependent). This includes fermentolyse, salt rest, and folds."
@@ -106,7 +106,7 @@ const STEPS = [
         showPredictedEnd: true,
         instructions: [
             "Let dough continue fermenting until it reaches target rise",
-            "Use the temperature calculator below for guidance",
+            "Use the temperature calculator above for guidance",
             "Monitor dough temperature with thermometer",
             "The remaining time shown accounts for the 3 hours already spent (fermentolyse + salt + folds)"
         ],
