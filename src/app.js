@@ -1,8 +1,10 @@
 import { bakePlan, recipeFor, loafDescription } from './recipe.js';
 import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, REST_MAX, REST_MIN, restEnd, restText, tidyRest } from './timing.js';
 import { STEP_TIPS, tipHtml } from './tips.js';
-import { BULK_FERMENTATION_TEMPS, PLAN_DEFAULTS, buildSchedule } from './schedule.js';
-import { progressLabel, timelineHtml } from './timeline.js';
+import { BULK_FERMENTATION_TEMPS, PLAN_DEFAULTS, buildSchedule, feedAnchorMs } from './schedule.js';
+import { countdownText, progressLabel, timelineHtml } from './timeline.js';
+import { clearActiveBake, loadActiveBake, pausedTimer, saveActiveBake, savedAgo, startedTimer, timerNow } from './persist.js';
+import { loadSettings, rememberChoices } from './settings.js';
 import { FEEDING_RATIOS, clockAfter, defaultFeedOption, feedTimeOptions, findRatio, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
 import { feedBarHtml } from './feedbar.js';
 import { fmtShort, fmtTime } from './clock.js';
@@ -186,6 +188,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeStartScreen();
     initializeBakingScreen(); // bound once; the buttons are reused by every bake
     loadBakeLog();
+    applyBakeChoices(loadSettings().lastBake || {});
+    renderResumeCard();
+    initPersistence();
+    initLogActions();
 });
 
 function initializeTabs() {
@@ -223,14 +229,14 @@ function initializeStartScreen() {
     document.getElementById('start-bake-btn').addEventListener('click', startBake);
 }
 
-function startBake() {
-    const loaves = parseInt(document.querySelector('input[name="loaves"]:checked').value);
-    const size = document.querySelector('input[name="size"]:checked').value;
-    const hydration = parseInt(document.getElementById('hydration').value);
-    currentBake = {
-        loaves: loaves,
-        size: size,
-        hydration: hydration,
+// A new bake with every field in its starting state
+function freshBake({ loaves, size, hydration, feedMode, feedHave }) {
+    return {
+        loaves,
+        size,
+        hydration,
+        feedMode,
+        feedHave,
         currentStep: 0,
         startTime: new Date().toISOString(),
         stepNotes: {},
@@ -246,11 +252,65 @@ function startBake() {
         doughTemp: null,
         foldsCompleted: [false, false, false, false]
     };
+}
+
+function startBake() {
+    const loaves = parseInt(document.querySelector('input[name="loaves"]:checked').value);
+    const size = document.querySelector('input[name="size"]:checked').value;
+    const hydration = parseInt(document.getElementById('hydration').value);
+    const last = loadSettings().lastBake || {};
+    // Feed mode and the starter in your jar carry over from last time
+    currentBake = freshBake({ loaves, size, hydration, feedMode: last.feedMode, feedHave: last.feedHave });
+    rememberChoices(currentBake);
     
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('baking-screen').style.display = 'block';
     
     renderStep();
+    persistBake();
+}
+
+// Put the loaf choices on the start screen (from last time, or from a bake in the log)
+function applyBakeChoices({ loaves, size, hydration }) {
+    const radio = (name, value) => { const r = document.querySelector(`input[name="${name}"][value="${value}"]`); if (r) r.checked = true; };
+    if (loaves) radio('loaves', loaves);
+    radio('size', size || 'regular');
+    const select = document.getElementById('hydration');
+    if (hydration && [...select.options].some(o => Number(o.value) === Number(hydration))) select.value = String(hydration);
+}
+
+// ---- Keeping the bake across reloads ----
+function persistBake() {
+    if (bakeInProgress()) saveActiveBake(currentBake);
+}
+
+function renderResumeCard() {
+    const card = document.getElementById('resume-card');
+    if (!card) return;
+    const saved = loadActiveBake(STEPS.length);
+    if (!saved || bakeInProgress()) { card.innerHTML = ''; return; }
+    const step = STEPS[saved.bake.currentStep];
+    card.innerHTML = `
+        <div class="resume-card">
+            <h3>Resume your bake</h3>
+            <p>${loafDescription(saved.bake)} · step ${step.id} of ${STEPS.length}, ${step.name}<br>
+               <small>Saved ${savedAgo(saved.savedAt)}</small></p>
+            <div class="btn-row">
+                <button type="button" class="btn btn-primary btn-small" id="resume-btn">Resume</button>
+                <button type="button" class="btn btn-outline btn-small" id="discard-btn">Start fresh</button>
+            </div>
+        </div>`;
+    document.getElementById('resume-btn').addEventListener('click', () => {
+        currentBake = { ...freshBake(saved.bake), ...saved.bake };
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('baking-screen').style.display = 'block';
+        renderStep();
+    });
+    document.getElementById('discard-btn').addEventListener('click', () => {
+        if (!confirm('Delete your saved bake and start fresh?')) return;
+        clearActiveBake();
+        renderResumeCard();
+    });
 }
 
 function initializeBakingScreen() {
@@ -305,9 +365,9 @@ function renderStep() {
                 <button id="calculate-bulk" class="btn btn-small">Calculate Time</button>
                 
                 <div id="bulk-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;">
-                    <p id="bulk-time" style="font-size: 18px; color: var(--accent); font-weight: 600; margin-bottom: 8px;"></p>
-                    <p id="bulk-rise" style="font-size: 16px; margin-bottom: 12px;"></p>
-                    <p style="font-size: 14px; color: var(--muted);"><em>Note: This is the total bulk fermentation time from when you added the starter (including fermentolyse, salt addition, and folds).</em></p>
+                    <p id="bulk-time" style="font-size: calc(18px * var(--ts, 1)); color: var(--accent); font-weight: 600; margin-bottom: 8px;"></p>
+                    <p id="bulk-rise" style="font-size: calc(16px * var(--ts, 1)); margin-bottom: 12px;"></p>
+                    <p style="font-size: calc(14px * var(--ts, 1)); color: var(--muted);"><em>Note: This is the total bulk fermentation time from when you added the starter (including fermentolyse, salt addition, and folds).</em></p>
                 </div>
             </div>
         `;
@@ -368,7 +428,7 @@ function renderStep() {
                 <div class="time-tracker-section" style="background: var(--info-bg); border-left-color: var(--info);">
                     <h4>🔮 Predicted End Time</h4>
                     <p><strong>Based on ${currentBake.doughTemp}°C:</strong> ~${fmtTime(predictedTime)}</p>
-                    <p style="font-size: 14px; color: var(--info-ink); margin-top: 8px;">Estimated ${bulkData.hours} hours from start (${bulkData.rise}% rise target)</p>
+                    <p style="font-size: calc(14px * var(--ts, 1)); color: var(--info-ink); margin-top: 8px;">Estimated ${bulkData.hours} hours from start (${bulkData.rise}% rise target)</p>
                 </div>
             `;
         }
@@ -413,7 +473,7 @@ function renderStep() {
                 <button id="calculate-bake-time" class="btn btn-small">Calculate Bake Time</button>
                 
                 <div id="bake-time-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;">
-                    <p id="bake-time-display" style="font-size: 18px; color: var(--accent); font-weight: 600;"></p>
+                    <p id="bake-time-display" style="font-size: calc(18px * var(--ts, 1)); color: var(--accent); font-weight: 600;"></p>
                 </div>
             </div>
         `;
@@ -457,17 +517,17 @@ function renderStep() {
                                     ${foldTimes[index] ? `<span class="fold-time">~${foldTimes[index]}</span>` : ''}
                                 </span>
                             </label>
-                            ${foldNum === 4 ? '<p style="font-size: 12px; color: var(--muted); margin: 4px 0 0 28px;">Add inclusions during this fold if using</p>' : ''}
+                            ${foldNum === 4 ? '<p style="font-size: calc(12px * var(--ts, 1)); color: var(--muted); margin: 4px 0 0 28px;">Add inclusions during this fold if using</p>' : ''}
                         </div>
                     `).join('')}
                 </div>
-                <p style="font-size: 13px; color: var(--muted); margin-top: 12px; font-style: italic;">
+                <p style="font-size: calc(13px * var(--ts, 1)); color: var(--muted); margin-top: 12px; font-style: italic;">
                     Folds start ${firstFoldMinutes(restMinutes(STEPS[2]))} minutes after you add the starter (${restText(restMinutes(STEPS[2]))} fermentolyse + 30 min salt rest)
                 </p>
                 
                 <div class="fold-timer-section">
                     <h4 style="margin-top: 20px;">30-Minute Timer</h4>
-                    <p style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Use this timer between folds</p>
+                    <p style="font-size: calc(14px * var(--ts, 1)); color: var(--muted); margin-bottom: 12px;">Use this timer between folds</p>
                 </div>
             </div>
         `;
@@ -548,9 +608,7 @@ function renderStep() {
     const timerSection = document.getElementById('timer-section');
     if (step.timerMinutes) {
         timerSection.style.display = 'block';
-        resetTimer();
-        timerSeconds = timerMinutesFor(step) * 60;
-        updateTimerDisplay();
+        restoreTimer(step);
     } else {
         timerSection.style.display = 'none';
         stopTimer();
@@ -583,6 +641,7 @@ function previousStep() {
 // selected, and starting again begins a fresh bake with the new amounts.
 function backToSetup() {
     stopTimer();
+    clearActiveBake();
     document.getElementById('baking-screen').style.display = 'none';
     document.getElementById('start-screen').style.display = 'block';
 }
@@ -633,6 +692,30 @@ function currentSchedule() {
     });
 }
 
+// The feed moment, fixed the first time it is needed so it doesn't drift as days pass
+function currentFeedAnchor() {
+    if (!currentBake.feedAnchor || currentBake.feedAnchorFor !== currentBake.starterFeedTime) {
+        currentBake.feedAnchor = feedAnchorMs(currentBake.starterFeedTime);
+        currentBake.feedAnchorFor = currentBake.starterFeedTime;
+    }
+    return currentBake.feedAnchor;
+}
+
+function tickCountdown() {
+    const el = document.getElementById('tl-countdown');
+    if (el) el.textContent = countdownText(Number(el.dataset.ms), Date.now());
+}
+
+// Save the bake every few seconds and whenever the page is hidden; keep the countdown fresh
+function initPersistence() {
+    setInterval(() => { tickCountdown(); persistBake(); }, 3000);
+    document.addEventListener('visibilitychange', () => {
+        persistBake();
+        if (document.visibilityState === 'visible' && bakeInProgress()) { timerTick(); tickCountdown(); }
+    });
+    window.addEventListener('pagehide', persistBake);
+}
+
 export function refreshTimeline() {
     const container = document.getElementById('timeline');
     if (!container) return;
@@ -640,7 +723,10 @@ export function refreshTimeline() {
     if (existing) timelineOpen = existing.open; // keep it open across updates
     const schedule = currentSchedule();
     const step = STEPS[currentBake.currentStep];
-    container.innerHTML = timelineHtml({ schedule, currentStepId: step.id, plan: currentPlan(), open: timelineOpen, defaultFeedTime: nowClock() });
+    container.innerHTML = timelineHtml({
+        schedule, currentStepId: step.id, plan: currentPlan(), open: timelineOpen, defaultFeedTime: nowClock(),
+        anchorMs: schedule ? currentFeedAnchor() : null, nowMs: Date.now()
+    });
     document.getElementById('progress-label').textContent =
         progressLabel({ schedule, currentStepId: step.id, totalSteps: STEPS.length });
     if (!schedule) {
@@ -681,7 +767,7 @@ function restPickerHtml(step) {
     return `
         <div class="time-tracker-section" style="background: var(--calc-bg); border-left-color: var(--accent);">
             <h4>⏲️ Rest length${tipHtml('restLength')}</h4>
-            <p style="font-size: 14px; color: var(--muted); margin-bottom: 8px;">The ${label} rest can be shortened to ${REST_MIN}–${REST_MAX} minutes, for example to bring the next steps back to tidy times.</p>
+            <p style="font-size: calc(14px * var(--ts, 1)); color: var(--muted); margin-bottom: 8px;">The ${label} rest can be shortened to ${REST_MIN}–${REST_MAX} minutes, for example to bring the next steps back to tidy times.</p>
             <div class="form-group">
                 <label for="rest-minutes">Minutes (${REST_MIN}–${REST_MAX}):</label>
                 <input type="number" id="rest-minutes" value="${restMinutes(step)}" min="${REST_MIN}" max="${REST_MAX}" step="1" inputmode="numeric">
@@ -697,7 +783,8 @@ function initRestPicker(step) {
     const preview = document.getElementById('rest-preview');
     const tidyBtn = document.getElementById('rest-tidy');
 
-    const refresh = () => {
+    // `changed` is true when you edit the minutes; drawing the step must not reset a saved timer
+    const refresh = (changed = false) => {
         const minutes = restMinutes(step);
         const end = restEnd(nowClock(), minutes);
         const tidy = tidyRest(nowClock());
@@ -711,17 +798,17 @@ function initRestPicker(step) {
         const suggestion = document.getElementById('autolyse-suggestion');
         if (suggestion) suggestion.outerHTML = autolyseSuggestionHtml();
         refreshTimeline();
-        if (!timerInterval) { stopTimer(); resetTimer(); }
+        if (changed && !timerInterval) { stopTimer(); resetTimer(); }
     };
     const set = (minutes) => {
         currentBake[step.restKey] = clampRest(minutes);
         input.value = currentBake[step.restKey];
-        refresh();
+        refresh(true);
     };
     input.addEventListener('input', () => {
         if (input.value === '') return;
         currentBake[step.restKey] = clampRest(input.value);
-        refresh();
+        refresh(true);
     });
     input.addEventListener('change', () => set(input.value));
     // The tidy suggestion depends on the time you press it, so work it out then
@@ -742,7 +829,7 @@ function autolyseSuggestionHtml() {
             <h4>⏰ Suggested Timing</h4>
             <p><strong>You fed your starter at:</strong> ${fmtTime(currentBake.starterFeedTime)}</p>
             <p><strong>You planned to start autolyse at:</strong> ${fmtTime(currentBake.plannedAutolyse)}</p>
-            <p style="font-size: 14px; color: var(--good-ink); margin-top: 8px;">Your starter (${currentBake.starterFeedRatio}) should be ready when the ${restText(rest)} autolyse ends.</p>
+            <p style="font-size: calc(14px * var(--ts, 1)); color: var(--good-ink); margin-top: 8px;">Your starter (${currentBake.starterFeedRatio}) should be ready when the ${restText(rest)} autolyse ends.</p>
         </div>
     `;
     }
@@ -752,7 +839,7 @@ function autolyseSuggestionHtml() {
             <h4>⏰ Suggested Timing</h4>
             <p><strong>You fed your starter at:</strong> ${fmtTime(currentBake.starterFeedTime)}</p>
             <p><strong>Suggested autolyse start:</strong> ${fmtTime(start)}</p>
-            <p style="font-size: 14px; color: var(--good-ink); margin-top: 8px;">This is based on your feeding ratio (${currentBake.starterFeedRatio}) rise time of ${riseTimeRange}, minus your ${restText(rest)} autolyse.</p>
+            <p style="font-size: calc(14px * var(--ts, 1)); color: var(--good-ink); margin-top: 8px;">This is based on your feeding ratio (${currentBake.starterFeedRatio}) rise time of ${riseTimeRange}, minus your ${restText(rest)} autolyse.</p>
         </div>
     `;
 }
@@ -872,7 +959,7 @@ function feedCalculatorHtml() {
 
             <div id="feed-result" style="display: none; margin-top: 16px; padding: 16px; background: var(--card); border-radius: 8px;" role="status"></div>
             ${fed ? '' : '<p style="margin-top: 12px;"><button type="button" class="link-btn" id="fed-link">Already fed your starter? Tell us when</button></p>'}
-            <p class="hint" style="margin-top: 12px; font-size: 13px;">Times are for a kitchen around 21–22°C. A warmer kitchen is faster, a cooler one slower.</p>
+            <p class="hint" style="margin-top: 12px; font-size: calc(13px * var(--ts, 1));">Times are for a kitchen around 21–22°C. A warmer kitchen is faster, a cooler one slower.</p>
         </div>
     `;
 }
@@ -1060,7 +1147,7 @@ function calculateFeed() {
 // (1h autolyse + 1h fermentolyse + 6h bulk at 25°C + 0.5h shaping)
 function fridgeEstimateHtml(autolyse) {
     const ready = clockAfter(autolyse.time, 8.5);
-    return `<p style="margin-top: 8px; color: var(--muted); font-size: 14px;"><strong>Dough ready for the fridge:</strong> about ${clockText({ time: ready.time, days: autolyse.days + ready.days })} (if your dough is 25°C and bulk takes 6 hours)</p>`;
+    return `<p style="margin-top: 8px; color: var(--muted); font-size: calc(14px * var(--ts, 1));"><strong>Dough ready for the fridge:</strong> about ${clockText({ time: ready.time, days: autolyse.days + ready.days })} (if your dough is 25°C and bulk takes 6 hours)</p>`;
 }
 
 function renderFeedPlan({ need, have, feedTime, neededBy }) {
@@ -1193,7 +1280,7 @@ function saveBulkStart() {
     if (predictionDiv) {
         predictionDiv.innerHTML = `
             <p style="color: var(--accent); font-weight: 600;">✓ Start time saved: ${fmtTime(startTime)}</p>
-            <p style="color: var(--muted); font-size: 14px; margin-top: 8px;">
+            <p style="color: var(--muted); font-size: calc(14px * var(--ts, 1)); margin-top: 8px;">
                 <strong>Predicted end time:</strong> ~${fmtTime(predictedTime)} (assuming 25°C, 6 hours bulk)
             </p>
         `;
@@ -1291,28 +1378,48 @@ function calculateTimeDifference(startTime, endTime) {
 }
 
 // Timer Functions
-function startTimer() {
-    if (!timerRunning) {
-        timerRunning = true;
-        document.getElementById('timer-start').style.display = 'none';
-        document.getElementById('timer-pause').style.display = 'inline-block';
-        
-        timerInterval = setInterval(() => {
-            if (timerSeconds > 0) {
-                timerSeconds--;
-                updateTimerDisplay();
-            } else {
-                stopTimer();
-                playNotification();
-            }
-        }, 1000);
+// The timer counts down to an end time (kept with the bake), not by ticks, so it stays right
+// when the screen is off, and a reloaded page picks up where it was.
+const showTimerButtons = (running) => {
+    document.getElementById('timer-start').style.display = running ? 'none' : 'inline-block';
+    document.getElementById('timer-pause').style.display = running ? 'inline-block' : 'none';
+};
+
+function setTimerNote(text) {
+    const note = document.getElementById('timer-note');
+    if (!note) return;
+    note.textContent = text || '';
+    note.hidden = !text;
+}
+
+function timerTick() {
+    const t = timerNow(currentBake.timer);
+    if (!t) return;
+    timerSeconds = t.seconds;
+    updateTimerDisplay();
+    if (t.finished) {
+        currentBake.timer = { step: currentBake.currentStep, running: false, endsAt: null, remaining: 0 };
+        stopTimer();
+        showTimerButtons(false);
+        playNotification();
     }
 }
 
+function startTimer() {
+    if (timerRunning || timerSeconds <= 0) return;
+    setTimerNote('');
+    currentBake.timer = startedTimer(timerSeconds, currentBake.currentStep);
+    timerRunning = true;
+    showTimerButtons(true);
+    timerInterval = setInterval(timerTick, 1000);
+    persistBake();
+}
+
 function pauseTimer() {
+    currentBake.timer = pausedTimer(currentBake.timer, currentBake.currentStep);
     stopTimer();
-    document.getElementById('timer-start').style.display = 'inline-block';
-    document.getElementById('timer-pause').style.display = 'none';
+    showTimerButtons(false);
+    persistBake();
 }
 
 function stopTimer() {
@@ -1325,13 +1432,35 @@ function stopTimer() {
 
 function resetTimer() {
     stopTimer();
+    if (currentBake) currentBake.timer = null;
     const step = STEPS[currentBake.currentStep];
     if (step.timerMinutes) {
         timerSeconds = timerMinutesFor(step) * 60;
         updateTimerDisplay();
     }
-    document.getElementById('timer-start').style.display = 'inline-block';
-    document.getElementById('timer-pause').style.display = 'none';
+    setTimerNote('');
+    showTimerButtons(false);
+}
+
+// When a step opens: carry on a saved timer for this step, or start from the full time
+function restoreTimer(step) {
+    const saved = currentBake.timer?.step === currentBake.currentStep ? currentBake.timer : null;
+    if (!saved) { resetTimer(); return; }
+    const t = timerNow(saved);
+    stopTimer();
+    timerSeconds = t.seconds;
+    updateTimerDisplay();
+    if (t.running) {
+        timerRunning = true;
+        showTimerButtons(true);
+        timerInterval = setInterval(timerTick, 1000);
+    } else {
+        showTimerButtons(false);
+        if (t.finished) {
+            currentBake.timer = { ...saved, running: false, endsAt: null, remaining: 0 };
+            setTimerNote('Your timer finished while you were away.');
+        }
+    }
 }
 
 function updateTimerDisplay() {
@@ -1345,7 +1474,7 @@ function playNotification() {
     // Visual notification
     document.getElementById('timer-display').style.color = 'var(--warn)';
     setTimeout(() => {
-        document.getElementById('timer-display').style.color = 'white';
+        document.getElementById('timer-display').style.color = '';
     }, 1000);
     
     // Audio notification (if supported)
@@ -1469,6 +1598,7 @@ function saveFinalBakeLog() {
     };
     
     saveBakeLog(bakeRecord);
+    clearActiveBake();
     
     // Reset to start screen
     document.getElementById('baking-screen').style.display = 'none';
@@ -1522,9 +1652,25 @@ export function loadBakeLog() {
                     ${log.retardDuration ? `<p><strong>Cold Retardation:</strong> ${log.retardDuration}</p>` : ''}
                     ${log.notes ? `<p><strong>Notes:</strong> ${log.notes}</p>` : ''}
                 </div>
+                <button type="button" class="btn btn-small btn-outline" data-repeat="${index}" style="margin-top: 10px;">Repeat this bake</button>
             </div>
         `;
     }).join('');
+}
+
+// "Repeat this bake" on a log entry: back to the start screen with the same loaves, size and hydration
+function initLogActions() {
+    document.getElementById('bake-log-list').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-repeat]');
+        if (!btn) return;
+        const log = JSON.parse(localStorage.getItem('sourdoughLogs') || '[]')[Number(btn.dataset.repeat)];
+        if (!log) return;
+        if (bakeInProgress() && !confirm('Leave the bake you are working on and start this one instead?')) return;
+        if (bakeInProgress()) backToSetup();
+        applyBakeChoices(log);
+        switchTab('bake');
+        window.scrollTo(0, 0);
+    });
 }
 
 // Notification permission is requested from the Settings tab (see shell.js)

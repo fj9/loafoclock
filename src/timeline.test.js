@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildSchedule } from './schedule.js';
-import { dayLabel, durationText, progressLabel, timelineHtml } from './timeline.js';
+import { countdownText, dayLabel, durationText, progressLabel, timelineHtml } from './timeline.js';
 
 const today = new Date(2026, 9, 18); // Sunday 18 Oct 2026
 const schedule = buildSchedule({ feedTime: '21:00', riseMinHours: 9 });
@@ -56,5 +56,36 @@ describe('progressLabel', () => {
     it('shows when the current step is planned', () => {
         expect(progressLabel({ schedule, currentStepId: 2, totalSteps: 10, today })).toBe('Step 2 of 10 · planned Mon 05:00');
         expect(progressLabel({ schedule: null, currentStepId: 2, totalSteps: 10, today })).toBe('Step 2 of 10');
+    });
+});
+
+describe('countdownText', () => {
+    const now = new Date(2026, 9, 18, 12, 0).getTime();
+    const min = 60000;
+    it('says how long until a moment', () => {
+        expect(countdownText(now + 200 * min, now)).toBe('in 3h 20m');
+        expect(countdownText(now + 120 * min, now)).toBe('in 2h');
+        expect(countdownText(now + 45 * min, now)).toBe('in 45m');
+        expect(countdownText(now + 26 * 60 * min, now)).toBe('in 1d 2h');
+    });
+    it('says how long ago when it has passed', () => {
+        expect(countdownText(now - 10 * min, now)).toBe('10m ago');
+        expect(countdownText(now - 90 * min, now)).toBe('1h 30m ago');
+    });
+    it('says now inside a minute', () => {
+        expect(countdownText(now + 20_000, now)).toBe('now');
+    });
+});
+
+describe('timeline countdown in the summary', () => {
+    it('shows how long until the next step when the feed moment is known', () => {
+        const anchor = new Date(2026, 9, 18, 21, 0).getTime();
+        const now = new Date(2026, 9, 18, 19, 40).getTime();
+        const html = timelineHtml({ schedule, currentStepId: 1, plan, today, anchorMs: anchor, nowMs: now });
+        expect(html).toContain('<span id="tl-countdown"');
+        expect(html).toContain('in 1h 20m'); // the feed itself, at 21:00
+    });
+    it('leaves it out without a feed moment', () => {
+        expect(timelineHtml({ schedule, currentStepId: 1, plan, today })).not.toContain('tl-countdown');
     });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PLAN_DEFAULTS, buildSchedule, bulkFor } from './schedule.js';
+import { PLAN_DEFAULTS, buildSchedule, bulkFor, eventMs, feedAnchorMs } from './schedule.js';
 
 const base = { feedTime: '21:00', riseMinHours: 9 }; // 1:6:6 fed at 21:00
 const times = (s) => Object.fromEntries(s.events.map((e) => [e.key, e.clock]));
@@ -99,5 +99,28 @@ describe('buildSchedule options', () => {
         const s = buildSchedule({ ...base, actuals: { bulkEnd: '12:00' } });
         expect(times(s).bulkEnd).toEqual({ time: '12:00', days: 1 });
         expect(times(s).fridge).toEqual({ time: '12:45', days: 1 });
+    });
+});
+
+describe('feedAnchorMs', () => {
+    const at = (h, m = 0) => new Date(2026, 9, 18, h, m).getTime(); // Sunday 18 Oct 2026
+    const hm = (ms) => { const d = new Date(ms); return `${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+    it('a feed later tonight is tonight', () => {
+        expect(hm(feedAnchorMs('22:00', at(19, 40)))).toBe('18 22:00');
+    });
+    it('a feed you did earlier today is today', () => {
+        expect(hm(feedAnchorMs('17:00', at(19, 40)))).toBe('18 17:00');
+    });
+    it('a morning feed chosen in the evening is tomorrow morning', () => {
+        expect(hm(feedAnchorMs('07:30', at(19, 40)))).toBe('19 07:30');
+    });
+    it('a small-hours feed chosen after midnight is tonight, not tomorrow', () => {
+        expect(hm(feedAnchorMs('23:00', at(0, 30)))).toBe('17 23:00');
+    });
+    it('puts events at the right moments', () => {
+        const s = buildSchedule({ feedTime: '22:00', riseMinHours: 9 });
+        const anchor = feedAnchorMs('22:00', at(19, 40));
+        const autolyse = s.events.find((e) => e.key === 'autolyse');
+        expect(hm(eventMs(anchor, autolyse))).toBe('19 06:00');
     });
 });

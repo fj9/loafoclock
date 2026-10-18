@@ -34,6 +34,8 @@ src/recipe.js   loaf sizes, hydration and ingredient amounts
 src/feeding.js  starter feeding ratios, rise times and the two feed calculators
 src/schedule.js the whole-bake plan: when each step happens, from your feed time
 src/timeline.js the timeline shown under the progress bar
+src/persist.js  saving the bake in progress, and the timer that keeps going with the screen off
+src/settings.js remembered settings (clock, hints, text size, last choices)
 src/clock.js    12-hour (default) or 24-hour time display
 src/timepicker.js  the quick-picks, big readout and slider used to choose a time
 src/timing.js   autolyse and fermentolyse rest lengths (30-60 min) and the tidy-time suggestion
@@ -74,6 +76,14 @@ The style comes from a sourdough tea towel: **light mode** is cream with terraco
 ## Choosing times
 
 Every time is chosen with the same picker: quick-pick buttons, a large readout and a slider, shown as "7:30 am" (Settings has a 12-hour or 24-hour choice). Feed and autolyse use 15 minute steps and buttons like 7 am, 8 am and 6 pm. Recording something that just happened (bulk start and end) uses 5 minute steps and Now, 15 min ago, 30 min ago and 1 hr ago. The cold retardation and fridge planner add a Yesterday, Today or Tomorrow choice. The timeline's own settings use the same picker.
+
+## Keeping your place
+
+- **Resume:** the bake in progress is saved every few seconds and whenever the page is hidden. If the page reloads or the phone locks, the start screen offers **Resume your bake** (or Start fresh). It's cleared when you log the bake or go back to the start.
+- **Timers:** a timer counts down to an end time that is saved with the bake, so it stays right with the screen off and carries on after a reload. If it ran out while you were away you're told.
+- **Next up:** the timeline line says how long until the next step, for example "next: Start autolyse Mon 8:00 am · in 3h 20m".
+- **Remembered choices:** the last loaves, size and hydration, the Simple or Advanced mode and the starter in your jar are filled in next time. **Repeat this bake** on any Log entry sets the start screen to that bake's loaves, size and hydration.
+- **Settings:** text size (Normal, Large, Larger), show or hide the (i) help hints, and a 12 or 24 hour clock.
 
 ## Made easy to follow
 

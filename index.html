@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script>
         try { var t = localStorage.getItem('sourdoughTheme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+        try { var st = JSON.parse(localStorage.getItem('sourdoughSettings') || '{}'); document.documentElement.dataset.hints = st.hints === false ? 'off' : 'on'; if (st.textSize === 'large' || st.textSize === 'larger') document.documentElement.dataset.text = st.textSize; } catch (e) {}
     </script>
     <title>Sourdough Companion</title>
 </head>
@@ -28,6 +29,7 @@
         <!-- Active Bake Tab -->
         <div id="bake-tab" class="tab-content active">
             <div id="start-screen">
+                <div id="resume-card"></div>
                 <h2>Start a New Bake</h2>
                 <div class="form-group">
                     <label>Number of Loaves:</label>
@@ -84,6 +86,7 @@
                 
                 <div class="timer-section" id="timer-section" style="display: none;">
                     <div class="timer-display" id="timer-display">00:00</div>
+                    <p class="timer-note" id="timer-note" hidden></p>
                     <div class="timer-controls">
                         <button id="timer-start" class="btn btn-small">Start</button>
                         <button id="timer-pause" class="btn btn-small" style="display: none;">Pause</button>
@@ -114,6 +117,22 @@
                     <button data-theme-mode="light">Light</button>
                     <button data-theme-mode="dark">Dark</button>
                     <button data-theme-mode="system">Follow my phone</button>
+                </div>
+            </section>
+            <section class="panel">
+                <h2>Text size</h2>
+                <div class="seg" id="text-seg">
+                    <button data-text-size="normal">Normal</button>
+                    <button data-text-size="large">Large</button>
+                    <button data-text-size="larger">Larger</button>
+                </div>
+            </section>
+            <section class="panel">
+                <h2>Help hints</h2>
+                <p class="hint">The little (i) buttons that explain terms.</p>
+                <div class="seg" id="hints-seg">
+                    <button data-hints-mode="on">Show</button>
+                    <button data-hints-mode="off">Hide</button>
                 </div>
             </section>
             <section class="panel">

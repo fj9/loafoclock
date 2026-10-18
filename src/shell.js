@@ -1,11 +1,11 @@
 import { registerSW } from 'virtual:pwa-register';
 import { setClock12 } from './clock.js';
 import { loadBakeLog, refreshTimeline, switchTab } from './app.js';
+import { applyDisplaySettings, loadSettings, saveSettings } from './settings.js';
 
 // App shell: theme, first-run tutorial, help, settings and footer.
 // Kept apart from app.js (the baking workflow) so each file does one job.
 
-const SETTINGS_KEY = 'sourdoughSettings';
 const THEME_KEY = 'sourdoughTheme';
 const LOG_KEY = 'sourdoughLogs';
 const PAGE_COLOURS = { light: '#9E3326', dark: '#30231D' }; // the header colour in each theme
@@ -29,13 +29,6 @@ const FAQ = [
     { q: 'Why did my timer stop?', a: 'Phones can pause web pages in the background. Keep the app open on screen, and turn on notifications in Settings so you get an alert when a timer finishes.' },
     { q: 'Can I change the recipe?', a: 'Not yet. The quantities are for one loaf and double for two.' }
 ];
-
-function loadSettings() {
-    try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (e) { return {}; }
-}
-function saveSettings(patch) {
-    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...loadSettings(), ...patch })); } catch (e) { /* private mode */ }
-}
 
 // ---- Theme ----
 function applyTheme(mode) {
@@ -98,6 +91,26 @@ function renderHelp() {
 }
 
 // ---- Settings ----
+function initDisplaySettings() {
+    const mark = () => {
+        const cfg = loadSettings();
+        document.querySelectorAll('[data-hints-mode]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.hintsMode === 'on') === (cfg.hints !== false))));
+        document.querySelectorAll('[data-text-size]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.textSize === (cfg.textSize || 'normal'))));
+    };
+    applyDisplaySettings(loadSettings());
+    mark();
+    document.querySelectorAll('[data-hints-mode]').forEach(b => b.addEventListener('click', () => {
+        saveSettings({ hints: b.dataset.hintsMode === 'on' });
+        applyDisplaySettings(loadSettings());
+        mark();
+    }));
+    document.querySelectorAll('[data-text-size]').forEach(b => b.addEventListener('click', () => {
+        saveSettings({ textSize: b.dataset.textSize });
+        applyDisplaySettings(loadSettings());
+        mark();
+    }));
+}
+
 function initClockSetting() {
     const apply = (twelve) => {
         setClock12(twelve);
@@ -113,6 +126,7 @@ function initClockSetting() {
 }
 
 function initSettings() {
+    initDisplaySettings();
     initClockSetting();
     document.querySelectorAll('[data-theme-mode]').forEach(b =>
         b.addEventListener('click', () => applyTheme(b.dataset.themeMode)));

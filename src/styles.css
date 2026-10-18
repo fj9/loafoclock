@@ -1,6 +1,7 @@
 /* Theme: "tea towel" light (cream, terracotta, rust) and "ember" dark (warm brown, ember orange).
    Light by default; dark via data-theme or the phone's setting. */
 :root {
+    --ts: 1; /* text size multiplier, see Settings */
     --page-bg: #F3DDB8; --page-dot: #FBF5E9;
     --card: #FBF5E9; --wash: #F5EAD2; --line: #E6D2AE; --dot: #D2622B;
     --ink: #4A2B20; --label: #5E3A2C; --muted: #7A5A4B;
@@ -50,6 +51,7 @@
 }
 
 body {
+    font-size: calc(16px * var(--ts, 1));
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background-color: var(--page-bg);
     background-image: radial-gradient(var(--page-dot) 26%, transparent 28%);
@@ -78,7 +80,7 @@ header {
 
 header h1 {
     font-family: var(--font-display);
-    font-size: 28px;
+    font-size: calc(28px * var(--ts, 1));
     font-weight: 400;
     letter-spacing: .5px;
     text-shadow: 2px 2px 0 var(--header-shadow);
@@ -95,7 +97,7 @@ header h1 {
     padding: 16px;
     background: none;
     border: none;
-    font-size: 16px;
+    font-size: calc(16px * var(--ts, 1));
     font-weight: 500;
     color: var(--muted);
     cursor: pointer;
@@ -136,7 +138,7 @@ header h1 {
     padding: 12px;
     border: 2px solid var(--line);
     border-radius: 8px;
-    font-size: 16px;
+    font-size: calc(16px * var(--ts, 1));
     transition: border-color 0.3s;
 }
 
@@ -168,7 +170,7 @@ header h1 {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: calc(16px * var(--ts, 1));
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
@@ -198,7 +200,7 @@ header h1 {
 
 .btn-small {
     padding: 8px 16px;
-    font-size: 14px;
+    font-size: calc(14px * var(--ts, 1));
 }
 
 .progress-bar {
@@ -226,7 +228,7 @@ header h1 {
 .step-card h3 {
     color: var(--accent);
     margin-bottom: 12px;
-    font-size: 20px;
+    font-size: calc(20px * var(--ts, 1));
     font-family: var(--font-display);
     font-weight: 400;
 }
@@ -271,7 +273,7 @@ header h1 {
 }
 
 .timer-display {
-    font-size: 48px;
+    font-size: calc(48px * var(--ts, 1));
     font-family: var(--font-display);
     font-weight: 400;
     color: var(--header-ink);
@@ -325,7 +327,7 @@ header h1 {
 .calculator-section h4 {
     color: var(--accent);
     margin-bottom: 12px;
-    font-size: 18px;
+    font-size: calc(18px * var(--ts, 1));
 }
 
 .calculator-section .form-group {
@@ -337,7 +339,7 @@ header h1 {
     padding: 10px;
     border: 2px solid var(--accent);
     border-radius: 6px;
-    font-size: 16px;
+    font-size: calc(16px * var(--ts, 1));
 }
 
 .calculator-section #feed-result {
@@ -365,7 +367,7 @@ header h1 {
 .time-tracker-section h4 {
     color: var(--warn-ink);
     margin-bottom: 12px;
-    font-size: 18px;
+    font-size: calc(18px * var(--ts, 1));
 }
 
 .time-tracker-section .form-group {
@@ -378,7 +380,7 @@ header h1 {
     padding: 10px;
     border: 2px solid var(--warn);
     border-radius: 6px;
-    font-size: 16px;
+    font-size: calc(16px * var(--ts, 1));
 }
 
 .fold-tracker-section {
@@ -391,7 +393,7 @@ header h1 {
 .fold-tracker-section h4 {
     color: var(--accent);
     margin-bottom: 12px;
-    font-size: 18px;
+    font-size: calc(18px * var(--ts, 1));
 }
 
 .fold-list {
@@ -436,7 +438,7 @@ header h1 {
 .fold-time {
     color: var(--accent);
     font-weight: 600;
-    font-size: 14px;
+    font-size: calc(14px * var(--ts, 1));
 }
 
 .fold-timer-section {
@@ -459,13 +461,13 @@ header h1 {
 }
 
 .bake-log-item .log-meta {
-    font-size: 14px;
+    font-size: calc(14px * var(--ts, 1));
     color: var(--muted);
     margin-bottom: 12px;
 }
 
 .bake-log-item .log-details {
-    font-size: 14px;
+    font-size: calc(14px * var(--ts, 1));
 }
 
 .bake-log-item .log-details p {
@@ -479,7 +481,7 @@ header h1 {
 }
 
 .empty-state p {
-    font-size: 18px;
+    font-size: calc(18px * var(--ts, 1));
     margin-top: 12px;
 }
 
@@ -493,11 +495,11 @@ header h1 {
     }
     
     header h1 {
-        font-size: 24px;
+        font-size: calc(24px * var(--ts, 1));
     }
     
     .timer-display {
-        font-size: 40px;
+        font-size: calc(40px * var(--ts, 1));
     }
 }
 
@@ -506,14 +508,14 @@ input, select, textarea { background: var(--card); color: var(--ink); font-famil
 .form-group input, .form-group select, .form-group textarea { border-color: var(--line); }
 
 /* Header actions + tabs */
-.tab-btn { padding: 14px 4px; font-size: 15px; }
+.tab-btn { padding: 14px 4px; font-size: calc(15px * var(--ts, 1)); }
 .tab-btn.active { background: var(--card); }
 
 /* Settings, help, footer */
 .panel { margin-bottom: 24px; }
 .panel h2 { margin-bottom: 8px; }
 .panel p, .panel li { margin-bottom: 8px; line-height: 1.45; }
-.panel .hint { color: var(--muted); font-size: 14px; }
+.panel .hint { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .seg { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .seg button { flex: 1; min-height: 48px; padding: 0 12px; border-radius: 10px; border: 2px solid var(--line);
     background: var(--card); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
@@ -524,7 +526,7 @@ input, select, textarea { background: var(--card); color: var(--ink); font-famil
 details.faq { border-top: 1px solid var(--line); padding: 10px 0; }
 details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
 .site-footer { margin: 0; padding: 16px 24px 24px; border-top: 2px dashed var(--line); text-align: center;
-    color: var(--muted); font-size: 14px; }
+    color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .site-footer .links { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; }
 .site-footer a { color: var(--accent); font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; }
 :focus-visible { outline: 3px solid var(--warn); outline-offset: 2px; }
@@ -536,7 +538,7 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
     padding: 20px 24px calc(20px + env(safe-area-inset-bottom)); }
 .sheet h2 { margin: 4px 0 8px; }
 .sheet p { margin-bottom: 16px; line-height: 1.45; }
-.sheet .muted { color: var(--muted); font-size: 14px; }
+.sheet .muted { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .sheet .btn-row { justify-content: space-between; flex-wrap: nowrap; }
 
 /* Info tooltips: positioned by shell.js so they never run off the screen */
@@ -544,13 +546,13 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
 .info-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--accent); background: var(--card);
     color: var(--accent); font: italic 700 13px/1 Georgia, serif; cursor: pointer; padding: 0; }
 .tip { display: none; position: fixed; width: max-content; max-width: min(280px, calc(100vw - 16px)); padding: 10px 14px;
-    border-radius: 8px; background: var(--ink); color: var(--card); font-size: 14px; font-weight: 400; line-height: 1.4;
+    border-radius: 8px; background: var(--ink); color: var(--card); font-size: calc(14px * var(--ts, 1)); font-weight: 400; line-height: 1.4;
     text-align: left; z-index: 30; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
 .tip-wrap.open .tip { display: block; }
 .radio-group { flex-wrap: wrap; }
 
 [hidden] { display: none !important; }
-.hint { color: var(--muted); font-size: 14px; }
+.hint { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .calculator-section .seg button { min-height: 44px; }
 
 .seg button small { font-weight: 400; opacity: .85; }
@@ -560,7 +562,7 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
 /* Timeline under the progress bar */
 .timeline { background: var(--wash); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 20px; }
 .timeline summary { padding: 12px 14px; cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
-.timeline .tl-next { font-weight: 400; color: var(--muted); font-size: 14px; }
+.timeline .tl-next { font-weight: 400; color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 
 .tl-list { list-style: none; margin: 0; padding: 4px 14px 8px 14px; border-left: 0; }
 .tl-item { position: relative; display: flex; gap: 12px; padding: 6px 0 6px 20px; border-left: 2px solid var(--line); margin-left: 6px; }
@@ -571,13 +573,13 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
 .tl-item.tl-next::before { background: var(--accent-strong); border-color: var(--accent-strong); box-shadow: 0 0 0 4px var(--glow); }
 .tl-item.tl-next .tl-time { color: var(--accent); }
 .tl-time { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 92px; white-space: nowrap; }
-.tl-label small { color: var(--muted); font-size: 13px; }
-.tl-gap { margin: 0 0 0 6px; padding: 2px 0 2px 20px; border-left: 2px dashed var(--line); color: var(--muted); font-size: 13px; }
+.tl-label small { color: var(--muted); font-size: calc(13px * var(--ts, 1)); }
+.tl-gap { margin: 0 0 0 6px; padding: 2px 0 2px 20px; border-left: 2px dashed var(--line); color: var(--muted); font-size: calc(13px * var(--ts, 1)); }
 .tl-warn { margin: 8px 14px; padding: 8px 12px; border-radius: 6px; background: var(--warn-bg); color: var(--warn-ink); }
-.timeline h4 { margin: 8px 14px; font-size: 15px; }
+.timeline h4 { margin: 8px 14px; font-size: calc(15px * var(--ts, 1)); }
 .tl-settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 0 14px; }
-.tl-settings label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 600; }
-.tl-settings input, .tl-settings select { padding: 8px; border: 2px solid var(--line); border-radius: 8px; font-size: 16px; }
+.tl-settings label { display: flex; flex-direction: column; gap: 4px; font-size: calc(14px * var(--ts, 1)); font-weight: 600; }
+.tl-settings input, .tl-settings select { padding: 8px; border: 2px solid var(--line); border-radius: 8px; font-size: calc(16px * var(--ts, 1)); }
 .timeline > .hint { margin: 10px 14px 14px; }
 
 /* Tea towel touches: slab headings with double rules, dotted dividers */
@@ -585,7 +587,7 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
     font-family: var(--font-display);
     font-weight: 400;
     color: var(--accent);
-    font-size: 20px;
+    font-size: calc(20px * var(--ts, 1));
     border-top: 2px solid var(--accent);
     border-bottom: 2px solid var(--accent);
     padding: 4px 0;
@@ -611,14 +613,14 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .btn-danger { background: var(--card); color: var(--danger); border: 2px solid var(--danger); }
 /* Before there is a plan, the timeline is just a quiet line */
 .timeline.tl-empty { background: transparent; border-style: dashed; margin-bottom: 14px; }
-.timeline.tl-empty summary { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 400; font-size: 14px; color: var(--muted); min-height: 36px; padding: 6px 12px; }
-.timeline.tl-empty .tl-next { font-size: 14px; }
+.timeline.tl-empty summary { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 400; font-size: calc(14px * var(--ts, 1)); color: var(--muted); min-height: 36px; padding: 6px 12px; }
+.timeline.tl-empty .tl-next { font-size: calc(14px * var(--ts, 1)); }
 
 /* Feed plan: result chips, the ready-window bar, the ratio list, time sliders */
-.chip { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 8px; margin-right: 6px; font-weight: 600; }
+.chip { display: inline-block; font-size: calc(12px * var(--ts, 1)); padding: 3px 10px; border-radius: 8px; margin-right: 6px; font-weight: 600; }
 .chip.ok { background: var(--good-bg); color: var(--good-ink); }
 .chip.warn { background: var(--warn-bg); color: var(--warn-ink); }
-.fp-head { font-size: 17px; margin-bottom: 4px; }
+.fp-head { font-size: calc(17px * var(--ts, 1)); margin-bottom: 4px; }
 .time-slider { width: 100%; margin-top: 8px; }
 .fb { margin: 10px 0 12px; }
 .fb-bar { position: relative; height: 30px; background: var(--wash); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
@@ -629,37 +631,49 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .fb-in { background: var(--accent-strong); }
 .fb-mk.fb-in { width: 4px; }
 .fb-mk.fb-off { background: var(--danger); }
-.fb-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.fb-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: calc(12px * var(--ts, 1)); color: var(--muted); }
 .fb-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 .fb-dot.fb-band { background: var(--good-bg); border: 1px solid var(--good); }
 .fp-ladder { list-style: none; padding: 0; }
-.fp-ladder li { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 5px 8px; border-radius: 6px; }
+.fp-ladder li { display: flex; justify-content: space-between; gap: 8px; font-size: calc(13px * var(--ts, 1)); padding: 5px 8px; border-radius: 6px; }
 .fp-ladder small { opacity: .7; }
 .fp-ladder .fp-best { background: var(--good-bg); color: var(--good-ink); font-weight: 600; }
 .fp-ladder .fp-no { color: var(--muted); }
 
 /* Simple and Advanced feed calculator */
 .link-btn { background: none; border: none; padding: 0; color: var(--accent); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; min-height: 32px; }
-.fp-answer { font-size: 17px; line-height: 1.45; margin-bottom: 8px; }
+.fp-answer { font-size: calc(17px * var(--ts, 1)); line-height: 1.45; margin-bottom: 8px; }
 .fp-sub { margin-bottom: 8px; }
-.fp-next { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
-.fp-callout { display: flex; gap: 8px; align-items: flex-start; padding: 8px 12px; margin: 8px 0; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-size: 14px; }
+.fp-next { color: var(--muted); font-size: calc(14px * var(--ts, 1)); margin-bottom: 10px; }
+.fp-callout { display: flex; gap: 8px; align-items: flex-start; padding: 8px 12px; margin: 8px 0; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-size: calc(14px * var(--ts, 1)); }
 .fp-more { margin-top: 10px; border-top: 1px dotted var(--dot); padding-top: 8px; }
 .fp-more summary { cursor: pointer; font-weight: 600; color: var(--accent); min-height: 32px; display: flex; align-items: center; }
 .amounts { margin: 4px 0 12px; border: 1px dashed var(--line); border-radius: 8px; padding: 0 12px; }
-.amounts summary { cursor: pointer; font-size: 14px; color: var(--muted); min-height: 40px; display: flex; align-items: center; }
+.amounts summary { cursor: pointer; font-size: calc(14px * var(--ts, 1)); color: var(--muted); min-height: 40px; display: flex; align-items: center; }
 .amounts .form-group { margin: 8px 0; }
 
 /* Time picker: quick picks, big readout, slider */
 .tp-label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--label); }
 .tp-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .tp-chip { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--line); background: var(--card);
-    color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+    color: var(--ink); font: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 600; cursor: pointer; }
 .tp-chip[aria-pressed="true"] { background: var(--accent-strong); border-color: var(--accent-strong); color: var(--on-accent); }
-.tp-readout { font-family: var(--font-display); font-size: 30px; line-height: 1.2; color: var(--accent); font-variant-numeric: tabular-nums; }
+.tp-readout { font-family: var(--font-display); font-size: calc(30px * var(--ts, 1)); line-height: 1.2; color: var(--accent); font-variant-numeric: tabular-nums; }
 
 .tl-pickers { padding: 0 14px; }
 .tl-pickers .tp { margin-bottom: 14px; }
 .timeline.tl-empty .tp { margin: 8px 0; }
 
 .tp-chip small { font-weight: 400; opacity: .85; }
+
+/* Text size and hints, from Settings */
+[data-text="large"] { --ts: 1.15; }
+[data-text="larger"] { --ts: 1.3; }
+[data-hints="off"] .tip-wrap { display: none; }
+
+/* Resume card and timer note */
+.resume-card { background: var(--calc-bg); border: 2px dashed var(--accent); border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; }
+.resume-card h3 { margin-bottom: 4px; color: var(--accent); font-family: var(--font-display); font-weight: 400; }
+.resume-card small { color: var(--muted); }
+.resume-card .btn-row { margin-top: 10px; }
+.timer-note { color: var(--header-ink); margin: -6px 0 12px; font-size: calc(14px * var(--ts, 1)); }

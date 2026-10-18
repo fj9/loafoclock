@@ -108,3 +108,22 @@ export function buildSchedule({
     ];
     return { events, fridgeHours, tooLongInFridge: fridgeHours > P.maxFridgeHours, bulk };
 }
+
+/**
+ * The moment (in ms) of the feed at "HH:MM", on whichever day is nearest to `now`. So a 22:00 feed
+ * chosen at 7 pm is tonight, a 17:00 one you did earlier is today, and a 07:30 feed chosen in the
+ * evening means tomorrow morning.
+ */
+export function feedAnchorMs(feedTime, now = Date.now()) {
+    const day = new Date(now);
+    const [h, m] = feedTime.split(':').map(Number);
+    let best = null;
+    for (const offset of [-1, 0, 1]) {
+        const t = new Date(day.getFullYear(), day.getMonth(), day.getDate() + offset, h, m).getTime();
+        if (best === null || Math.abs(t - now) < Math.abs(best - now)) best = t;
+    }
+    return best;
+}
+
+/** When a schedule event happens, given the feed moment. */
+export const eventMs = (anchorMs, event) => anchorMs + event.minutes * 60000;

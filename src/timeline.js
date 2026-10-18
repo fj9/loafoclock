@@ -25,7 +25,19 @@ export function durationText(minutes) {
 
 const GAP_SHOWN_MIN = 90;
 
-export function timelineHtml({ schedule, currentStepId, plan, open, today, defaultFeedTime = '' }) {
+/** "in 3h 20m", "10m ago", "now": how far a moment is from `nowMs`. */
+export function countdownText(ms, nowMs) {
+    const diff = Math.round((ms - nowMs) / 60000);
+    const mins = Math.abs(diff);
+    if (mins < 1) return 'now';
+    const d = Math.floor(mins / 1440);
+    const h = Math.floor((mins % 1440) / 60);
+    const m = mins % 60;
+    const span = d ? `${d}d${h ? ` ${h}h` : ''}` : h ? `${h}h${m ? ` ${m}m` : ''}` : `${m}m`;
+    return diff > 0 ? `in ${span}` : `${span} ago`;
+}
+
+export function timelineHtml({ schedule, currentStepId, plan, open, today, defaultFeedTime = '', anchorMs = null, nowMs = Date.now() }) {
     if (!schedule) {
         // One quiet line until there is something to show; the quick form is only for later steps,
         // since step 1 has the "Already fed" mode in the calculator.
@@ -66,7 +78,7 @@ export function timelineHtml({ schedule, currentStepId, plan, open, today, defau
 
     return `
         <details class="timeline" id="timeline-details"${open ? ' open' : ''}>
-            <summary>🕒 Your timeline<span class="tl-next"> · next: ${next.label.split(' (')[0]} ${when(next.clock)}</span></summary>
+            <summary>🕒 Your timeline<span class="tl-next"> · next: ${next.label.split(' (')[0]} ${when(next.clock)}${anchorMs === null ? '' : ` · <span id="tl-countdown" data-ms="${anchorMs + next.minutes * 60000}">${countdownText(anchorMs + next.minutes * 60000, nowMs)}</span>`}</span></summary>
             <ol class="tl-list">${items}</ol>
             ${schedule.tooLongInFridge ? '<p class="tl-warn">⚠️ That is more than 72 hours in the fridge. Try fewer extra days.</p>' : ''}
             <h4>Adjust the plan</h4>
