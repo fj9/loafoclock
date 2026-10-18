@@ -28,7 +28,7 @@ describe('timelineHtml', () => {
     });
     it('offers a quick I-fed form on later steps, still collapsed', () => {
         const html = timelineHtml({ schedule: null, currentStepId: 3, plan, today, defaultFeedTime: '17:40' });
-        expect(html).toContain('id="tl-fed-time" value="17:40"');
+        expect(html).toContain('<input type="hidden" id="tl-fed-time" value="17:40">');
         expect(html).toContain('<option value="1:6:6" selected>');
         expect(html).not.toMatch(/<details[^>]* open/);
     });

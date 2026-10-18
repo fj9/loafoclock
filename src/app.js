@@ -6,7 +6,7 @@ import { progressLabel, timelineHtml } from './timeline.js';
 import { FEEDING_RATIOS, clockAfter, defaultAutolyseFor, feedStyle, findRatio, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
 import { feedBarHtml } from './feedbar.js';
 import { fmtTime } from './clock.js';
-import { AUTOLYSE_CHIPS, FEED_CHIPS, bindTimePicker, nearestQuarter, setTimePicker, timePickerHtml } from './timepicker.js';
+import { AUTOLYSE_CHIPS, DAYS_AHEAD, DAYS_BACK, FEED_CHIPS, JUST_NOW_CHIPS, bindDateTimePicker, bindTimePicker, dateTimePickerHtml, localDateTime, nearestMinutes, nearestQuarter, setDateTimePicker, setTimePicker, timePickerHtml } from './timepicker.js';
 
 // Sourdough Baking Steps
 const STEPS = [
@@ -315,15 +315,11 @@ function renderStep() {
     
     // Add bulk fermentation start time tracker
     if (step.trackBulkStart) {
-        const currentTime = new Date().toTimeString().slice(0, 5);
         html += `
             <div class="time-tracker-section">
                 <h4>⏱️ Track Bulk Fermentation Start</h4>
                 <p style="margin-bottom: 12px;">Record the time when you add the starter - this marks the beginning of bulk fermentation.</p>
-                <div class="form-group">
-                    <label>Start time:</label>
-                    <input type="time" id="bulk-start-time" value="${currentBake.bulkFermentStart || currentTime}">
-                </div>
+                ${timePickerHtml({ id: 'bulk-start-time', key: 'day', label: 'Start time:', value: currentBake.bulkFermentStart || nearestMinutes(new Date(), 5), chips: JUST_NOW_CHIPS })}
                 <button id="save-bulk-start" class="btn btn-small">Save Start Time</button>
                 <div id="bulk-start-prediction" style="display: none; margin-top: 12px; padding: 12px; background: var(--card); border-radius: 6px;"></div>
             </div>
@@ -332,15 +328,11 @@ function renderStep() {
     
     // Add bulk fermentation end time tracker
     if (step.trackBulkEnd) {
-        const currentTime = new Date().toTimeString().slice(0, 5);
         html += `
             <div class="time-tracker-section">
                 <h4>⏱️ Track Bulk Fermentation End</h4>
-                ${currentBake.bulkFermentStart ? `<p><strong>Started at:</strong> ${currentBake.bulkFermentStart}</p>` : '<p style="color: var(--danger);">⚠️ Start time not recorded</p>'}
-                <div class="form-group">
-                    <label>End time:</label>
-                    <input type="time" id="bulk-end-time" value="${currentBake.bulkFermentEnd || currentTime}">
-                </div>
+                ${currentBake.bulkFermentStart ? `<p><strong>Started at:</strong> ${fmtTime(currentBake.bulkFermentStart)}</p>` : '<p style="color: var(--danger);">⚠️ Start time not recorded</p>'}
+                ${timePickerHtml({ id: 'bulk-end-time', key: 'day', label: 'End time:', value: currentBake.bulkFermentEnd || nearestMinutes(new Date(), 5), chips: JUST_NOW_CHIPS })}
                 <button id="save-bulk-end" class="btn btn-small">Save End Time</button>
                 <div id="bulk-duration" style="display: none; margin-top: 12px; padding: 12px; background: var(--card); border-radius: 6px; font-weight: 600; color: var(--accent);"></div>
             </div>
@@ -375,7 +367,7 @@ function renderStep() {
             html += `
                 <div class="time-tracker-section" style="background: var(--info-bg); border-left-color: var(--info);">
                     <h4>🔮 Predicted End Time</h4>
-                    <p><strong>Based on ${currentBake.doughTemp}°C:</strong> ~${predictedTime}</p>
+                    <p><strong>Based on ${currentBake.doughTemp}°C:</strong> ~${fmtTime(predictedTime)}</p>
                     <p style="font-size: 14px; color: var(--info-ink); margin-top: 8px;">Estimated ${bulkData.hours} hours from start (${bulkData.rise}% rise target)</p>
                 </div>
             `;
@@ -384,19 +376,11 @@ function renderStep() {
     
     // Add retardation time tracker
     if (step.trackRetardation) {
-        const currentTime = new Date().toTimeString().slice(0, 5);
-        const currentDate = new Date().toISOString().slice(0, 10);
         html += `
             <div class="time-tracker-section">
                 <h4>⏱️ Track Cold Retardation</h4>
-                <div class="form-group">
-                    <label>Start date & time:</label>
-                    <input type="datetime-local" id="retard-start-time" value="${currentBake.retardationStart || currentDate + 'T' + currentTime}">
-                </div>
-                <div class="form-group">
-                    <label>End date & time:</label>
-                    <input type="datetime-local" id="retard-end-time" value="${currentBake.retardationEnd || ''}">
-                </div>
+                ${dateTimePickerHtml({ id: 'retard-start-time', label: 'Start:', value: currentBake.retardationStart || '', chips: JUST_NOW_CHIPS, days: DAYS_BACK })}
+                ${dateTimePickerHtml({ id: 'retard-end-time', label: 'End:', value: currentBake.retardationEnd || '', chips: [{ now: true }, { time: '06:00' }, { time: '07:00' }, { time: '08:00' }, { time: '18:00' }], days: DAYS_AHEAD })}
                 <button id="save-retard-times" class="btn btn-small">Calculate Duration</button>
                 <div id="retard-duration" style="display: none; margin-top: 12px; padding: 12px; background: var(--card); border-radius: 6px; font-weight: 600; color: var(--accent);"></div>
             </div>
@@ -405,19 +389,12 @@ function renderStep() {
     
     // Add retardation planner
     if (step.hasRetardationPlanner) {
-        const currentDate = new Date();
-        const currentDateStr = currentDate.toISOString().slice(0, 10);
-        const currentTimeStr = currentDate.toTimeString().slice(0, 5);
-        
         html += `
             <div class="calculator-section">
                 <h4>Bake Time Planner${tipHtml('fridgePlanner')}</h4>
                 <p>Plan when to bake based on your retardation time.</p>
                 
-                <div class="form-group">
-                    <label>When are you putting dough in fridge?</label>
-                    <input type="datetime-local" id="fridge-start" value="${currentDateStr}T${currentTimeStr}">
-                </div>
+                ${dateTimePickerHtml({ id: 'fridge-start', label: 'When are you putting dough in fridge?', value: '', chips: [{ now: true }, { time: '16:00' }, { time: '18:00' }, { time: '20:00' }, { time: '22:00' }], days: DAYS_AHEAD })}
                 
                 <div class="form-group">
                     <label>How long will you cold ferment?</label>
@@ -463,7 +440,7 @@ function renderStep() {
             <div class="fold-tracker-section">
                 <h4>Fold Checklist</h4>
                 ${currentBake.bulkFermentStart ? 
-                    `<p style="margin-bottom: 16px; color: var(--muted);">Started bulk fermentation at ${currentBake.bulkFermentStart}</p>` : 
+                    `<p style="margin-bottom: 16px; color: var(--muted);">Started bulk fermentation at ${fmtTime(currentBake.bulkFermentStart)}</p>` : 
                     `<p style="margin-bottom: 16px; color: var(--danger);">⚠️ Bulk fermentation start time not recorded</p>`
                 }
                 
@@ -542,19 +519,26 @@ function renderStep() {
     }
     
     // Add time tracking event listeners
+    // The time pickers hold their value in a hidden field; the Save buttons read it
+    const noop = () => {};
     if (step.trackBulkStart) {
+        bindTimePicker('bulk-start-time', 'day', noop);
         document.getElementById('save-bulk-start').addEventListener('click', saveBulkStart);
     }
     
     if (step.trackBulkEnd) {
+        bindTimePicker('bulk-end-time', 'day', noop);
         document.getElementById('save-bulk-end').addEventListener('click', saveBulkEnd);
     }
     
     if (step.trackRetardation) {
+        bindDateTimePicker('retard-start-time', noop);
+        bindDateTimePicker('retard-end-time', noop);
         document.getElementById('save-retard-times').addEventListener('click', saveRetardTimes);
     }
     
     if (step.hasRetardationPlanner) {
+        bindDateTimePicker('fridge-start', noop);
         document.getElementById('calculate-bake-time').addEventListener('click', calculateBakeTime);
     }
     
@@ -660,6 +644,7 @@ export function refreshTimeline() {
     document.getElementById('progress-label').textContent =
         progressLabel({ schedule, currentStepId: step.id, totalSteps: STEPS.length });
     if (!schedule) {
+        if (document.getElementById('tl-fed-time')) bindTimePicker('tl-fed-time', 'feed', () => {}, { live: false });
         document.getElementById('tl-fed-go')?.addEventListener('click', () => {
             const time = document.getElementById('tl-fed-time').value;
             if (!time) return;
@@ -674,14 +659,15 @@ export function refreshTimeline() {
 
     document.getElementById('timeline-details').addEventListener('toggle', e => { timelineOpen = e.target.open; });
     const bind = (id, apply) => document.getElementById(id).addEventListener('change', e => { apply(e.target.value); refreshTimeline(); });
-    bind('tl-feed', v => {
-        if (!v) return;
+    // These pickers sit inside the timeline, which is redrawn when they change, so act on release
+    bindTimePicker('tl-feed', 'feed', v => {
         currentBake.starterFeedTime = v;
         const suggestion = document.getElementById('autolyse-suggestion');
         if (suggestion) suggestion.outerHTML = autolyseSuggestionHtml();
-    });
+        refreshTimeline();
+    }, { live: false });
+    bindTimePicker('tl-bake', 'autolyse', v => { currentBake.planBakeAt = v; refreshTimeline(); }, { live: false });
     bind('tl-temp', v => { currentBake.planTemp = parseFloat(v); });
-    bind('tl-bake', v => { if (v) currentBake.planBakeAt = v; });
     bind('tl-extra', v => { currentBake.planExtraFridgeDays = parseInt(v); });
 }
 
@@ -1154,9 +1140,9 @@ function saveBulkStart() {
     const predictionDiv = document.getElementById('bulk-start-prediction');
     if (predictionDiv) {
         predictionDiv.innerHTML = `
-            <p style="color: var(--accent); font-weight: 600;">✓ Start time saved: ${startTime}</p>
+            <p style="color: var(--accent); font-weight: 600;">✓ Start time saved: ${fmtTime(startTime)}</p>
             <p style="color: var(--muted); font-size: 14px; margin-top: 8px;">
-                <strong>Predicted end time:</strong> ~${predictedTime} (assuming 25°C, 6 hours bulk)
+                <strong>Predicted end time:</strong> ~${fmtTime(predictedTime)} (assuming 25°C, 6 hours bulk)
             </p>
         `;
         predictionDiv.style.display = 'block';
@@ -1220,7 +1206,7 @@ function calculateBakeTime() {
     const bakeDate = new Date(startDate.getTime() + (retardHours * 60 * 60 * 1000));
     
     const dateStr = bakeDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-    const timeStr = bakeDate.toTimeString().slice(0, 5);
+    const timeStr = fmtTime(bakeDate.toTimeString().slice(0, 5));
     
     document.getElementById('bake-time-display').innerHTML = `
         <strong>Bake at:</strong> ${dateStr} at ${timeStr}
@@ -1228,8 +1214,10 @@ function calculateBakeTime() {
     document.getElementById('bake-time-result').style.display = 'block';
     
     // Auto-fill the retardation tracker
-    document.getElementById('retard-start-time').value = fridgeStart;
-    document.getElementById('retard-end-time').value = bakeDate.toISOString().slice(0, 16);
+    if (document.getElementById('retard-start-time')) {
+        setDateTimePicker('retard-start-time', fridgeStart);
+        setDateTimePicker('retard-end-time', localDateTime(bakeDate));
+    }
 }
 
 function calculateTimeDifference(startTime, endTime) {

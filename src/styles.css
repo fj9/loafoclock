@@ -657,3 +657,7 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
     color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .tp-chip[aria-pressed="true"] { background: var(--accent-strong); border-color: var(--accent-strong); color: var(--on-accent); }
 .tp-readout { font-family: var(--font-display); font-size: 30px; line-height: 1.2; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.tl-pickers { padding: 0 14px; }
+.tl-pickers .tp { margin-bottom: 14px; }
+.timeline.tl-empty .tp { margin: 8px 0; }

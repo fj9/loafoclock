@@ -73,7 +73,7 @@ The style comes from a sourdough tea towel: **light mode** is cream with terraco
 
 ## Choosing times
 
-Feed and autolyse times are picked with quick-pick buttons (Now, 7 am, 8 am, 6 pm...), a large readout and a slider in 15 minute steps, and shown as "7:30 am". Settings has a 12-hour or 24-hour clock choice. Other places that record a time (bulk start and end, the fridge planner and the timeline settings) still use the browser's own time box.
+Every time is chosen with the same picker: quick-pick buttons, a large readout and a slider, shown as "7:30 am" (Settings has a 12-hour or 24-hour choice). Feed and autolyse use 15 minute steps and buttons like 7 am, 8 am and 6 pm. Recording something that just happened (bulk start and end) uses 5 minute steps and Now, 15 min ago, 30 min ago and 1 hr ago. The cold retardation and fridge planner add a Yesterday, Today or Tomorrow choice. The timeline's own settings use the same picker.
 
 ## Made easy to follow
 

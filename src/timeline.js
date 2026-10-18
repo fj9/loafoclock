@@ -1,5 +1,6 @@
 // HTML for the timeline shown under the progress bar. Pure: takes a schedule from schedule.js.
 import { fmtTime } from './clock.js';
+import { AUTOLYSE_CHIPS, FEED_CHIPS, timePickerHtml } from './timepicker.js';
 import { FEEDING_RATIOS } from './feeding.js';
 import { PLAN_DEFAULTS } from './schedule.js';
 
@@ -30,9 +31,9 @@ export function timelineHtml({ schedule, currentStepId, plan, open, today, defau
         // since step 1 has the "Already fed" mode in the calculator.
         const form = currentStepId > 1 ? `
             <p class="hint" style="margin: 0 0 8px;">Already fed your starter? Tell us when:</p>
+            ${timePickerHtml({ id: 'tl-fed-time', key: 'feed', label: 'I fed at', value: defaultFeedTime, chips: FEED_CHIPS })}
             <div class="tl-settings" style="padding: 0;">
-                <label>I fed at <input type="time" id="tl-fed-time" value="${defaultFeedTime}"></label>
-                <label>Ratio <select id="tl-fed-ratio">${FEEDING_RATIOS.map((r) => `<option value="${r.ratio}"${r.n === 6 ? ' selected' : ''}>${r.ratio}</option>`).join('')}</select></label>
+                <label>Feed I used <select id="tl-fed-ratio">${FEEDING_RATIOS.map((r) => `<option value="${r.ratio}"${r.n === 6 ? ' selected' : ''}>${r.ratio}</option>`).join('')}</select></label>
             </div>
             <button type="button" id="tl-fed-go" class="btn btn-small" style="margin-top: 10px;">Show my timeline</button>` : `
             <p class="hint" style="margin: 0;">Work out your feed in the Starter Calculator below (or pick Already fed) and your timeline will appear here.</p>`;
@@ -69,12 +70,14 @@ export function timelineHtml({ schedule, currentStepId, plan, open, today, defau
             <ol class="tl-list">${items}</ol>
             ${schedule.tooLongInFridge ? '<p class="tl-warn">⚠️ That is more than 72 hours in the fridge. Try fewer extra days.</p>' : ''}
             <h4>Adjust the plan</h4>
+            <div class="tl-pickers">
+                ${timePickerHtml({ id: 'tl-feed', key: 'feed', label: 'Feeding at', value: plan.feedTime, chips: FEED_CHIPS })}
+                ${timePickerHtml({ id: 'tl-bake', key: 'autolyse', label: 'Bake at', value: plan.bakeAt, chips: AUTOLYSE_CHIPS })}
+            </div>
             <div class="tl-settings">
-                <label>Feeding at <input type="time" id="tl-feed" value="${plan.feedTime}"></label>
                 <label>Dough temperature
                     <select id="tl-temp">${tempOptions.map((t) => `<option value="${t.temp}"${t.temp === plan.temp ? ' selected' : ''}>${t.label}</option>`).join('')}</select>
                 </label>
-                <label>Bake at <input type="time" id="tl-bake" value="${plan.bakeAt}"></label>
                 <label>Extra days in the fridge
                     <select id="tl-extra">${[0, 1, 2].map((n) => `<option value="${n}"${n === plan.extraFridgeDays ? ' selected' : ''}>${n === 0 ? 'None' : `+${n} day${n > 1 ? 's' : ''}`}</option>`).join('')}</select>
                 </label>
