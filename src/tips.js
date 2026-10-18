@@ -10,7 +10,7 @@ export const TIPS = {
     },
     haveStarter: {
         label: 'starter I have',
-        text: 'How much starter is in your jar right now, in grams. Put the jar on scales and take off the weight of the empty jar.'
+        text: 'How much starter is in your jar right now, in grams.'
     },
     needStarter: {
         label: 'starter I need',
@@ -26,15 +26,15 @@ export const TIPS = {
     },
     ready: {
         label: 'ready starter',
-        text: 'Ready means active: risen, with a domed top and lots of bubbles. Use it soon after it peaks, within a couple of hours.'
+        text: 'Ready means active: risen, with lots of bubbles. Use it soon after it peaks, within a couple of hours.'
     },
     autolyse: {
         label: 'autolyse',
-        text: 'Mixing only the flour and water and leaving them to rest. No kneading. It makes the dough easier to handle and gives a better loaf.'
+        text: 'Mixing only the flour and water and leaving them to rest.'
     },
     restLength: {
         label: 'rest length',
-        text: 'Anywhere from 30 to 60 minutes works. An hour is the usual. A shorter rest is fine if you want to finish at a tidier time.'
+        text: 'Anywhere from 30 to 60 minutes works. An hour is the usual. A shorter rest is fine if you need.'
     },
     fermentolyse: {
         label: 'fermentolyse',
@@ -58,7 +58,7 @@ export const TIPS = {
     },
     targetRise: {
         label: 'target rise',
-        text: 'How much bigger the dough should get. 50% means one and a half times its starting size. Put the dough in a straight-sided tub and mark the level with a rubber band.'
+        text: 'How much bigger the dough should get. 50% means one and a half times its starting size. Put the dough in a straight-sided tub and mark the level.'
     },
     totalBulk: {
         label: 'total bulk time',
@@ -70,7 +70,7 @@ export const TIPS = {
     },
     finalShape: {
         label: 'final shape',
-        text: 'Shape the dough into a tight oval and place it seam side up in a floured banneton (a proving basket) that holds its shape.'
+        text: 'Shape the dough into a tight oval and place it seam side up in a floured banneton (a proving basket).'
     },
     retardation: {
         label: 'cold retardation',
