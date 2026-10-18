@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HYDRATIONS, loafDescription, recipeFor } from './recipe.js';
+import { HYDRATIONS, bakePlan, loafDescription, recipeFor } from './recipe.js';
 
 const one = (size, hydration, loaves = 1) => recipeFor({ size, hydration, loaves });
 
@@ -64,5 +64,23 @@ describe('recipeFor', () => {
 describe('loafDescription', () => {
     it('names the count, size and banneton', () => {
         expect(loafDescription({ loaves: 2, size: 'large' })).toBe('2 × Large (30cm banneton, ~1.5kg)');
+    });
+});
+
+describe('bakePlan', () => {
+    it('large loaf: 25 minutes lid on at 240, then 25 more lid off at 230', () => {
+        const p = bakePlan({ size: 'large' });
+        expect(p.duration).toBe('50 minutes total');
+        expect(p.instructions).toContain('Bake at 240°C for 25 minutes (lid on)');
+        expect(p.instructions).toContain('Reduce to 230°C and bake 25 more minutes (lid off)');
+    });
+    it('regular loaf: 20 minutes lid on, then 20-25 more lid off', () => {
+        const p = bakePlan({ size: 'regular' });
+        expect(p.duration).toBe('40-45 minutes total');
+        expect(p.instructions).toContain('Bake at 240°C for 20 minutes (lid on)');
+        expect(p.instructions).toContain('Reduce to 230°C and bake 20-25 more minutes (lid off)');
+    });
+    it('treats older bakes without a size as regular', () => {
+        expect(bakePlan({}).duration).toBe('40-45 minutes total');
     });
 });

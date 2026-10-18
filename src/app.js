@@ -1,4 +1,4 @@
-import { recipeFor, loafDescription } from './recipe.js';
+import { bakePlan, recipeFor, loafDescription } from './recipe.js';
 import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, REST_MAX, REST_MIN, restEnd, restText, tidyRest } from './timing.js';
 import { STEP_TIPS, tipHtml } from './tips.js';
 import { clockAfter, findRatio, planFromAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
@@ -155,15 +155,10 @@ const STEPS = [
     {
         id: 10,
         name: "Baking",
-        duration: "50 minutes total",
+        duration: "40-50 minutes total",
         timerMinutes: null,
-        instructions: [
-            "Preheat oven and Dutch oven to 240°C",
-            "Place dough directly from fridge into hot Dutch oven",
-            "Add ice to Dutch oven for steam",
-            "Bake at 240°C for 25 minutes (lid on)",
-            "Reduce to 230°C and bake 25 more minutes (lid off)"
-        ],
+        getBakePlan: true, // times depend on the loaf size, see bakePlan()
+        instructions: [],
         notes: "Bake directly from fridge - no need to bring to room temperature"
     }
 ];
@@ -291,7 +286,7 @@ function renderStep() {
             <span class="step-number">${step.id}</span>
             ${step.name}${tipHtml(STEP_TIPS[step.id])}
         </h3>
-        <p><strong>Duration:</strong> <span id="step-duration">${step.restKey ? restText(restMinutes(step)) : step.duration}</span></p>
+        <p><strong>Duration:</strong> <span id="step-duration">${step.restKey ? restText(restMinutes(step)) : step.getBakePlan ? bakePlan(currentBake).duration : step.duration}</span></p>
     `;
 
     if (step.restKey) html += restPickerHtml(step);
@@ -529,7 +524,7 @@ function renderStep() {
         <div class="instructions-list">
             <strong>Instructions:</strong>
             <ul>
-                ${step.instructions.map(inst => `<li>${step.restKey ? inst.replace('1 hour', restText(restMinutes(step))) : inst}</li>`).join('')}
+                ${(step.getBakePlan ? bakePlan(currentBake).instructions : step.instructions).map(inst => `<li>${step.restKey ? inst.replace('1 hour', restText(restMinutes(step))) : inst}</li>`).join('')}
             </ul>
         </div>
     `;

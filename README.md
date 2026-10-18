@@ -75,7 +75,7 @@ The app follows your weekly workflow:
 7. **Pre-Shape** (30 min bench rest)
 8. **Final Shape**
 9. **Cold Retardation** (8-72 hours)
-10. **Baking** (240°C → 230°C, 50 min total)
+10. **Baking** (240°C → 230°C; 40-45 min total for a regular loaf, 50 min for a large)
 
 ## Recipe
 

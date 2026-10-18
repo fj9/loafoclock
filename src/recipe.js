@@ -42,3 +42,23 @@ export function loafDescription(bake) {
     const size = LOAF_SIZES[bake.size] || LOAF_SIZES.regular;
     return `${bake.loaves} × ${size.label} (${size.note})`;
 }
+
+// Bake times: the large loaf needs longer in the pot than the regular one
+const BAKE_TIMES = {
+    regular: { lidOn: '20', lidOff: '20-25', total: '40-45 minutes total' },
+    large: { lidOn: '25', lidOff: '25', total: '50 minutes total' }
+};
+
+export function bakePlan(bake) {
+    const t = BAKE_TIMES[bake.size] || BAKE_TIMES.regular;
+    return {
+        duration: t.total,
+        instructions: [
+            'Preheat oven and Dutch oven to 240°C',
+            'Place dough directly from fridge into hot Dutch oven',
+            'Add ice to Dutch oven for steam',
+            `Bake at 240°C for ${t.lidOn} minutes (lid on)`,
+            `Reduce to 230°C and bake ${t.lidOff === '25' ? '25 more' : `${t.lidOff} more`} minutes (lid off)`
+        ]
+    };
+}
