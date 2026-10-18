@@ -1360,7 +1360,7 @@ export function loadBakeLog() {
         let outcomeColor = 'var(--muted)';
         if (log.outcome === 'Excellent') outcomeColor = 'var(--good)';
         else if (log.outcome === 'Good') outcomeColor = 'var(--info)';
-        else if (log.outcome === 'Fair') outcomeColor = 'var(--warn)';
+        else if (log.outcome === 'Fair') outcomeColor = 'var(--warn-ink)';
         else if (log.outcome === 'Poor') outcomeColor = 'var(--danger)';
         
         return `

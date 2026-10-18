@@ -608,3 +608,4 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .timer-controls .btn.btn-small { background: var(--card); color: var(--accent); border-color: transparent; }
 .timer-controls .btn.btn-small:hover { background: var(--wash); }
 .timeline .tl-next { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.btn-danger { background: var(--card); color: var(--danger); border: 2px solid var(--danger); }
