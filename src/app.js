@@ -3,7 +3,7 @@ import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, RE
 import { STEP_TIPS, tipHtml } from './tips.js';
 import { BULK_FERMENTATION_TEMPS, PLAN_DEFAULTS, buildSchedule } from './schedule.js';
 import { progressLabel, timelineHtml } from './timeline.js';
-import { FEEDING_RATIOS, clockAfter, feedStyle, findRatio, isAwkwardHour, parseClock, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
+import { FEEDING_RATIOS, clockAfter, defaultAutolyseFor, feedStyle, findRatio, isAwkwardHour, parseClock, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
 import { feedBarHtml } from './feedbar.js';
 
 // Sourdough Baking Steps
@@ -792,14 +792,13 @@ const FEED_MODES = {
 
 // Sensible starting values so nobody has to type to get an answer
 const DEFAULT_STARTER_HAVE = 100;      // grams in a typical jar; plenty for even two large loaves
-const DEFAULT_AUTOLYSE_TIME = '08:00'; // a morning start, after feeding the evening before
 const DEFAULT_PLAN_FEED_TIME = '22:00'; // a bedtime feed, for the advanced plan
 
-// The sliders: feed in the evening or small hours, autolyse the next morning or midday.
-// Each runs in 15 minute steps from a start time; the time boxes still take any time.
+// The sliders cover the whole day in 15 minute steps; the time boxes take any time.
+// Autolyse is always the next time it comes round after the feed.
 const SLIDERS = {
-    feed: { base: 16 * 60, max: 11 * 60 + 45 },     // 16:00 to 03:45
-    autolyse: { base: 4 * 60, max: 9 * 60 }         // 04:00 to 13:00
+    feed: { base: 5 * 60, max: 23 * 60 + 45 },      // 05:00 round to 04:45, so morning and evening feeds both fit
+    autolyse: { base: 4 * 60, max: 23 * 60 + 45 }   // 04:00 round to 03:45
 };
 const sliderToClock = (key, value) => {
     const m = (SLIDERS[key].base + Number(value)) % 1440;
@@ -807,7 +806,7 @@ const sliderToClock = (key, value) => {
 };
 const clockToSlider = (key, time) => {
     const offset = (parseClock(time) - SLIDERS[key].base + 1440) % 1440;
-    return Math.min(SLIDERS[key].max, offset > SLIDERS[key].max + 360 ? 0 : offset); // far outside the range sits at the near end
+    return Math.min(SLIDERS[key].max, offset);
 };
 
 const FEED_TIME_LABELS = {
@@ -825,7 +824,9 @@ function feedCalculatorHtml() {
     const adv = mode === 'deadline';
     const fed = mode === 'fed';
     const feedDefault = currentBake.feedDraft || (adv ? DEFAULT_PLAN_FEED_TIME : nowTime());
-    const autolyseDefault = currentBake.starterNeededBy || DEFAULT_AUTOLYSE_TIME;
+    // Until you choose an autolyse time yourself it follows your feed time: a morning start after an
+    // evening feed, or nine hours on after a daytime feed
+    const autolyseDefault = currentBake.autolyseDraft || defaultAutolyseFor(feedDefault);
     const have = currentBake.feedHave ?? DEFAULT_STARTER_HAVE;
     const need = currentBake.feedNeed ?? starterNeededTotal();
     const showButton = !adv;
@@ -910,7 +911,14 @@ function initFeedCalculator() {
         if (go) switchFeedMode(go.dataset.feedGo);
     });
 
-    const setFeed = (value) => { currentBake.feedTouched = true; currentBake.feedDraft = value; };
+    const setFeed = (value) => {
+        currentBake.feedTouched = true;
+        currentBake.feedDraft = value;
+        if (autolyseTime && !currentBake.autolyseDraft && value) { // keep the untouched autolyse time sensible
+            autolyseTime.value = defaultAutolyseFor(value);
+            autolyseSlider.value = clockToSlider('autolyse', autolyseTime.value);
+        }
+    };
     feedTime.addEventListener('input', () => {
         setFeed(feedTime.value);
         if (feedSlider && feedTime.value) feedSlider.value = clockToSlider('feed', feedTime.value);
@@ -919,12 +927,12 @@ function initFeedCalculator() {
     feedSlider?.addEventListener('input', () => { feedTime.value = sliderToClock('feed', feedSlider.value); setFeed(feedTime.value); live(); });
     autolyseTime?.addEventListener('input', () => {
         if (autolyseTime.value) autolyseSlider.value = clockToSlider('autolyse', autolyseTime.value);
-        currentBake.starterNeededBy = autolyseTime.value;
+        currentBake.autolyseDraft = autolyseTime.value;
         live();
     });
     autolyseSlider?.addEventListener('input', () => {
         autolyseTime.value = sliderToClock('autolyse', autolyseSlider.value);
-        currentBake.starterNeededBy = autolyseTime.value;
+        currentBake.autolyseDraft = autolyseTime.value;
         live();
     });
     $('fed-ratio')?.addEventListener('change', live);

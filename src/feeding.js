@@ -130,3 +130,13 @@ export function isAwkwardHour(time) {
 export function feedStyle(ratio) {
     return ratio.n <= 3 ? 'quick' : ratio.n <= 6 ? 'standard' : 'slow';
 }
+
+/**
+ * A sensible autolyse time to start from, given when you feed: a morning start after an evening
+ * or night feed, otherwise nine hours on (a standard 1:6:6 feed plus its hour of rest).
+ */
+export function defaultAutolyseFor(feedTime) {
+    const m = parseClock(feedTime);
+    const eveningOrNight = m >= 16 * 60 || m < 4 * 60;
+    return eveningOrNight ? '08:00' : clockAfter(feedTime, 9).time;
+}

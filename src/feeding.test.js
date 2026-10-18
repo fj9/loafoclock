@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clockAfter, feedAt, feedStyle, findRatio, hoursUntil, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding.js';
+import { clockAfter, defaultAutolyseFor, feedAt, feedStyle, findRatio, hoursUntil, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding.js';
 
 describe('clock helpers', () => {
     it('adds hours and reports days rolled over', () => {
@@ -136,5 +136,27 @@ describe('plain language helpers', () => {
         expect(feedStyle(findRatio('1:3:3'))).toBe('quick');
         expect(feedStyle(findRatio('1:6:6'))).toBe('standard');
         expect(feedStyle(findRatio('1:8:8'))).toBe('slow');
+    });
+});
+
+describe('defaultAutolyseFor', () => {
+    it('suggests a morning autolyse after an evening or night feed', () => {
+        expect(defaultAutolyseFor('22:00')).toBe('08:00');
+        expect(defaultAutolyseFor('16:00')).toBe('08:00');
+        expect(defaultAutolyseFor('02:00')).toBe('08:00');
+    });
+    it('suggests nine hours on after a daytime feed', () => {
+        expect(defaultAutolyseFor('07:30')).toBe('16:30');
+        expect(defaultAutolyseFor('10:00')).toBe('19:00');
+    });
+    it('the suggestion always lets a standard feed fit', () => {
+        for (const feed of ['07:30', '10:00', '15:45', '22:00', '00:30']) {
+            const p = planFeedForAutolyse({ need: 180, feedTime: feed, autolyseAt: defaultAutolyseFor(feed) });
+            expect(p.best, feed).not.toBeNull();
+        }
+    });
+    it('a morning feed with an evening autolyse works out', () => {
+        const p = planFeedForAutolyse({ need: 180, feedTime: '07:30', autolyseAt: '17:00' });
+        expect(p.best.ratio.ratio).toBe('1:6:6'); // 9.5h + 1h rest = 10.5h
     });
 });

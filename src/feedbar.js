@@ -7,6 +7,12 @@ const clock = (feedTime, hours) => {
     const c = clockAfter(feedTime, hours);
     return `${c.time}${dayText(c.days)}`;
 };
+// "04:20 to 06:20 (next day)": say the day once when both ends fall on the same day
+const clockRange = (feedTime, fromHours, toHours) => {
+    const a = clockAfter(feedTime, fromHours);
+    const b = clockAfter(feedTime, toHours);
+    return a.days === b.days ? `${a.time} to ${b.time}${dayText(b.days)}` : `${a.time}${dayText(a.days)} to ${b.time}${dayText(b.days)}`;
+};
 const pct = (hours, end) => `${Math.max(0, Math.min(100, (hours / end) * 100)).toFixed(1)}%`;
 
 /**
@@ -26,9 +32,9 @@ export function feedBarHtml({ feedTime, ratio, autolyseHours = null, starterInHo
         `<span><i class="fb-dot fb-feed"></i>Feed ${clock(feedTime, 0)}</span>`,
         autolyseHours !== null ? `<span><i class="fb-dot fb-autolyse"></i>Autolyse ${clock(feedTime, autolyseHours)}</span>` : '',
         starterInHours !== null ? `<span><i class="fb-dot fb-in"></i>Starter in ${clock(feedTime, starterInHours)}</span>` : '',
-        `<span><i class="fb-dot fb-band"></i>Ready ${clock(feedTime, ratio.minHours)} to ${clock(feedTime, ratio.maxHours)}</span>`
+        `<span><i class="fb-dot fb-band"></i>Ready ${clockRange(feedTime, ratio.minHours, ratio.maxHours)}</span>`
     ].join('');
-    const label = `Feed at ${clock(feedTime, 0)}; starter ready ${clock(feedTime, ratio.minHours)} to ${clock(feedTime, ratio.maxHours)}`;
+    const label = `Feed at ${clock(feedTime, 0)}; starter ready ${clockRange(feedTime, ratio.minHours, ratio.maxHours)}`;
     return `
         <div class="fb" role="img" aria-label="${label}">
             <div class="fb-bar">
