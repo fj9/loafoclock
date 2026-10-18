@@ -244,6 +244,9 @@ const LOAF_SIZES = {
 const HYDRATIONS = [60, 65, 70, 75, 80];
 const DEFAULT_HYDRATION = 70;
 const WATER_ROUNDING_G = 5;
+// Snap to a round 50g if the exact amount is within this leeway, so the recipe feels tidy
+const WATER_SNAP_G = 50;
+const WATER_LEEWAY_G = 10;
 
 // Salt, honey and oil for a regular loaf (450g flour); other sizes keep the same proportion to the flour
 const REGULAR_FLOUR = 450;
@@ -254,8 +257,11 @@ function recipeFor(bake) {
     const size = LOAF_SIZES[bake.size] || LOAF_SIZES.regular;
     const hydration = (bake.hydration || DEFAULT_HYDRATION) / 100;
     const totalFlour = size.flour + size.starter / 2;
-    const exactWater = hydration * totalFlour - size.starter / 2;
-    const water = Math.round(exactWater / WATER_ROUNDING_G) * WATER_ROUNDING_G;
+    const exactWater = Math.round((hydration * totalFlour - size.starter / 2) * 100) / 100; // trims float noise
+    const snapped = Math.round(exactWater / WATER_SNAP_G) * WATER_SNAP_G;
+    const water = Math.abs(snapped - exactWater) <= WATER_LEEWAY_G
+        ? snapped
+        : Math.round(exactWater / WATER_ROUNDING_G) * WATER_ROUNDING_G;
     const n = bake.loaves;
     return {
         flour: size.flour * n,

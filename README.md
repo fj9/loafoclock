@@ -40,12 +40,12 @@ The app follows your weekly workflow:
 
 ## Recipe
 
-Flour and starter are fixed per loaf; the hydration you choose (60-80%, default 70%) only changes the water. Hydration counts the starter as half flour, half water, and water is rounded to the nearest 5g.
+Flour and starter are fixed per loaf; the hydration you choose (60-80%, default 70%) only changes the water. Hydration counts the starter as half flour, half water, and water is rounded to a tidy number (a round 50g when within 10g, otherwise the nearest 5g).
 
 | Loaf | Flour | Starter | Water at 70% |
 | --- | --- | --- | --- |
-| Regular (25cm banneton, ~1kg) | 450g | 150g | 295g |
-| Large (30cm banneton, ~1.5kg) | 600g | 200g | 390g |
+| Regular (25cm banneton, ~1kg) | 450g | 150g | 300g |
+| Large (30cm banneton, ~1.5kg) | 600g | 200g | 400g |
 
 Salt, honey and olive oil are 10g, 15g and 20g for a regular loaf, and the same proportion of the flour for a large one (13g, 20g and 27g). Two loaves double everything.
 
