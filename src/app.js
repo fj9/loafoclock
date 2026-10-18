@@ -1,4 +1,5 @@
 import { recipeFor, loafDescription } from './recipe.js';
+import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, REST_MAX, REST_MIN, restEnd, restText, tidyRest } from './timing.js';
 import { clockAfter, findRatio, planFromAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
 
 // Bulk fermentation temperature chart
@@ -42,6 +43,7 @@ const STEPS = [
         duration: "1 hour",
         timerMinutes: 60,
         showAutolyseTime: true,
+        restKey: 'autolyseMinutes',
         getIngredients: (r) => [
             `${r.flour}g flour`,
             `${r.water}g water`
@@ -57,6 +59,7 @@ const STEPS = [
         duration: "1 hour",
         timerMinutes: 60,
         trackBulkStart: true,
+        restKey: 'fermentolyseMinutes',
         getIngredients: (r) => [
             `${r.starter}g active starter`
         ],
@@ -92,7 +95,7 @@ const STEPS = [
         instructions: [
             "Perform 4 stretch and folds, 30 minutes apart",
             "Use the checklist above and the timer below to track your progress",
-            "If adding bulky inclusions (cheese, fruit, chocolate), add before fold 4"
+            "If adding bulky inclusions (cheese, fruit, chocolate), add during fold 4"
         ],
         notes: "Total bulk fermentation: 6-16 hours from adding starter (temperature dependent). This includes fermentolyse, salt rest, and folds."
     },
@@ -108,7 +111,7 @@ const STEPS = [
             "Let dough continue fermenting until it reaches target rise",
             "Use the temperature calculator above for guidance",
             "Monitor dough temperature with thermometer",
-            "The remaining time shown accounts for the 3 hours already spent (fermentolyse + salt + folds)"
+            "The remaining time shown accounts for the time already spent (fermentolyse + salt + folds)"
         ],
         notes: "Temperature dependent - use proving drawer if needed"
     },
@@ -177,6 +180,8 @@ let currentBake = {
     retardationEnd: null,
     starterFeedTime: null,
     starterFeedRatio: null,
+    autolyseMinutes: REST_DEFAULT,
+    fermentolyseMinutes: REST_DEFAULT,
     doughTemp: null,
     foldsCompleted: [false, false, false, false]
 };
@@ -241,6 +246,8 @@ function startBake() {
         retardationEnd: null,
         starterFeedTime: null,
         starterFeedRatio: null,
+        autolyseMinutes: REST_DEFAULT,
+        fermentolyseMinutes: REST_DEFAULT,
         doughTemp: null,
         foldsCompleted: [false, false, false, false]
     };
@@ -274,27 +281,16 @@ function renderStep() {
             <span class="step-number">${step.id}</span>
             ${step.name}
         </h3>
-        <p><strong>Duration:</strong> ${step.duration}</p>
+        <p><strong>Duration:</strong> <span id="step-duration">${step.restKey ? restText(restMinutes(step)) : step.duration}</span></p>
     `;
+
+    if (step.restKey) html += restPickerHtml(step);
     
     // Add starter calculator if applicable
     if (step.hasCalculator) html += feedCalculatorHtml();
     
     // Show suggested autolyse time
-    if (step.showAutolyseTime && currentBake.starterFeedTime && currentBake.starterFeedRatio) {
-        const feedRatio = findRatio(currentBake.starterFeedRatio);
-        const riseTimeRange = feedRatio ? riseLabel(feedRatio) : '6-8 hrs';
-        const autolyseTime = clockAfter(currentBake.starterFeedTime, (feedRatio ? feedRatio.minHours : 6) - 1).time;
-        
-        html += `
-            <div class="time-tracker-section" style="background: var(--good-bg); border-left-color: var(--good);">
-                <h4>⏰ Suggested Timing</h4>
-                <p><strong>You fed your starter at:</strong> ${currentBake.starterFeedTime}</p>
-                <p><strong>Suggested autolyse start:</strong> ${autolyseTime}</p>
-                <p style="font-size: 14px; color: var(--good-ink); margin-top: 8px;">This is based on your feeding ratio (${currentBake.starterFeedRatio}) rise time of ${riseTimeRange}, minus 1 hour.</p>
-            </div>
-        `;
-    }
+    if (step.showAutolyseTime) html += autolyseSuggestionHtml();
     
     // Add temperature calculator if applicable
     if (step.hasTempCalculator) {
@@ -454,13 +450,13 @@ function renderStep() {
         const foldTimes = [];
         
         // Calculate suggested fold times based on bulk start
-        // Folds start 90 minutes after fermentolyse (1hr fermentolyse + 30min salt rest)
+        // Folds start after the fermentolyse rest plus a 30 min salt rest (90 min with a full hour)
         if (currentBake.bulkFermentStart) {
             const [startHours, startMinutes] = currentBake.bulkFermentStart.split(':').map(Number);
             for (let i = 0; i < 4; i++) {
                 const foldDate = new Date();
                 foldDate.setHours(startHours);
-                foldDate.setMinutes(startMinutes + 90 + (30 * i)); // 90 min offset + 30 min intervals
+                foldDate.setMinutes(startMinutes + firstFoldMinutes(restMinutes(STEPS[2])) + (30 * i)); // first fold, then 30 min intervals
                 foldTimes.push(foldDate.toTimeString().slice(0, 5));
             }
         }
@@ -486,12 +482,12 @@ function renderStep() {
                                     ${foldTimes[index] ? `<span class="fold-time">~${foldTimes[index]}</span>` : ''}
                                 </span>
                             </label>
-                            ${foldNum === 4 ? '<p style="font-size: 12px; color: var(--muted); margin: 4px 0 0 28px;">Add inclusions before this fold if using</p>' : ''}
+                            ${foldNum === 4 ? '<p style="font-size: 12px; color: var(--muted); margin: 4px 0 0 28px;">Add inclusions during this fold if using</p>' : ''}
                         </div>
                     `).join('')}
                 </div>
                 <p style="font-size: 13px; color: var(--muted); margin-top: 12px; font-style: italic;">
-                    Folds start 1.5 hours after fermentolyse (1hr fermentolyse + 30min salt rest)
+                    Folds start ${firstFoldMinutes(restMinutes(STEPS[2]))} minutes after you add the starter (${restText(restMinutes(STEPS[2]))} fermentolyse + 30 min salt rest)
                 </p>
                 
                 <div class="fold-timer-section">
@@ -520,7 +516,7 @@ function renderStep() {
         <div class="instructions-list">
             <strong>Instructions:</strong>
             <ul>
-                ${step.instructions.map(inst => `<li>${inst}</li>`).join('')}
+                ${step.instructions.map(inst => `<li>${step.restKey ? inst.replace('1 hour', restText(restMinutes(step))) : inst}</li>`).join('')}
             </ul>
         </div>
     `;
@@ -563,12 +559,14 @@ function renderStep() {
         document.getElementById('calculate-bake-time').addEventListener('click', calculateBakeTime);
     }
     
+    if (step.restKey) initRestPicker(step);
+    
     // Handle timer
     const timerSection = document.getElementById('timer-section');
     if (step.timerMinutes) {
         timerSection.style.display = 'block';
         resetTimer();
-        timerSeconds = step.timerMinutes * 60;
+        timerSeconds = timerMinutesFor(step) * 60;
         updateTimerDisplay();
     } else {
         timerSection.style.display = 'none';
@@ -615,6 +613,81 @@ function nextStep() {
 function toggleFold(index) {
     currentBake.foldsCompleted[index] = !currentBake.foldsCompleted[index];
     renderStep();
+}
+
+// ---- Rest length for autolyse and fermentolyse (30-60 min) ----
+const restMinutes = (step) => clampRest(currentBake[step.restKey] ?? REST_DEFAULT);
+const timerMinutesFor = (step) => (step.restKey ? restMinutes(step) : step.timerMinutes);
+const nowClock = () => new Date().toTimeString().slice(0, 5);
+
+function restPickerHtml(step) {
+    const label = step.restKey === 'autolyseMinutes' ? 'autolyse' : 'fermentolyse';
+    return `
+        <div class="time-tracker-section" style="background: var(--calc-bg); border-left-color: var(--accent);">
+            <h4>⏲️ Rest length</h4>
+            <p style="font-size: 14px; color: var(--muted); margin-bottom: 8px;">The ${label} rest can be shortened to ${REST_MIN}–${REST_MAX} minutes, for example to bring the next steps back to tidy times.</p>
+            <div class="form-group">
+                <label for="rest-minutes">Minutes (${REST_MIN}–${REST_MAX}):</label>
+                <input type="number" id="rest-minutes" value="${restMinutes(step)}" min="${REST_MIN}" max="${REST_MAX}" step="1" inputmode="numeric">
+            </div>
+            <p class="hint" id="rest-preview" role="status"></p>
+            <button type="button" id="rest-tidy" class="btn btn-small btn-outline"></button>
+        </div>
+    `;
+}
+
+function initRestPicker(step) {
+    const input = document.getElementById('rest-minutes');
+    const preview = document.getElementById('rest-preview');
+    const tidyBtn = document.getElementById('rest-tidy');
+
+    const refresh = () => {
+        const minutes = restMinutes(step);
+        const end = restEnd(nowClock(), minutes);
+        const tidy = tidyRest(nowClock());
+        preview.textContent = `If you start now, the ${minutes} minute rest ends at ${clockText(end)}.`;
+        tidyBtn.hidden = tidy.minutes === minutes;
+        tidyBtn.textContent = `Use ${tidy.minutes} minutes (ends ${clockText(tidy.end)})`;
+        document.getElementById('step-duration').textContent = restText(minutes);
+        document.querySelectorAll('.instructions-list li').forEach(li => {
+            li.textContent = li.textContent.replace(/(1 hour|\d+ minutes)(?= *$)/, restText(minutes));
+        });
+        const suggestion = document.getElementById('autolyse-suggestion');
+        if (suggestion) suggestion.outerHTML = autolyseSuggestionHtml();
+        if (!timerInterval) { stopTimer(); resetTimer(); }
+    };
+    const set = (minutes) => {
+        currentBake[step.restKey] = clampRest(minutes);
+        input.value = currentBake[step.restKey];
+        refresh();
+    };
+    input.addEventListener('input', () => {
+        if (input.value === '') return;
+        currentBake[step.restKey] = clampRest(input.value);
+        refresh();
+    });
+    input.addEventListener('change', () => set(input.value));
+    // The tidy suggestion depends on the time you press it, so work it out then
+    tidyBtn.addEventListener('click', () => set(tidyRest(nowClock()).minutes));
+    refresh();
+}
+
+// Starter's earliest peak is feed + rise. The starter goes in when the autolyse rest ends,
+// so autolyse should start `rest` minutes before that peak.
+function autolyseSuggestionHtml() {
+    if (!currentBake.starterFeedTime || !currentBake.starterFeedRatio) return '<div id="autolyse-suggestion"></div>';
+    const feedRatio = findRatio(currentBake.starterFeedRatio);
+    const riseTimeRange = feedRatio ? riseLabel(feedRatio) : '6-8 hrs';
+    const rest = restMinutes(STEPS[1]);
+    const start = clockAfter(currentBake.starterFeedTime, ((feedRatio ? feedRatio.minHours : 6) * 60 - rest) / 60).time;
+    return `
+        <div id="autolyse-suggestion" class="time-tracker-section" style="background: var(--good-bg); border-left-color: var(--good);">
+            <h4>⏰ Suggested Timing</h4>
+            <p><strong>You fed your starter at:</strong> ${currentBake.starterFeedTime}</p>
+            <p><strong>Suggested autolyse start:</strong> ${start}</p>
+            <p style="font-size: 14px; color: var(--good-ink); margin-top: 8px;">This is based on your feeding ratio (${currentBake.starterFeedRatio}) rise time of ${riseTimeRange}, minus your ${restText(rest)} autolyse.</p>
+        </div>
+    `;
 }
 
 // Starter Calculator
@@ -842,9 +915,9 @@ function calculateBulkTime() {
     });
     
     // Display results
-    // Total bulk time includes: 1hr fermentolyse + 30min salt rest + 1.5hrs folds = 3 hours already done
+    // Total bulk time includes the fermentolyse rest, 30min salt rest and 1.5hrs of folds (3 hours with a full hour)
     const totalBulkHours = closestTemp.hours;
-    const remainingHours = totalBulkHours - 3;
+    const remainingHours = Math.round((totalBulkHours - bulkHoursBeforeRemaining(restMinutes(STEPS[2]))) * 100) / 100;
     
     const hoursText = closestTemp.hours === Math.floor(closestTemp.hours) 
         ? `${closestTemp.hours} hours` 
@@ -1015,7 +1088,7 @@ function resetTimer() {
     stopTimer();
     const step = STEPS[currentBake.currentStep];
     if (step.timerMinutes) {
-        timerSeconds = step.timerMinutes * 60;
+        timerSeconds = timerMinutesFor(step) * 60;
         updateTimerDisplay();
     }
     document.getElementById('timer-start').style.display = 'inline-block';

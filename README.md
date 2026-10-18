@@ -32,6 +32,7 @@ npm run icons    # re-render the PNG icons from public/favicon.svg
 ```text
 src/recipe.js   loaf sizes, hydration and ingredient amounts
 src/feeding.js  starter feeding ratios, rise times and the two feed calculators
+src/timing.js   autolyse and fermentolyse rest lengths (30-60 min) and the tidy-time suggestion
 src/app.js      the baking workflow, timers, calculators and bake log
 src/shell.js    theme, welcome cards, settings, help, footer, update prompt
 public/         favicon and app icons
@@ -49,6 +50,10 @@ Step 1 has two calculators, using a chart of ten standard ratios (1:1:1 to 1:10:
 - **Plan from autolyse:** enter when you want to start your autolyse, the starter you need, and the earliest you can feed (now, unless you say otherwise). It tells you when to feed, as late as possible so the starter is fresh, using 1:6:6 if there's time. If you're short of time it steps down to 1:5:5, 1:4:4 ... 1:1:1, which peak sooner but use more of your own starter, and it lists every option so you can see the trade-off.
 
 The next step then suggests your autolyse time from the feed you planned (an hour before the starter's earliest rise time).
+
+## Autolyse and fermentolyse length
+
+Both rests default to 1 hour but can be set anywhere from 30 to 60 minutes. A button suggests the longest rest that ends on the hour or half hour if you start now (for example, starting at 10:20 suggests 40 minutes, ending at 11:00) so the steps after it land on tidy times. The timer, the suggested autolyse start, the fold times and the remaining bulk time all follow the length you choose.
 
 ## Your Sourdough Method
 
