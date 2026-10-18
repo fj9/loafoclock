@@ -1,6 +1,6 @@
 // HTML for the timeline shown under the progress bar. Pure: takes a schedule from schedule.js.
 import { fmtTime } from './clock.js';
-import { AUTOLYSE_CHIPS, FEED_CHIPS, timePickerHtml } from './timepicker.js';
+import { BAKE_CHIPS, FEED_CHIPS, timePickerHtml } from './timepicker.js';
 import { FEEDING_RATIOS } from './feeding.js';
 import { PLAN_DEFAULTS } from './schedule.js';
 
@@ -72,7 +72,7 @@ export function timelineHtml({ schedule, currentStepId, plan, open, today, defau
             <h4>Adjust the plan</h4>
             <div class="tl-pickers">
                 ${timePickerHtml({ id: 'tl-feed', key: 'feed', label: 'Feeding at', value: plan.feedTime, chips: FEED_CHIPS })}
-                ${timePickerHtml({ id: 'tl-bake', key: 'autolyse', label: 'Bake at', value: plan.bakeAt, chips: AUTOLYSE_CHIPS })}
+                ${timePickerHtml({ id: 'tl-bake', key: 'autolyse', label: 'Bake at', value: plan.bakeAt, chips: BAKE_CHIPS })}
             </div>
             <div class="tl-settings">
                 <label>Dough temperature

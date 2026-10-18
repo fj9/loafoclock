@@ -39,7 +39,11 @@ export const FEED_CHIPS = [
 ];
 // For recording something that just happened
 export const JUST_NOW_CHIPS = [{ now: true }, { ago: 15 }, { ago: 30 }, { ago: 60 }];
+// Mornings, or a start after lunch
 export const AUTOLYSE_CHIPS = [
+    { time: '06:00' }, { time: '07:00' }, { time: '08:00' }, { time: '13:00' }, { time: '14:00' }, { time: '15:00' }
+];
+export const BAKE_CHIPS = [
     { time: '06:00' }, { time: '07:00' }, { time: '08:00' }, { time: '09:00' }, { time: '12:00' }, { time: '18:00' }
 ];
 

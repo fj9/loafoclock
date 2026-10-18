@@ -126,17 +126,29 @@ export function isAwkwardHour(time) {
     return m >= AWKWARD_FROM || m < AWKWARD_TO;
 }
 
-/** Plain-English name for a ratio, so the main text need not talk in ratios. */
-export function feedStyle(ratio) {
-    return ratio.n <= 3 ? 'quick' : ratio.n <= 6 ? 'standard' : 'slow';
-}
+const clockFromMinutes = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
 /**
- * A sensible autolyse time to start from, given when you feed: a morning start after an evening
- * or night feed, otherwise nine hours on (a standard 1:6:6 feed plus its hour of rest).
+ * The feed times that suit an autolyse time: every whole hour between `from` and `to` (waking
+ * hours by default) at which some feed fits, each with the best ratio for it. Earliest feed first.
  */
-export function defaultAutolyseFor(feedTime) {
-    const m = parseClock(feedTime);
-    const eveningOrNight = m >= 16 * 60 || m < 4 * 60;
-    return eveningOrNight ? '08:00' : clockAfter(feedTime, 9).time;
+export function feedTimeOptions({ autolyseAt, autolyseMin = 60, need, have = null, fromHour = 6, toHour = 22 }) {
+    const options = [];
+    for (let h = fromHour; h <= toHour; h++) {
+        const feedTime = clockFromMinutes(h * 60);
+        const plan = planFeedForAutolyse({ need, feedTime, autolyseAt, autolyseMin, have });
+        if (plan.best) {
+            options.push({
+                feedTime, ratio: plan.best.ratio, feed: plan.best.feed, gapHours: plan.gapHours,
+                notEnoughStarter: plan.best.notEnoughStarter
+            });
+        }
+    }
+    return options.sort((a, b) => b.gapHours - a.gapHours);
+}
+
+/** The option to start on: the latest feed that is a standard 1:6:6, else the latest one. */
+export function defaultFeedOption(options) {
+    const sixes = options.filter((o) => o.ratio.n === ASSUMED_RATIO_N);
+    return (sixes.length ? sixes[sixes.length - 1] : options[options.length - 1]) ?? null;
 }

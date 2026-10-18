@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clockAfter, defaultAutolyseFor, feedAt, feedStyle, findRatio, hoursUntil, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding.js';
+import { clockAfter, defaultFeedOption, feedAt, feedTimeOptions, findRatio, hoursUntil, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding.js';
 
 describe('clock helpers', () => {
     it('adds hours and reports days rolled over', () => {
@@ -131,32 +131,45 @@ describe('plain language helpers', () => {
         expect(isAwkwardHour('06:00')).toBe(false);
         expect(isAwkwardHour('08:00')).toBe(false);
     });
-    it('calls ratios quick, standard or slow', () => {
-        expect(feedStyle(findRatio('1:1:1'))).toBe('quick');
-        expect(feedStyle(findRatio('1:3:3'))).toBe('quick');
-        expect(feedStyle(findRatio('1:6:6'))).toBe('standard');
-        expect(feedStyle(findRatio('1:8:8'))).toBe('slow');
-    });
 });
 
-describe('defaultAutolyseFor', () => {
-    it('suggests a morning autolyse after an evening or night feed', () => {
-        expect(defaultAutolyseFor('22:00')).toBe('08:00');
-        expect(defaultAutolyseFor('16:00')).toBe('08:00');
-        expect(defaultAutolyseFor('02:00')).toBe('08:00');
+describe('feedTimeOptions', () => {
+    const opts = (autolyseAt, extra = {}) => feedTimeOptions({ autolyseAt, need: 180, ...extra });
+    const byTime = (list) => Object.fromEntries(list.map((o) => [o.feedTime, o.ratio.ratio]));
+
+    it('for an 08:00 autolyse lists evening feeds, with 10pm as 1:6:6', () => {
+        const o = byTime(opts('08:00'));
+        expect(o['22:00']).toBe('1:6:6');
+        expect(o['21:00']).toBe('1:8:8');
+        expect(o['17:00']).toBe('1:10:10');
+        expect(o['23:00']).toBeUndefined(); // the middle of the night is left out
+        expect(o['03:00']).toBeUndefined();
     });
-    it('suggests nine hours on after a daytime feed', () => {
-        expect(defaultAutolyseFor('07:30')).toBe('16:30');
-        expect(defaultAutolyseFor('10:00')).toBe('19:00');
+    it('is earliest feed first', () => {
+        const times = opts('08:00').map((o) => o.feedTime);
+        expect(times[0]).toBe('17:00');
+        expect(times[times.length - 1]).toBe('22:00');
     });
-    it('the suggestion always lets a standard feed fit', () => {
-        for (const feed of ['07:30', '10:00', '15:45', '22:00', '00:30']) {
-            const p = planFeedForAutolyse({ need: 180, feedTime: feed, autolyseAt: defaultAutolyseFor(feed) });
-            expect(p.best, feed).not.toBeNull();
+    it('for a 15:00 autolyse lists morning feeds', () => {
+        const o = byTime(opts('15:00'));
+        expect(o['06:00']).toBe('1:6:6');   // 9h to autolyse + 1h rest = 10h
+        expect(o['09:00']).toBe('1:3:3');   // 6h + 1h = 7h
+        expect(Object.keys(o).every((t) => t >= '06:00' && t <= '22:00')).toBe(true);
+    });
+    it('only lists feeds that fit, so no option is a miss', () => {
+        for (const at of ['06:00', '07:00', '08:00', '13:00', '14:00', '15:00']) {
+            for (const o of opts(at)) {
+                expect(o.gapHours).toBeGreaterThanOrEqual(o.ratio.minHours);
+                expect(o.gapHours).toBeLessThanOrEqual(o.ratio.maxHours);
+            }
         }
     });
-    it('a morning feed with an evening autolyse works out', () => {
-        const p = planFeedForAutolyse({ need: 180, feedTime: '07:30', autolyseAt: '17:00' });
-        expect(p.best.ratio.ratio).toBe('1:6:6'); // 9.5h + 1h rest = 10.5h
+    it('flags options the starter in your jar cannot cover', () => {
+        const o = opts('08:00', { have: 10 });
+        expect(o.find((x) => x.feedTime === '22:00').notEnoughStarter).toBe(true);
+    });
+    it('starts on the latest 1:6:6, as in a 10pm feed for 8am', () => {
+        expect(defaultFeedOption(opts('08:00')).feedTime).toBe('22:00');
+        expect(defaultFeedOption([])).toBeNull();
     });
 });

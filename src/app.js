@@ -3,9 +3,9 @@ import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, RE
 import { STEP_TIPS, tipHtml } from './tips.js';
 import { BULK_FERMENTATION_TEMPS, PLAN_DEFAULTS, buildSchedule } from './schedule.js';
 import { progressLabel, timelineHtml } from './timeline.js';
-import { FEEDING_RATIOS, clockAfter, defaultAutolyseFor, feedStyle, findRatio, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
+import { FEEDING_RATIOS, clockAfter, defaultFeedOption, feedTimeOptions, findRatio, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
 import { feedBarHtml } from './feedbar.js';
-import { fmtTime } from './clock.js';
+import { fmtShort, fmtTime } from './clock.js';
 import { AUTOLYSE_CHIPS, DAYS_AHEAD, DAYS_BACK, FEED_CHIPS, JUST_NOW_CHIPS, bindDateTimePicker, bindTimePicker, dateTimePickerHtml, localDateTime, nearestMinutes, nearestQuarter, setDateTimePicker, setTimePicker, timePickerHtml } from './timepicker.js';
 
 // Sourdough Baking Steps
@@ -780,7 +780,8 @@ const FEED_MODES = {
 
 // Sensible starting values so nobody has to type to get an answer
 const DEFAULT_STARTER_HAVE = 100;      // grams in a typical jar; plenty for even two large loaves
-const DEFAULT_PLAN_FEED_TIME = '22:00'; // a bedtime feed, for the advanced plan
+const DEFAULT_AUTOLYSE_TIME = '08:00'; // a morning start
+const DEFAULT_PLAN_FEED_TIME = '22:00'; // used only if no suitable feed time can be listed
 
 const FEED_TIME_LABELS = {
     limited: () => 'What time are you feeding?',
@@ -791,15 +792,36 @@ const FEED_TIME_LABELS = {
 const starterNeededTotal = () => recipeFor(currentBake).starter + 30;
 const nowTime = () => nearestQuarter();
 
+// Advanced: pick the autolyse time first; only the feed times that suit it are offered
+function advancedFeedOptions(autolyseAt) {
+    return feedTimeOptions({
+        autolyseAt,
+        autolyseMin: restMinutes(STEPS[1]),
+        need: currentBake.feedNeed ?? starterNeededTotal(),
+        have: currentBake.feedHave ?? DEFAULT_STARTER_HAVE
+    });
+}
+
+// Keep the feed time you chose if it still suits; otherwise the latest standard 1:6:6 feed
+const pickAdvancedFeed = (options, wanted) =>
+    options.find(o => o.feedTime === wanted)?.feedTime ?? defaultFeedOption(options)?.feedTime ?? wanted ?? DEFAULT_PLAN_FEED_TIME;
+
+function feedOptionChipsHtml(options, selected) {
+    if (!options.length) {
+        return '<p class="hint">No feed fits that autolyse time between 6 am and 10 pm. Try another autolyse time, or pick a feed time below.</p>';
+    }
+    return options.map(o =>
+        `<button type="button" class="tp-chip" data-feed-option="${o.feedTime}" aria-pressed="${o.feedTime === selected}"${o.notEnoughStarter ? ` title="Needs ${o.feed.starter}g of your starter"` : ''}>${fmtShort(o.feedTime)} <small>${o.ratio.ratio}${o.notEnoughStarter ? ' ⚠' : ''}</small></button>`).join('');
+}
+
 function feedCalculatorHtml() {
     const recipeStarter = recipeFor(currentBake).starter;
     const mode = currentBake.feedMode || 'limited';
     const adv = mode === 'deadline';
     const fed = mode === 'fed';
-    const feedDefault = currentBake.feedDraft || (adv ? DEFAULT_PLAN_FEED_TIME : nowTime());
-    // Until you choose an autolyse time yourself it follows your feed time: a morning start after an
-    // evening feed, or nine hours on after a daytime feed
-    const autolyseDefault = currentBake.autolyseDraft || defaultAutolyseFor(feedDefault);
+    const autolyseDefault = currentBake.autolyseDraft || DEFAULT_AUTOLYSE_TIME;
+    const feedOptions = adv ? advancedFeedOptions(autolyseDefault) : [];
+    const feedDefault = adv ? pickAdvancedFeed(feedOptions, currentBake.feedDraft) : (currentBake.feedDraft || nowTime());
     const have = currentBake.feedHave ?? DEFAULT_STARTER_HAVE;
     const need = currentBake.feedNeed ?? starterNeededTotal();
     const showButton = !adv;
@@ -817,12 +839,20 @@ function feedCalculatorHtml() {
 
             ${adv ? timePickerHtml({ id: 'need-by-time', key: 'autolyse', label: `I want to start autolyse at:${tipHtml('autolyseAt')}`, value: autolyseDefault, chips: AUTOLYSE_CHIPS }) : ''}
 
-            ${timePickerHtml({ id: 'feed-time', key: 'feed', label: FEED_TIME_LABELS[mode](), value: feedDefault, chips: FEED_CHIPS })}
+            ${adv ? `
+            <div class="form-group" id="feed-pick">
+                <span class="tp-label">${FEED_TIME_LABELS.deadline()}</span>
+                <div class="tp-chips" id="feed-options" role="group" aria-label="Suitable feed times">${feedOptionChipsHtml(feedOptions, feedDefault)}</div>
+                <details class="amounts" id="other-feed">
+                    <summary>Pick another time</summary>
+                    ${timePickerHtml({ id: 'feed-time', key: 'feed', label: 'Feed time', value: feedDefault, chips: FEED_CHIPS })}
+                </details>
+            </div>` : timePickerHtml({ id: 'feed-time', key: 'feed', label: FEED_TIME_LABELS[mode](), value: feedDefault, chips: FEED_CHIPS })}
 
             ${fed ? `
             <div class="form-group">
                 <label for="fed-ratio">Feed I used:${tipHtml('ratio')}</label>
-                <select id="fed-ratio">${FEEDING_RATIOS.map(r => `<option value="${r.ratio}"${r.ratio === (currentBake.starterFeedRatio || '1:6:6') ? ' selected' : ''}>${r.ratio} (${feedStyle(r)})</option>`).join('')}</select>
+                <select id="fed-ratio">${FEEDING_RATIOS.map(r => `<option value="${r.ratio}"${r.ratio === (currentBake.starterFeedRatio || '1:6:6') ? ' selected' : ''}>${r.ratio}</option>`).join('')}</select>
             </div>` : ''}
 
             ${adv ? `
@@ -871,15 +901,36 @@ function initFeedCalculator() {
         if (go) switchFeedMode(go.dataset.feedGo);
     });
 
-    // The time pickers: chips and a slider. Until you choose an autolyse time yourself it follows the feed.
-    bindTimePicker('feed-time', 'feed', (value) => {
+    // Advanced: the feed-time list follows the autolyse time. Elsewhere, a plain time picker.
+    const syncFeedChips = () => document.querySelectorAll('#feed-options [data-feed-option]').forEach(c =>
+        c.setAttribute('aria-pressed', String(c.dataset.feedOption === $('feed-time').value)));
+    const refreshFeedOptions = () => {
+        if (!$('feed-options')) return;
+        const options = advancedFeedOptions($('need-by-time').value);
+        const selected = pickAdvancedFeed(options, currentBake.feedDraft);
+        currentBake.feedDraft = selected;
+        setTimePicker('feed-time', 'feed', selected);
+        $('feed-options').innerHTML = feedOptionChipsHtml(options, selected);
+    };
+    const feedChosen = (value) => {
         currentBake.feedTouched = true;
         currentBake.feedDraft = value;
-        if ($('need-by-time') && !currentBake.autolyseDraft) setTimePicker('need-by-time', 'autolyse', defaultAutolyseFor(value));
+        syncFeedChips();
         live();
+    };
+    bindTimePicker('feed-time', 'feed', feedChosen);
+    $('feed-options')?.addEventListener('click', (e) => {
+        const chip = e.target.closest('[data-feed-option]');
+        if (!chip) return;
+        setTimePicker('feed-time', 'feed', chip.dataset.feedOption);
+        feedChosen(chip.dataset.feedOption);
     });
     if ($('need-by-time')) {
-        bindTimePicker('need-by-time', 'autolyse', (value) => { currentBake.autolyseDraft = value; live(); });
+        bindTimePicker('need-by-time', 'autolyse', (value) => {
+            currentBake.autolyseDraft = value;
+            refreshFeedOptions();
+            live();
+        });
     }
     $('fed-ratio')?.addEventListener('change', live);
 
@@ -890,6 +941,7 @@ function initFeedCalculator() {
         currentBake.feedHave = parseFloat(have.value) || undefined;
         currentBake.feedNeed = parseFloat(need.value) || undefined;
         $('amounts-summary').textContent = `Starter amounts: ${have.value || '?'}g in your jar, ${need.value || '?'}g needed. Change`;
+        refreshFeedOptions();
         live();
     };
     have?.addEventListener('input', onAmounts);
@@ -941,7 +993,7 @@ function feedDetailsHtml({ feedTime, ratio, autolyseHours, starterInHours, autol
     return `
         <details class="fp-more">
             <summary>See how this works</summary>
-            <p style="margin-bottom: 4px;">This is a <strong>${feedStyle(ratio)} feed</strong> (${ratio.ratio}${tipHtml('ratio')}). It takes ${riseLabel(ratio)} to be ready.</p>
+            <p style="margin-bottom: 4px;">You're using a <strong>${ratio.ratio}</strong> feed${tipHtml('ratio')}. It takes ${riseLabel(ratio)} to be ready.</p>
             ${feedBarHtml({ feedTime, ratio, autolyseHours, starterInHours })}
             ${fridgeEstimateHtml(autolyse)}
             ${extra}
@@ -1027,7 +1079,7 @@ function renderFeedPlan({ need, have, feedTime, neededBy }) {
     } else {
         const six = plan.sixOption;
         if (best.ratio.n !== six.ratio.n) {
-            html += `<p class="hint" style="margin-bottom: 6px;">A standard feed would be ${hoursText(six.offHours)} too ${six.status === 'tooFast' ? 'early' : 'late'} for your autolyse, so this is a ${feedStyle(best.ratio)} feed.</p>`;
+            html += `<p class="hint" style="margin-bottom: 6px;">A ${six.ratio.ratio} feed would be ${hoursText(six.offHours)} too ${six.status === 'tooFast' ? 'early' : 'late'} for your autolyse, so this uses ${best.ratio.ratio}.</p>`;
         }
         if (best.notEnoughStarter) {
             html += feedWarning(`This needs ${best.feed.starter}g of your starter but you only have ${have}g. Try a different feed time, or change the starter amounts below.`);
@@ -1042,7 +1094,7 @@ function renderFeedPlan({ need, have, feedTime, neededBy }) {
         const note = o.fits
             ? (o.notEnoughStarter ? `needs ${o.feed.starter}g, more than you have` : `fits · use ${o.feed.starter}g starter`)
             : o.status === 'tooSlow' ? `ready ${hoursText(o.offHours)} too late` : `ready ${hoursText(o.offHours)} too early`;
-        ladder += `<li class="${o === best ? 'fp-best' : o.fits ? '' : 'fp-no'}"><span>${o === best ? '✓ ' : ''}${o.ratio.ratio} <small>${feedStyle(o.ratio)}</small></span><span>${note}</span></li>`;
+        ladder += `<li class="${o === best ? 'fp-best' : o.fits ? '' : 'fp-no'}"><span>${o === best ? '✓ ' : ''}${o.ratio.ratio} <small>${riseLabel(o.ratio)}</small></span><span>${note}</span></li>`;
     }
     ladder += '</ul>';
 
