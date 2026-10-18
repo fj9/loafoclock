@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#667eea">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%9E%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <script>
         try { var t = localStorage.getItem('sourdoughTheme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
     </script>
     <title>Sourdough Companion</title>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -149,7 +150,6 @@
         <footer class="site-footer" id="site-footer"></footer>
     </div>
 
-    <script src="shell.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html>

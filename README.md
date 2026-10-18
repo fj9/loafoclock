@@ -15,13 +15,30 @@ A mobile-friendly web app to guide you through sourdough baking and track your b
 
 ## How to Use
 
-### Option 1: Open Locally
-1. Simply open `index.html` in any web browser
-2. Works on desktop, tablet, or phone
+Open https://fj9.github.io/sourdough/ on your phone or computer. Use your browser's "Add to Home Screen" / "Install" option and it works like an app, including offline once it has loaded once. When a new version is available it asks you to reload.
 
-### Option 2: GitHub Pages
-Pushing to `main` deploys the site via `.github/workflows/deploy.yml`.
-In the repo, set **Settings → Pages → Source** to **GitHub Actions** (one-off).
+## Development
+
+Vite, plain JavaScript, Vitest and `vite-plugin-pwa`.
+
+```bash
+npm install
+npm run dev      # dev server
+npm test         # recipe maths (src/recipe.test.js)
+npm run build    # production build into dist/
+npm run icons    # re-render the PNG icons from public/favicon.svg
+```
+
+```text
+src/recipe.js   loaf sizes, hydration and ingredient amounts
+src/app.js      the baking workflow, timers, calculators and bake log
+src/shell.js    theme, welcome cards, settings, help, footer, update prompt
+public/         favicon and app icons
+```
+
+## Hosting on GitHub Pages
+
+`.github/workflows/deploy.yml` runs the tests, builds and deploys `dist/` on every push to `main`. In the repository settings, set Pages > Source to "GitHub Actions". The build uses relative paths, so it works under `https://<user>.github.io/<repo>/`.
 
 ## Your Sourdough Method
 

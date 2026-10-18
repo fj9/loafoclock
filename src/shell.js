@@ -1,3 +1,6 @@
+import { registerSW } from 'virtual:pwa-register';
+import { switchTab, loadBakeLog } from './app.js';
+
 // App shell: theme, first-run tutorial, help, settings and footer.
 // Kept apart from app.js (the baking workflow) so each file does one job.
 
@@ -151,6 +154,31 @@ function initSettings() {
     });
 }
 
+// ---- Offline and updates ----
+// Registers the service worker and asks to reload once a new version has been cached.
+function initUpdates() {
+    const reload = registerSW({
+        onNeedRefresh() {
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            overlay.setAttribute('role', 'alertdialog');
+            overlay.setAttribute('aria-label', 'Update available');
+            overlay.innerHTML = `
+                <div class="sheet">
+                    <h2>A new version is ready</h2>
+                    <p>Reload to get the latest fixes. Your bake log is kept.</p>
+                    <div class="btn-row">
+                        <button class="btn btn-outline" id="update-later">Later</button>
+                        <button class="btn btn-primary" id="update-now">Reload</button>
+                    </div>
+                </div>`;
+            overlay.querySelector('#update-later').addEventListener('click', () => overlay.remove());
+            overlay.querySelector('#update-now').addEventListener('click', () => reload());
+            document.body.appendChild(overlay);
+        }
+    });
+}
+
 // ---- Footer ----
 function renderFooter() {
     const links = FOOTER_LINKS.filter(l => l.url)
@@ -183,6 +211,7 @@ function initTooltips() {
 document.addEventListener('DOMContentLoaded', () => {
     initTooltips();
     initSettings();
+    initUpdates();
     renderHelp();
     renderFooter();
     if (!loadSettings().welcomeSeen) showTutorial();
