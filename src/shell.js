@@ -193,19 +193,55 @@ function renderFooter() {
     });
 }
 
-// Tap-to-show tooltips for touch screens (hover and focus are handled in CSS)
+// Tooltips: hover, keyboard focus or a tap shows them; a tap keeps one open until you tap away.
+// They are positioned here (fixed, clamped to the screen) so the card edges never cut them off.
+function placeTip(wrap) {
+    const btn = wrap.querySelector('.info-btn');
+    const tip = wrap.querySelector('.tip');
+    const b = btn.getBoundingClientRect();
+    const t = tip.getBoundingClientRect();
+    const margin = 8;
+    const left = Math.min(Math.max(margin, b.left + b.width / 2 - t.width / 2), window.innerWidth - t.width - margin);
+    const above = b.top - t.height - margin;
+    tip.style.left = `${left}px`;
+    tip.style.top = `${above >= margin ? above : b.bottom + margin}px`;
+}
+
 function initTooltips() {
+    const open = (wrap) => { wrap.classList.add('open'); placeTip(wrap); };
+    const close = (wrap) => { if (!wrap.dataset.pinned) wrap.classList.remove('open'); };
+    const closeAll = () => document.querySelectorAll('.tip-wrap.open').forEach(w => { delete w.dataset.pinned; w.classList.remove('open'); });
+
+    document.addEventListener('mouseover', e => {
+        const wrap = e.target.closest?.('.tip-wrap');
+        if (wrap) open(wrap);
+    });
+    document.addEventListener('mouseout', e => {
+        const wrap = e.target.closest?.('.tip-wrap');
+        if (wrap && !wrap.contains(e.relatedTarget)) close(wrap);
+    });
+    document.addEventListener('focusin', e => {
+        const wrap = e.target.closest?.('.tip-wrap');
+        if (wrap) open(wrap);
+    });
+    document.addEventListener('focusout', e => {
+        const wrap = e.target.closest?.('.tip-wrap');
+        if (wrap) close(wrap);
+    });
     document.addEventListener('click', e => {
-        const wrap = e.target.closest('.tip-wrap');
-        document.querySelectorAll('.tip-wrap.open').forEach(w => { if (w !== wrap) w.classList.remove('open'); });
+        const wrap = e.target.closest?.('.tip-wrap');
+        document.querySelectorAll('.tip-wrap.open').forEach(w => {
+            if (w !== wrap) { delete w.dataset.pinned; w.classList.remove('open'); }
+        });
         if (wrap && e.target.closest('.info-btn')) {
-            e.preventDefault();
-            wrap.classList.toggle('open');
+            e.preventDefault(); // the button may sit inside a label
+            if (wrap.dataset.pinned) { delete wrap.dataset.pinned; wrap.classList.remove('open'); }
+            else { wrap.dataset.pinned = '1'; open(wrap); }
         }
     });
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') document.querySelectorAll('.tip-wrap.open').forEach(w => w.classList.remove('open'));
-    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+    window.addEventListener('scroll', closeAll, { passive: true, capture: true });
+    window.addEventListener('resize', closeAll);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

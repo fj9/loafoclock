@@ -1,5 +1,6 @@
 import { recipeFor, loafDescription } from './recipe.js';
 import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, REST_MAX, REST_MIN, restEnd, restText, tidyRest } from './timing.js';
+import { STEP_TIPS, tipHtml } from './tips.js';
 import { clockAfter, findRatio, planFromAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
 
 // Bulk fermentation temperature chart
@@ -167,6 +168,15 @@ const STEPS = [
     }
 ];
 
+// A typical home kitchen: dough comes out of mixing at about 24°C. The quick choices are for
+// anyone without a thermometer.
+const DEFAULT_DOUGH_TEMP = 24;
+const DOUGH_TEMP_PRESETS = [
+    { label: 'Cool kitchen', temp: 21 },
+    { label: 'Typical', temp: 24 },
+    { label: 'Warm kitchen', temp: 26 }
+];
+
 // App State
 let currentBake = {
     loaves: 1,
@@ -279,7 +289,7 @@ function renderStep() {
     let html = `
         <h3>
             <span class="step-number">${step.id}</span>
-            ${step.name}
+            ${step.name}${tipHtml(STEP_TIPS[step.id])}
         </h3>
         <p><strong>Duration:</strong> <span id="step-duration">${step.restKey ? restText(restMinutes(step)) : step.duration}</span></p>
     `;
@@ -296,12 +306,15 @@ function renderStep() {
     if (step.hasTempCalculator) {
         html += `
             <div class="calculator-section">
-                <h4>Bulk Fermentation Time Calculator</h4>
+                <h4>Bulk Fermentation Time Calculator${tipHtml('bulk')}</h4>
                 <p>Enter your dough temperature to estimate fermentation time and target rise.</p>
                 
                 <div class="form-group">
-                    <label>Dough temperature (°C):</label>
-                    <input type="number" id="dough-temp" value="22" min="18" max="27" step="0.5">
+                    <label for="dough-temp">Dough temperature (°C):${tipHtml('doughTemp')}</label>
+                    <input type="number" id="dough-temp" value="${currentBake.doughTemp || DEFAULT_DOUGH_TEMP}" min="18" max="27" step="0.5">
+                </div>
+                <div class="seg" id="temp-presets" role="group" aria-label="Quick temperature choices">
+                    ${DOUGH_TEMP_PRESETS.map(p => `<button type="button" data-temp="${p.temp}">${p.label}<br><small>${p.temp}°C</small></button>`).join('')}
                 </div>
                 
                 <button id="calculate-bulk" class="btn btn-small">Calculate Time</button>
@@ -413,7 +426,7 @@ function renderStep() {
         
         html += `
             <div class="calculator-section">
-                <h4>Bake Time Planner</h4>
+                <h4>Bake Time Planner${tipHtml('fridgePlanner')}</h4>
                 <p>Plan when to bake based on your retardation time.</p>
                 
                 <div class="form-group">
@@ -540,6 +553,7 @@ function renderStep() {
     // Add temperature calculator event listener if applicable
     if (step.hasTempCalculator) {
         document.getElementById('calculate-bulk').addEventListener('click', calculateBulkTime);
+        initTempPresets();
     }
     
     // Add time tracking event listeners
@@ -624,7 +638,7 @@ function restPickerHtml(step) {
     const label = step.restKey === 'autolyseMinutes' ? 'autolyse' : 'fermentolyse';
     return `
         <div class="time-tracker-section" style="background: var(--calc-bg); border-left-color: var(--accent);">
-            <h4>⏲️ Rest length</h4>
+            <h4>⏲️ Rest length${tipHtml('restLength')}</h4>
             <p style="font-size: 14px; color: var(--muted); margin-bottom: 8px;">The ${label} rest can be shortened to ${REST_MIN}–${REST_MAX} minutes, for example to bring the next steps back to tidy times.</p>
             <div class="form-group">
                 <label for="rest-minutes">Minutes (${REST_MIN}–${REST_MAX}):</label>
@@ -705,9 +719,13 @@ const FEED_MODES = {
     }
 };
 
+// Sensible starting values so nobody has to type to get an answer
+const DEFAULT_STARTER_HAVE = 100;      // grams in a typical jar; plenty for even two large loaves
+const DEFAULT_AUTOLYSE_TIME = '08:00'; // a morning start, after feeding the evening before
+
 const FEED_TIME_LABELS = {
-    limited: 'What time are you feeding?',
-    deadline: 'Earliest I can feed (now, unless you say otherwise):'
+    limited: () => 'What time are you feeding?',
+    deadline: () => `Earliest I can feed (now, unless you say otherwise):${tipHtml('earliestFeed')}`
 };
 
 function feedCalculatorHtml() {
@@ -727,22 +745,22 @@ function feedCalculatorHtml() {
             <p class="hint" id="feed-mode-hint" style="margin: 8px 0 12px;">${FEED_MODES[mode].hint}</p>
 
             <div class="form-group">
-                <label for="current-starter">Starter I have now (g)<span id="have-optional"${mode === 'deadline' ? '' : ' hidden'}> (optional)</span>:</label>
-                <input type="number" id="current-starter" value="30" min="1" max="2000">
+                <label for="current-starter">Starter I have now (g)<span id="have-optional"${mode === 'deadline' ? '' : ' hidden'}> (optional)</span>:${tipHtml('haveStarter')}</label>
+                <input type="number" id="current-starter" value="${DEFAULT_STARTER_HAVE}" min="1" max="2000">
             </div>
 
             <div class="form-group">
-                <label for="needed-starter">Starter I need (g):</label>
+                <label for="needed-starter">Starter I need (g):${tipHtml('needStarter')}</label>
                 <input type="number" id="needed-starter" value="${starterNeeded}" min="1" max="2000">
             </div>
 
             <div class="form-group" id="need-by-row"${mode === 'deadline' ? '' : ' hidden'}>
-                <label for="need-by-time">I want to start autolyse at:</label>
-                <input type="time" id="need-by-time" value="${currentBake.starterNeededBy || ''}">
+                <label for="need-by-time">I want to start autolyse at:${tipHtml('autolyseAt')}</label>
+                <input type="time" id="need-by-time" value="${currentBake.starterNeededBy || DEFAULT_AUTOLYSE_TIME}">
             </div>
 
             <div class="form-group">
-                <label for="feed-time" id="feed-time-label">${mode === 'deadline' ? FEED_TIME_LABELS.deadline : FEED_TIME_LABELS.limited}</label>
+                <label for="feed-time" id="feed-time-label">${FEED_TIME_LABELS[mode]()}</label>
                 <input type="time" id="feed-time" value="${currentBake.starterFeedTime || currentTime}">
             </div>
 
@@ -762,7 +780,7 @@ function initFeedCalculator() {
         document.getElementById('feed-mode-hint').textContent = FEED_MODES[mode].hint;
         document.getElementById('need-by-row').hidden = mode !== 'deadline';
         document.getElementById('have-optional').hidden = mode !== 'deadline';
-        document.getElementById('feed-time-label').textContent = FEED_TIME_LABELS[mode];
+        document.getElementById('feed-time-label').innerHTML = FEED_TIME_LABELS[mode]();
         document.getElementById('feed-result').style.display = 'none';
     };
     modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.feedMode)));
@@ -813,7 +831,7 @@ function calculateFeed() {
         html += feedWarning(`You don't have enough starter for 1:6:6, so this uses ${ratio.ratio}, which takes longer to rise.`);
     }
     html += feedAmountsHtml(feed, 'Feeding Ratio', ratio);
-    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Likely ready:</strong> ${rangeText(plan.window.from, plan.window.to)} (${riseLabel(ratio)} after feeding)</p>`;
+    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Likely ready:</strong>${tipHtml('ready')} ${rangeText(plan.window.from, plan.window.to)} (${riseLabel(ratio)} after feeding)</p>`;
 
     // Save for the autolyse suggestion on the next step
     currentBake.starterFeedTime = feedTime;
@@ -834,7 +852,7 @@ function feedAmountsHtml(feed, ratioLabel, ratio) {
             <li><strong>+ ${feed.water}g</strong> water</li>
             <li style="border-top: 2px solid var(--accent); margin-top: 8px; padding-top: 8px;"><strong>= ${feed.total}g</strong> total starter</li>
         </ul>
-        <p style="margin-top: 12px;"><strong>${ratioLabel}:</strong> ${ratio.ratio}</p>
+        <p style="margin-top: 12px;"><strong>${ratioLabel}:</strong>${tipHtml('ratio')} ${ratio.ratio}</p>
     `;
 }
 
@@ -870,7 +888,7 @@ function renderAutolysePlan({ need, have, feedTime, neededBy }) {
     }
     html += `<p style="font-size: 18px; font-weight: 600; color: var(--accent);">Feed at ${planClock(best.feedTime)}</p>`;
     html += feedAmountsHtml(best.feed, 'Suggested Ratio', best.ratio);
-    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Starter ready for the dough:</strong> ${rangeText(best.window.from, best.window.to, planDayText)} (${riseLabel(best.ratio)} after feeding)</p>`;
+    html += `<p style="margin-top: 8px; color: var(--accent); font-weight: 600;"><strong>Starter ready for the dough:</strong>${tipHtml('ready')} ${rangeText(best.window.from, best.window.to, planDayText)} (${riseLabel(best.ratio)} after feeding)</p>`;
     html += autolyseSummaryHtml({ time: neededBy, days: 0 }, `feeding ${best.ratio.minHours - 1} hours earlier`);
 
     html += `<h4 style="margin-top: 16px;">All options</h4>
@@ -888,6 +906,20 @@ function renderAutolysePlan({ need, have, feedTime, neededBy }) {
     currentBake.starterFeedRatio = best.ratio.ratio;
     currentBake.starterNeededBy = neededBy;
     return html;
+}
+
+// Quick temperature choices: set the box and work out the time straight away
+function initTempPresets() {
+    const input = document.getElementById('dough-temp');
+    const buttons = [...document.querySelectorAll('#temp-presets [data-temp]')];
+    const highlight = () => buttons.forEach(b => b.setAttribute('aria-pressed', String(parseFloat(input.value) === Number(b.dataset.temp))));
+    buttons.forEach(b => b.addEventListener('click', () => {
+        input.value = b.dataset.temp;
+        highlight();
+        calculateBulkTime();
+    }));
+    input.addEventListener('input', highlight);
+    highlight();
 }
 
 // Bulk Fermentation Temperature Calculator
@@ -928,12 +960,12 @@ function calculateBulkTime() {
         : `${remainingHours} hours`;
     
     document.getElementById('bulk-time').innerHTML = `
-        <strong>Total Bulk Time:</strong> ${hoursText}<br>
+        <strong>Total Bulk Time:</strong>${tipHtml('totalBulk')} ${hoursText}<br>
         <strong>Remaining after folds:</strong> ${remainingText}
     `;
     
     document.getElementById('bulk-rise').innerHTML = `
-        <strong>Target Rise:</strong> ${closestTemp.rise}% increase in volume
+        <strong>Target Rise:</strong>${tipHtml('targetRise')} ${closestTemp.rise}% increase in volume
     `;
     
     document.getElementById('bulk-result').style.display = 'block';

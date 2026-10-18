@@ -33,6 +33,7 @@ npm run icons    # re-render the PNG icons from public/favicon.svg
 src/recipe.js   loaf sizes, hydration and ingredient amounts
 src/feeding.js  starter feeding ratios, rise times and the two feed calculators
 src/timing.js   autolyse and fermentolyse rest lengths (30-60 min) and the tidy-time suggestion
+src/tips.js     plain-English tooltip text for the jargon (edit the wording here)
 src/app.js      the baking workflow, timers, calculators and bake log
 src/shell.js    theme, welcome cards, settings, help, footer, update prompt
 public/         favicon and app icons
@@ -54,6 +55,12 @@ The next step then suggests your autolyse time from the feed you planned (an hou
 ## Autolyse and fermentolyse length
 
 Both rests default to 1 hour but can be set anywhere from 30 to 60 minutes. A button suggests the longest rest that ends on the hour or half hour if you start now (for example, starting at 10:20 suggests 40 minutes, ending at 11:00) so the steps after it land on tidy times. The timer, the suggested autolyse start, the fold times and the remaining bulk time all follow the length you choose.
+
+## Made easy to follow
+
+Every step title and the tricky terms (feeding ratio, dough temperature, target rise and so on) have a small (i) button. Hover over it, tab to it, or tap it to see a plain-English explanation; tap away to close it.
+
+Inputs start with sensible values: 100g of starter in the jar, autolyse at 08:00, and a dough temperature of 24°C. Anyone without a thermometer can tap Cool kitchen (21°C), Typical (24°C) or Warm kitchen (26°C) to get the bulk fermentation time straight away.
 
 ## Your Sourdough Method
 
