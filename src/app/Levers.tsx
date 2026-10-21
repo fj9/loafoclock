@@ -6,6 +6,7 @@ import {
 } from '../domain/plan';
 import { QUICK_FEED_NUDGE_AT } from '../domain/bakeLog';
 import { lengthOf } from './format';
+import { Tip } from './Tip';
 
 interface Props {
     levers: LeverSet;
@@ -32,7 +33,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }:
     return (
         <section class="levers" aria-label="Levers">
             <div class="lever">
-                <span class="label" id="lv-loaf">Your loaf</span>
+                <span class="label" id="lv-loaf">Your loaf</span> <Tip name="loaf" />
                 <div class="seg-choice" role="group" aria-labelledby="lv-loaf">
                     {([1, 2] as const).map((n) => (
                         <button type="button" class={(levers.loaves ?? 1) === n ? 'on' : ''} aria-pressed={(levers.loaves ?? 1) === n} onClick={() => set({ loaves: n })}>
@@ -47,7 +48,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }:
                         </button>
                     ))}
                 </div>
-                <label for="lv-hydration" class="sub">Hydration</label>
+                <label for="lv-hydration" class="sub">Hydration</label> <Tip name="hydration" />
                 <select id="lv-hydration" value={levers.hydration ?? DEFAULT_HYDRATION} onChange={(e) => set({ hydration: Number((e.target as HTMLSelectElement).value) })}>
                     {HYDRATIONS.map((h) => <option value={h}>{h}%</option>)}
                 </select>
@@ -55,7 +56,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }:
             </div>
 
             <div class="lever">
-                <label for="lv-ratio">Feed</label>
+                <label for="lv-ratio">Feed</label> <Tip name="ratio" />
                 <select id="lv-ratio" value={levers.ratioN} disabled={locked.feedRatio}
                     onChange={(e) => set({ ratioN: Number((e.target as HTMLSelectElement).value), starterDelayMin: 0 })}>
                     {FEEDING_RATIOS.map((r) => {
@@ -70,7 +71,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }:
 
             {widthMin > 0 && (
                 <div class="lever">
-                    <label for="lv-wait">Wait before adding the starter</label>
+                    <label for="lv-wait">Extend starter fermentation time</label> <Tip name="extendStarter" />
                     <input id="lv-wait" type="range" min={0} max={widthMin} step={15} value={levers.starterDelayMin}
                         onInput={(e) => set({ starterDelayMin: Number((e.target as HTMLInputElement).value) })} />
                     <output>{levers.starterDelayMin ? `${lengthOf(levers.starterDelayMin * 60_000)} after it is ready` : 'As soon as it is ready'}</output>
@@ -78,14 +79,14 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }:
             )}
 
             <div class="lever">
-                <label for="lv-temp">Dough temperature</label>
+                <label for="lv-temp">Dough temperature</label> <Tip name="doughTemp" />
                 <input id="lv-temp" type="range" min={COOLEST_TEMP} max={WARMEST_TEMP} step={0.5} value={levers.doughTemp} disabled={locked.doughTemp}
                     onInput={(e) => set({ doughTemp: Number((e.target as HTMLInputElement).value) })} />
                 <output>{levers.doughTemp}°C: bulk takes about {hoursText(bulk.hours)}</output>
             </div>
 
             <div class="lever">
-                <label for="lv-fridge">Time in the fridge</label>
+                <label for="lv-fridge">Time in the fridge</label> <Tip name="retardation" />
                 {fridgeHours !== null ? (
                     <>
                         <input id="lv-fridge" type="range" min={FRIDGE_MIN_HOURS} max={FRIDGE_MAX_HOURS} step={0.25} value={fridgeHours} disabled={locked.fridge}
@@ -114,7 +115,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }:
             </div>
 
             <div class="lever">
-                <span class="label" id="lv-cool">Cooling before carving</span>
+                <span class="label" id="lv-cool">Cooling before carving</span> <Tip name="cooling" />
                 <div class="seg-choice" role="group" aria-labelledby="lv-cool">
                     {COOLING_CHOICES.map((c) => (
                         <button type="button" class={levers.cooling === c ? 'on' : ''} aria-pressed={levers.cooling === c} onClick={() => set({ cooling: c })}>{c} min</button>
