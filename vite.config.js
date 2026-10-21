@@ -12,7 +12,7 @@ export default defineConfig({
         VitePWA({
             registerType: 'prompt', // the app asks the user to reload when a new version is cached
             workbox: { globPatterns: ['**/*.{js,css,html,woff2}'] }, // include the bundled heading font
-            includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
+            includeAssets: ['favicon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png'],
             manifest: {
                 name: "Loaf O'Clock",
                 short_name: "Loaf O'Clock",
