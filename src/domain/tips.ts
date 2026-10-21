@@ -13,6 +13,22 @@ export const TIPS = {
         label: 'a feeding ratio',
         text: 'Parts of starter : flour : water, by weight. 1:6:6 means 1g of starter for every 6g of flour and 6g of water. More flour and water takes longer to rise but needs less starter.'
     },
+    loaf: {
+        label: 'your loaf',
+        text: 'How many loaves and how big. Only the amounts change, apart from a larger loaf baking a little longer.'
+    },
+    hydration: {
+        label: 'hydration',
+        text: 'How much water there is compared with flour. Higher is wetter, stickier dough with a more open crumb. 70% is a good place to start.'
+    },
+    extendStarter: {
+        label: 'extend starter fermentation time',
+        text: 'Leave your fed starter to ferment for longer once it is ready, so you can start the autolyse later, such as in the morning. Starter left too long goes stale, so the slider stops before that.'
+    },
+    cooling: {
+        label: 'cooling before carving',
+        text: 'The loaf is still cooking inside as it cools. Cutting too early gives a gummy crumb, so wait for the time you pick.'
+    },
     haveStarter: {
         label: 'starter I have',
         text: 'How much starter is in your jar right now, in grams.'

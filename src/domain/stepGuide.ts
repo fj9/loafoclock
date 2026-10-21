@@ -35,10 +35,12 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
             const f = feedAt(l.ratioN, r.starter + KEEP_BACK_G);
             return {
                 title: 'Feed your starter',
-                ingredients: [`${f.starter}g starter, straight from the fridge`, `${f.flour}g flour`, `${f.water}g water`],
+                ingredients: [`${f.starter}g starter, straight from the fridge`, `${f.water}g water`, `${f.flour}g flour`],
                 instructions: [
-                    'Mix the starter, flour and water in a clean jar',
-                    `Leave it somewhere warm until it is active, bubbly and at its peak, about ${clock(plan.starterReadyAt)} to ${clock(plan.starterStaleAt)}`
+                    'Put the starter in a clean jar and add the water',
+                    'Mix thoroughly until the water is fully mixed into the starter',
+                    'Add the flour and mix until no dry flour remains',
+                    `Cover and leave it somewhere warm to ferment until it is active, bubbly and at its peak, about ${clock(plan.starterReadyAt)} to ${clock(plan.starterStaleAt)}`
                 ],
                 note: `Makes ${f.total}g at 1:${l.ratioN}:${l.ratioN}: ${r.starter}g for the dough and ${f.total - r.starter}g to keep as your next starter.`,
                 tip: 'starter'

@@ -26,7 +26,7 @@ describe('step guide', () => {
     it('works out the feed so there is starter to keep back', () => {
         const g = guideFor('feed', plan({ ratioN: 6 }), clock);
         // 150 + 30 = 180 needed at 1:6:6 = 14g starter, 84g flour, 84g water
-        expect(g.ingredients).toEqual(['14g starter, straight from the fridge', '84g flour', '84g water']);
+        expect(g.ingredients).toEqual(['14g starter, straight from the fridge', '84g water', '84g flour']);
         expect(g.note).toContain('182g');
     });
 
