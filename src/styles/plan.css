@@ -1,0 +1,52 @@
+/* Timeline, levers and the Start now screen. Colours come from tokens.css. */
+.eyebrow { margin: 0; font-size: calc(13px * var(--ts, 1)); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.big { margin: 2px 0 4px; font-family: var(--font-display); font-size: calc(22px * var(--ts, 1)); }
+.result .range { margin: 8px 0 0; }
+.hint.warn, .problems { color: var(--warn-ink); background: var(--warn-bg); border-radius: 8px; padding: 8px 12px; }
+.problems { list-style: none; margin: 0 0 16px; display: grid; gap: 4px; }
+
+.timeline { margin: 0 0 16px; }
+.tl-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--wash); }
+.tl-track { position: relative; height: 128px; }
+.tl-sleep { position: absolute; top: 0; bottom: 0; background: var(--info-bg); opacity: .9; background-image: repeating-linear-gradient(45deg, transparent 0 6px, var(--line) 6px 7px); }
+.tl-day { position: absolute; top: 4px; padding-left: 6px; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--muted); white-space: nowrap; }
+.tl-seg { position: absolute; top: 56px; height: 18px; border-radius: 4px; }
+.tl-seg.rising { background: var(--good-bg); border: 1px solid var(--good); }
+.tl-seg.bulk { background: var(--fill-a); }
+.tl-seg.fridge { background: var(--info); }
+.tl-seg.proof { background: var(--warn); }
+.tl-seg.bake { background: var(--fill-b); }
+.tl-seg.cool { background: var(--good); opacity: .6; }
+.tl-mark { position: absolute; top: 50px; width: 12px; height: 30px; margin-left: -6px; display: flex; flex-direction: column; align-items: center; }
+.tl-mark::before { content: ''; width: 10px; height: 10px; margin-top: 10px; border-radius: 50%; background: var(--ink); border: 2px solid var(--card); }
+.tl-mark.small::before { width: 6px; height: 6px; margin-top: 12px; }
+.tl-mark.carve::before { background: var(--good); width: 14px; height: 14px; margin-top: 8px; }
+.tl-mark.asleep::before { background: var(--danger); }
+.tl-label { position: absolute; top: 34px; font-size: calc(11px * var(--ts, 1)); white-space: nowrap; transform: translateX(-4px); color: var(--ink); font-weight: 600; }
+.tl-now { position: absolute; top: 24px; bottom: 0; width: 2px; background: var(--accent); }
+.tl-now span { position: absolute; top: -2px; left: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 700; color: var(--accent); }
+.tl-key { display: flex; flex-wrap: wrap; gap: 4px 12px; list-style: none; padding: 6px 2px 0; margin: 0; font-size: calc(12px * var(--ts, 1)); color: var(--muted); }
+.tl-key li::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 2px; background: var(--line); }
+.tl-key .rising::before { background: var(--good-bg); border: 1px solid var(--good); }
+.tl-key .bulk::before { background: var(--fill-a); }
+.tl-key .fridge::before { background: var(--info); }
+.tl-key .proof::before { background: var(--warn); }
+.tl-key .bake::before { background: var(--fill-b); }
+.tl-key .sleep::before { background: var(--info-bg); border: 1px solid var(--line); }
+
+.levers { display: grid; gap: 14px; margin: 0 0 16px; }
+.lever { display: grid; gap: 4px; }
+.lever label, .lever .label { font-weight: 700; }
+.lever select, .lever input[type="range"] { width: 100%; font: inherit; accent-color: var(--accent); }
+.lever select { padding: 8px; border-radius: 8px; border: 2px solid var(--line); background: var(--card); color: var(--ink); }
+.lever output { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
+.lever .hint { margin: 2px 0 0; }
+.link { font: inherit; font-weight: 600; background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; }
+.seg-choice { display: flex; gap: 8px; }
+.seg-choice button { flex: 1; font: inherit; font-weight: 600; padding: 8px; border-radius: 8px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.seg-choice button.on { background: var(--accent-strong); color: var(--on-accent); border-color: var(--accent-strong); }
+
+.steps ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.steps .when { font-weight: 700; }
+.steps .asleep { color: var(--danger); }
+.start-now > .btn { margin-bottom: 16px; }
