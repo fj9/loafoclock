@@ -1,14 +1,16 @@
 import { readFileSync } from 'node:fs';
-import { defineConfig } from 'vite';
+import preact from '@preact/preset-vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { defineConfig } from 'vitest/config';
 
-const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
 
 export default defineConfig({
     define: { __APP_VERSION__: JSON.stringify(version) }, // shown on the About page
     // Relative base keeps the build working at any GitHub Pages repo path.
     base: './',
     plugins: [
+        preact(),
         VitePWA({
             registerType: 'prompt', // the app asks the user to reload when a new version is cached
             workbox: { globPatterns: ['**/*.{js,css,html,woff2}'] }, // include the bundled heading font
@@ -16,7 +18,7 @@ export default defineConfig({
             manifest: {
                 name: "Loaf O'Clock",
                 short_name: "Loaf O'Clock",
-                description: 'A free sourdough planner that tells you what to do, and when.',
+                description: 'A free sourdough planner that shows how feed, temperature and the fridge move your bake, so you can fit it around your day.',
                 theme_color: '#9A4A22',
                 background_color: '#FBF5EA',
                 display: 'standalone',
@@ -28,5 +30,10 @@ export default defineConfig({
                 ]
             }
         })
-    ]
+    ],
+    test: {
+        // The parked legacy tests still run until the files they cover are replaced
+        include: ['src/**/*.test.{ts,tsx}', 'legacy/**/*.test.js'],
+        environment: 'node' // component tests opt in with `// @vitest-environment jsdom`
+    }
 });
