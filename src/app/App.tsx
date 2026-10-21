@@ -2,9 +2,10 @@ import { useEffect, useState } from 'preact/hooks';
 import { addToLog, importOldLog, loadLog, oldLogEntries, quickFeedStreak, removeFromLog, type LogEntry } from '../domain/bakeLog';
 import { setClock12 } from '../domain/clock';
 import { clearLive, loadLive, lockPlan, saveLive, type LiveRecord } from '../domain/liveStore';
-import { buildPlan, type Levers } from '../domain/plan';
+import { buildPlan, type Actuals, type Levers } from '../domain/plan';
 import { applyDisplaySettings, applyTheme, loadSettings, saveSettings, type Settings } from '../domain/settings';
 import { About } from './About';
+import { AlreadyFed } from './AlreadyFed';
 import { BreadAt } from './BreadAt';
 import { FinishForm } from './FinishForm';
 import { Help } from './Help';
@@ -18,7 +19,7 @@ import { UpdatePrompt } from './UpdatePrompt';
 /** Round up to the next 5 minutes so the plan does not change every second. */
 const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
 
-type Mode = 'now' | 'at';
+type Mode = 'now' | 'at' | 'fed';
 type Tab = 'plan' | 'log' | 'settings' | 'help' | 'about';
 const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['log', 'Log'], ['settings', 'Settings'], ['help', 'Help']];
 
@@ -40,7 +41,7 @@ export function App() {
     const change = (patch: Settings) => { saveSettings(patch); setSettings((s) => ({ ...s, ...patch })); };
 
     const update = (rec: LiveRecord) => { saveLive(rec); setLive(rec); };
-    const start = (levers: Levers) => update(lockPlan(levers, Date.now()));
+    const start = (levers: Levers, actuals: Actuals = {}) => update({ ...lockPlan(levers, Date.now()), actuals });
     const discard = () => { clearLive(); setLive(null); setFinishing(null); };
     const saveEntry = (entry: LogEntry) => { setLog(addToLog(entry)); discard(); setTab('log'); };
 
@@ -73,10 +74,13 @@ export function App() {
                 <div class="seg-choice mode" role="group" aria-label="How do you want to plan?">
                     <button type="button" class={mode === 'now' ? 'on' : ''} aria-pressed={mode === 'now'} onClick={() => setMode('now')}>Start a loaf now</button>
                     <button type="button" class={mode === 'at' ? 'on' : ''} aria-pressed={mode === 'at'} onClick={() => setMode('at')}>I want bread at…</button>
+                    <button type="button" class={mode === 'fed' ? 'on' : ''} aria-pressed={mode === 'fed'} onClick={() => setMode('fed')}>I've already fed my starter</button>
                 </div>
                 {mode === 'now'
                     ? <StartNow key={repeat?.key ?? 0} now={now} onStart={start} quickStreak={streak} base={repeat?.base} />
-                    : <BreadAt now={now} onStart={start} quickStreak={streak} />}
+                    : mode === 'at'
+                        ? <BreadAt now={now} onStart={start} quickStreak={streak} />
+                        : <AlreadyFed now={now} onStart={start} quickStreak={streak} />}
             </>
         )
     );

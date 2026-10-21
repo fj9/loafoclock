@@ -14,6 +14,8 @@ interface Props {
     /** Lock the plan and go to the live view. */
     onStart?: (levers: LeverSet) => void;
     quickStreak?: number;
+    /** The starter was fed before you opened the app: the feed is done and cannot change. */
+    fed?: { minDelayMin: number };
 }
 
 function describe(v: Violation, plan: Plan, zone: Zone): string {
@@ -26,9 +28,10 @@ function describe(v: Violation, plan: Plan, zone: Zone): string {
 }
 
 /** The timeline, the levers and the step list for one plan. */
-export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak }: Props) {
+export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed }: Props) {
     const plan = useMemo(() => buildPlan(levers), [levers]);
-    const problems = violations(plan, { zone, carveAt });
+    // A feed that has already happened is not held to waking hours.
+    const problems = violations(plan, { zone, carveAt }).filter((v) => !(fed && v.kind === 'asleep' && v.stepId === 'feed'));
     return (
         <>
             {problems.length > 0 && (
@@ -37,7 +40,8 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quic
                 </ul>
             )}
             <Timeline plan={plan} zone={zone} now={now} />
-            <Levers levers={levers} zone={zone} onChange={onChange} quickStreak={quickStreak} />
+            <Levers levers={levers} zone={zone} onChange={onChange} quickStreak={quickStreak}
+                locked={fed ? { feedRatio: true } : undefined} minDelayMin={fed?.minDelayMin} />
             <section class="panel steps">
                 <h2>The steps</h2>
                 <ol>
