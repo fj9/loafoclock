@@ -4,7 +4,9 @@
 
 [![Deploy to GitHub Pages](https://github.com/fj9/sourdough/actions/workflows/deploy.yml/badge.svg)](https://github.com/fj9/sourdough/actions/workflows/deploy.yml)
 
-A free sourdough planner that tells you what to do, and when. It's a mobile-friendly web app that walks you through a weekly sourdough bake, plans the whole thing backwards from when you want to start, and keeps a log of how each loaf turned out. It installs to your phone's home screen, works offline, and keeps everything on your own device.
+A free sourdough planner that shows how feed, temperature and the fridge move your bake, so you can fit it around your day.
+
+Sourdough that fits your life: see how feed ratio, dough temperature and time in the fridge shape your timeline, then move the bake to suit your day. It's a mobile-friendly web app that installs to your phone's home screen, works offline, and keeps everything on your own device.
 
 **Use it:** https://fj9.github.io/sourdough/
 
@@ -13,6 +15,7 @@ A free sourdough planner that tells you what to do, and when. It's a mobile-frie
 ## Contents
 
 - [What it does](#what-it-does)
+- [The three levers](#the-three-levers)
 - [The bake](#the-bake)
 - [How the planning works](#how-the-planning-works)
 - [Using it](#using-it)
@@ -28,14 +31,28 @@ A free sourdough planner that tells you what to do, and when. It's a mobile-frie
 
 ## What it does
 
+Most sourdough apps quietly adjust the schedule for you. This one shows you the levers and what each one does to your day, so you can fit sourdough around your life. As a side effect, it helps you understand the process.
+
+- **Shows you the levers.** Feed ratio, dough temperature and time in the fridge each move your timeline. See [The three levers](#the-three-levers).
+- **Plans backwards.** Tell it when you're feeding, or when you want to start your autolyse, and it works out the feed, when the starter will be ready, and a full timeline of when each step happens. It also shows how long until the next step.
 - **Guides a bake step by step.** Ten steps from feeding the starter to the oven, each with instructions, ingredient amounts, and a timer where the step has one.
-- **Plans backwards.** Tell it when you're feeding, or when you want to start your autolyse, and it works out the feed, when the starter will be ready, and a full timeline of when each step happens.
-- **Shows how long until the next step**, so you know when you can walk away.
 - **Scales the recipe** for one or two loaves, regular (25cm banneton, about 1kg) or large (30cm, about 1.5kg), at a hydration you choose from 60% to 80%.
 - **Keeps your place.** The bake in progress is saved, so a reload or a locked phone doesn't lose it, and timers keep counting with the screen off.
 - **Logs your bakes** with outcome, notes and the timings you recorded, and lets you repeat any past bake.
 - **Is easy to follow.** Plain-English tips on every step and tricky term, sensible defaults, a first-run tutorial, a text size setting and a Help tab.
 - **Works offline** and installs as an app (a progressive web app), with a light theme (Flour) and a dark one (Ember).
+
+## The three levers
+
+Each lever changes your timeline in a different place.
+
+| Lever | What it changes | Where to find it |
+| --- | --- | --- |
+| Feed ratio | When your starter is ready. There are ten feeds, from 1:1:1 (ready in 4 to 6 hours) to 1:10:10 (13 to 16 hours). 1:6:6 (9 to 11 hours) is the standard, and is picked whenever it fits | Step 1, the starter calculator. Simple uses 1:6:6, and Advanced lists the feed times that suit your autolyse time. "See how this works" shows the ready window on a bar |
+| Dough temperature | How long bulk fermentation takes, and the rise to aim for. 5.5 hours at 26 to 27°C, 7 hours at 24°C (the default), 12 hours at 21°C, and 16 hours at 18 to 19°C | Step 6, the Bulk Fermentation Time Calculator, and the temperature setting in the timeline (Cool 21°C, Typical 24°C, Warm 26°C) |
+| Time in the fridge | When you bake, and how much flavour builds. Anywhere from 8 to 72 hours | Step 9, the Bake Time Planner, and the "Bake at" and "Extra days in the fridge" settings in the timeline |
+
+The timeline ties them together. Change a lever and the steps after it move. A different feed time moves everything, a different dough temperature moves the end of bulk onwards, and a different fridge time moves the oven and the bake.
 
 ## The bake
 
