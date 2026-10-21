@@ -57,6 +57,10 @@ export interface Levers {
     size: LoafSize;
     autolyseMin: number;
     fermentolyseMin: number;
+    /** How many loaves, baked together (1 if not set). Only changes the amounts. */
+    loaves?: 1 | 2;
+    /** Total dough hydration in percent (70 if not set). Only changes the water. */
+    hydration?: number;
 }
 
 export const DEFAULT_LEVERS: Omit<Levers, 'feedAt'> = {
