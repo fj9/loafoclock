@@ -11,6 +11,8 @@ interface Props {
     zone?: Zone;
     /** The time you asked to carve, if you picked one. Rest before carving is counted up to it. */
     carveAt?: number;
+    /** Lock the plan and go to the live view. */
+    onStart?: (levers: LeverSet) => void;
 }
 
 function describe(v: Violation, plan: Plan, zone: Zone): string {
@@ -23,7 +25,7 @@ function describe(v: Violation, plan: Plan, zone: Zone): string {
 }
 
 /** The timeline, the levers and the step list for one plan. */
-export function PlanDetail({ levers, onChange, now, zone, carveAt }: Props) {
+export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart }: Props) {
     const plan = useMemo(() => buildPlan(levers), [levers]);
     const problems = violations(plan, { zone, carveAt });
     return (
@@ -45,6 +47,9 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt }: Props) {
                     ))}
                 </ol>
             </section>
+            {onStart && (
+                <button type="button" class="btn big-btn" onClick={() => onStart(levers)}>Start this plan</button>
+            )}
         </>
     );
 }

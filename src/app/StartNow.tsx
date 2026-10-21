@@ -6,10 +6,11 @@ import { clockOf, dayLabel, lengthOf, whenOf } from './format';
 interface Props {
     now: number;
     zone?: Zone;
+    onStart?: (levers: LeverSet) => void;
 }
 
 /** "Start a loaf now": see the range, then pull the levers. */
-export function StartNow({ now, zone }: Props) {
+export function StartNow({ now, zone, onStart }: Props) {
     const [levers, setLevers] = useState<LeverSet>(() => startNowLevers(now, {}, zone) ?? leversAt(now));
     const plan = useMemo(() => buildPlan(levers), [levers]);
     const range = useMemo(() => carveRange(now, { cooling: levers.cooling, size: levers.size }), [now, levers.cooling, levers.size]);
@@ -25,7 +26,7 @@ export function StartNow({ now, zone }: Props) {
                     {' '}With no fridge, {whenOf(range.noFridge.readyToCarve, zone)}, but less sourdough.
                 </p>
             </section>
-            <PlanDetail levers={levers} onChange={setLevers} now={now} zone={zone} />
+            <PlanDetail levers={levers} onChange={setLevers} now={now} zone={zone} onStart={onStart} />
             <button type="button" class="btn outline" onClick={() => setLevers(startNowLevers(now, {}, zone) ?? leversAt(now))}>
                 Suggest levers again
             </button>

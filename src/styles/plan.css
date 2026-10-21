@@ -63,3 +63,20 @@
 .card-line { font-weight: 600; font-size: calc(14px * var(--ts, 1)); }
 .card-blurb { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .card-warn { color: var(--warn-ink); background: var(--warn-bg); border-radius: 6px; padding: 2px 8px; justify-self: start; font-size: calc(13px * var(--ts, 1)); }
+
+.big-btn { width: 100%; padding: 14px 16px; font-size: calc(18px * var(--ts, 1)); margin: 8px 0 0; }
+.next-up { margin: 0 0 16px; }
+.next-up.overdue { border-color: var(--danger); }
+.next-up.due { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.next-up.done { border-color: var(--good); background: var(--good-bg); }
+.folds { display: flex; gap: 10px; list-style: none; padding: 0; margin: 8px 0; }
+.folds li { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--accent); }
+.folds li.done { background: var(--accent); }
+.folds li.now { box-shadow: 0 0 0 3px var(--glow); }
+.free { margin: 8px 0 0; }
+.keep .link { color: inherit; }
+.live-steps li.done { color: var(--muted); text-decoration: line-through; }
+.live-steps li.overdue { color: var(--danger); }
+.live-steps .shift { color: var(--muted); font-style: normal; }
+.live-steps .link { margin-left: 8px; font-size: calc(13px * var(--ts, 1)); }
+.sheet .chips { margin: 12px 0; }
