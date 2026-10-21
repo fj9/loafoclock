@@ -107,6 +107,8 @@ Review points with the owner after milestones 2, 3 and 4.
 
 - [x] **Milestone 0: set-up.** TypeScript (strict) and Preact in place, the carry-over modules ported to `src/domain` with their tests, the first app parked in `legacy/`, a placeholder Preact shell with the design tokens, PWA and update prompt, and CI that typechecks, tests and builds. Pages needs switching on once in the repository settings.
 
+- [x] **Milestone 1: plan model** (`src/domain/plan`). Zone-aware time helpers, levers, forward planner on real timestamps, rules (waking hours, fridge range, rest before carving), backward planner (fresh, more flavour, bedtime, no fridge), fit hints (range, fridge fit and nudge, start-now levers) and live reconcile (ticks, shifts, keep my bake time, locks). Tests include the clocks-going-back weekend of 25 October 2026. Rest before carving is counted from the loaf coming out of the oven.
+
 ## Open items
 
 1. Quick feeds in a row before the nudge: suggested 3.
