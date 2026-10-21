@@ -39,3 +39,17 @@ export function lengthOf(ms: number): string {
     if (!h) return `${m} m`;
     return m ? `${h} h ${m} m` : `${h} h`;
 }
+
+/** For a day chip: "Today", "Tomorrow", or "Sat 24" */
+export function chipDay(ms: number, now: number, zone?: Zone): string {
+    const label = dayLabel(ms, now, zone);
+    return label === 'Today' || label === 'Tomorrow' ? label : `${weekdayOf(ms, zone)} ${partsOf(ms, zone).day}`;
+}
+
+/** "Sunday 25 October" */
+export function fullDay(ms: number, zone?: Zone): string {
+    const p = partsOf(ms, zone);
+    const name = new Date(Date.UTC(p.year, p.month - 1, p.day)).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
+    const month = new Date(Date.UTC(p.year, p.month - 1, p.day)).toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+    return `${name} ${p.day} ${month}`;
+}
