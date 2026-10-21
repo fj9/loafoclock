@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STEP_TIPS, TIPS, tipHtml } from './tips.js';
+import { STEP_TIPS, TIPS, tipHtml } from './tips';
 
 describe('tips', () => {
     it('every tip has a label and plain text of a sensible length', () => {
@@ -16,12 +16,12 @@ describe('tips', () => {
     it('links the button to its tooltip, with a unique id each time', () => {
         const a = tipHtml('ratio');
         const b = tipHtml('ratio');
-        const id = (h) => h.match(/aria-describedby="([^"]+)"/)[1];
+        const id = (h: string) => h.match(/aria-describedby="([^"]+)"/)![1];
         expect(a).toContain(`id="${id(a)}"`);
         expect(id(a)).not.toBe(id(b));
         expect(a).toContain('role="tooltip"');
     });
     it('rejects unknown keys', () => {
-        expect(() => tipHtml('nope')).toThrow();
+        expect(() => tipHtml('nope' as never)).toThrow();
     });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clockAfter, defaultFeedOption, feedAt, feedTimeOptions, findRatio, hoursUntil, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding.js';
+import { clockAfter, defaultFeedOption, feedAt, feedTimeOptions, findRatio, hoursUntil, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter } from './feeding';
 
 describe('clock helpers', () => {
     it('adds hours and reports days rolled over', () => {
@@ -29,16 +29,29 @@ describe('feedAt', () => {
     });
 });
 
+import type { FeedTimeOption, LimitedPlan } from './feeding';
+
+/** Narrows a limited-starter plan that can be made. */
+const reachable = (p: LimitedPlan) => {
+    if (!p.canReach) throw new Error('expected a plan that can be made');
+    return p;
+};
+/** Narrows a limited-starter plan that cannot be made. */
+const unreachable = (p: LimitedPlan) => {
+    if (p.canReach) throw new Error('expected a plan that cannot be made');
+    return p;
+};
+
 describe('planLimitedStarter', () => {
     it('uses 1:6:6 and only as much starter as needed', () => {
-        const p = planLimitedStarter({ have: 50, need: 230, feedTime: '21:00' });
+        const p = reachable(planLimitedStarter({ have: 50, need: 230, feedTime: '21:00' }));
         expect(p.ratio.ratio).toBe('1:6:6');
         expect(p.feed.starter).toBe(18);
         expect(p.window.from).toEqual({ time: '06:00', days: 1 });
         expect(p.window.to).toEqual({ time: '08:00', days: 1 });
     });
     it('dilutes just enough when there is too little starter for 1:6:6', () => {
-        const p = planLimitedStarter({ have: 30, need: 460, feedTime: '08:00' });
+        const p = reachable(planLimitedStarter({ have: 30, need: 460, feedTime: '08:00' }));
         expect(p.canReach).toBe(true);
         expect(p.diluted).toBe(true);
         expect(p.ratio.ratio).toBe('1:8:8');
@@ -46,7 +59,7 @@ describe('planLimitedStarter', () => {
         expect(p.feed.total).toBeGreaterThanOrEqual(460);
     });
     it('says so when even 1:10:10 cannot reach the amount', () => {
-        const p = planLimitedStarter({ have: 10, need: 460, feedTime: '08:00' });
+        const p = unreachable(planLimitedStarter({ have: 10, need: 460, feedTime: '08:00' }));
         expect(p.canReach).toBe(false);
         expect(p.reachable).toBe(210);
         expect(p.minStarter).toBe(22);
@@ -57,24 +70,25 @@ describe('planLimitedStarter', () => {
 });
 
 describe('planFeedForAutolyse', () => {
-    const plan = (feedTime, autolyseAt, extra = {}) => planFeedForAutolyse({ need: 180, feedTime, autolyseAt, ...extra });
+    const plan = (feedTime: string, autolyseAt: string, extra: { autolyseMin?: number; have?: number } = {}) =>
+        planFeedForAutolyse({ need: 180, feedTime, autolyseAt, ...extra });
 
     it('feeding at 22:00 for an 08:00 autolyse gives an 11 hour wait and 1:6:6 still fits', () => {
         const p = plan('22:00', '08:00');
         expect(p.gapHours).toBe(11);
-        expect(p.best.ratio.ratio).toBe('1:6:6');
+        expect(p.best!.ratio.ratio).toBe('1:6:6');
     });
     it('moves to a slower ratio when the wait is longer', () => {
         const p = plan('21:00', '08:00'); // 12h: 1:6:6 peaks an hour early
-        expect(p.sixOption.status).toBe('tooFast');
-        expect(p.sixOption.offHours).toBe(1);
-        expect(p.best.ratio.ratio).toBe('1:8:8'); // window centred closest to 12h
+        expect(p.sixOption!.status).toBe('tooFast');
+        expect(p.sixOption!.offHours).toBe(1);
+        expect(p.best!.ratio.ratio).toBe('1:8:8'); // window centred closest to 12h
     });
     it('moves to a quicker ratio when the wait is shorter', () => {
         const p = plan('23:30', '08:00'); // 9.5h
-        expect(p.best.ratio.ratio).toBe('1:6:6');
+        expect(p.best!.ratio.ratio).toBe('1:6:6');
         const q = plan('01:00', '08:00'); // 8h
-        expect(q.best.ratio.ratio).toBe('1:4:4'); // mid 8 is closest, 1:5:5 and 1:3:3 also fit but are further off
+        expect(q.best!.ratio.ratio).toBe('1:4:4'); // mid 8 is closest, 1:5:5 and 1:3:3 also fit but are further off
     });
     it('counts the autolyse rest as part of the wait', () => {
         expect(plan('22:00', '08:00', { autolyseMin: 40 }).gapHours).toBeCloseTo(10.67, 2);
@@ -82,12 +96,12 @@ describe('planFeedForAutolyse', () => {
     it('every ratio is listed with a status', () => {
         const p = plan('22:00', '08:00');
         expect(p.options).toHaveLength(10);
-        expect(p.options.find((o) => o.ratio.ratio === '1:1:1').status).toBe('tooFast');
-        expect(p.options.find((o) => o.ratio.ratio === '1:10:10').status).toBe('tooSlow');
+        expect(p.options.find((o) => o.ratio.ratio === '1:1:1')!.status).toBe('tooFast');
+        expect(p.options.find((o) => o.ratio.ratio === '1:10:10')!.status).toBe('tooSlow');
     });
     it('says when there is too little time, and when to feed by', () => {
         const p = plan('05:00', '08:00'); // 4h wait including the rest... 3 + 1
-        expect(p.best.ratio.ratio).toBe('1:1:1');
+        expect(p.best!.ratio.ratio).toBe('1:1:1');
         const s = plan('06:30', '08:00'); // 2.5h
         expect(s.best).toBeNull();
         expect(s.problem).toMatchObject({ kind: 'tooShort', feedBy: '05:00' });
@@ -98,8 +112,8 @@ describe('planFeedForAutolyse', () => {
         expect(p.problem).toMatchObject({ kind: 'tooLong', feedFrom: '16:00' });
     });
     it('warns when the starter you have is not enough', () => {
-        expect(plan('22:00', '08:00', { have: 10 }).best.notEnoughStarter).toBe(true);  // 1:6:6 needs 14g
-        expect(plan('22:00', '08:00', { have: 20 }).best.notEnoughStarter).toBe(false);
+        expect(plan('22:00', '08:00', { have: 10 }).best!.notEnoughStarter).toBe(true);  // 1:6:6 needs 14g
+        expect(plan('22:00', '08:00', { have: 20 }).best!.notEnoughStarter).toBe(false);
     });
 });
 
@@ -134,8 +148,8 @@ describe('plain language helpers', () => {
 });
 
 describe('feedTimeOptions', () => {
-    const opts = (autolyseAt, extra = {}) => feedTimeOptions({ autolyseAt, need: 180, ...extra });
-    const byTime = (list) => Object.fromEntries(list.map((o) => [o.feedTime, o.ratio.ratio]));
+    const opts = (autolyseAt: string, extra: { have?: number } = {}) => feedTimeOptions({ autolyseAt, need: 180, ...extra });
+    const byTime = (list: FeedTimeOption[]) => Object.fromEntries(list.map((o) => [o.feedTime, o.ratio.ratio]));
 
     it('for an 08:00 autolyse lists evening feeds, with 10pm as 1:6:6', () => {
         const o = byTime(opts('08:00'));
@@ -166,10 +180,10 @@ describe('feedTimeOptions', () => {
     });
     it('flags options the starter in your jar cannot cover', () => {
         const o = opts('08:00', { have: 10 });
-        expect(o.find((x) => x.feedTime === '22:00').notEnoughStarter).toBe(true);
+        expect(o.find((x) => x.feedTime === '22:00')!.notEnoughStarter).toBe(true);
     });
     it('starts on the latest 1:6:6, as in a 10pm feed for 8am', () => {
-        expect(defaultFeedOption(opts('08:00')).feedTime).toBe('22:00');
+        expect(defaultFeedOption(opts('08:00'))!.feedTime).toBe('22:00');
         expect(defaultFeedOption([])).toBeNull();
     });
 });

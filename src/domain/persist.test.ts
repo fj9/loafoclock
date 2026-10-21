@@ -1,17 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { BAKE_KEY, clearActiveBake, loadActiveBake, pausedTimer, saveActiveBake, savedAgo, startedTimer, timerNow } from './persist.js';
-import { loadSettings, rememberChoices, saveSettings, applyDisplaySettings } from './settings.js';
-
-const fakeStorage = () => {
-    const data = {};
-    return { getItem: (k) => (k in data ? data[k] : null), setItem: (k, v) => { data[k] = String(v); }, removeItem: (k) => { delete data[k]; }, data };
-};
+import { BAKE_KEY, clearActiveBake, loadActiveBake, pausedTimer, saveActiveBake, savedAgo, startedTimer, timerNow } from './persist';
+import { fakeStorage } from './test-helpers';
 
 describe('saved bake', () => {
     it('round-trips a bake', () => {
         const s = fakeStorage();
         saveActiveBake({ loaves: 2, size: 'large', currentStep: 3, starterFeedTime: '22:00' }, s, 1000);
-        const back = loadActiveBake(10, s);
+        const back = loadActiveBake(10, s)!;
         expect(back.bake).toMatchObject({ loaves: 2, size: 'large', currentStep: 3, starterFeedTime: '22:00' });
         expect(back.savedAt).toBe(1000);
     });
@@ -44,7 +39,7 @@ describe('timer that survives a locked screen', () => {
     it('counts down from the end time, not from ticks', () => {
         const t = startedTimer(3600, 1, t0);
         expect(timerNow(t, t0)).toEqual({ seconds: 3600, running: true, finished: false });
-        expect(timerNow(t, t0 + 600_000).seconds).toBe(3000);          // ten minutes later, screen was off
+        expect(timerNow(t, t0 + 600_000)!.seconds).toBe(3000);          // ten minutes later, screen was off
     });
     it('reports a timer that ran out while you were away', () => {
         const t = startedTimer(60, 1, t0);
@@ -58,32 +53,5 @@ describe('timer that survives a locked screen', () => {
     });
     it('has nothing when there is no timer', () => {
         expect(timerNow(null)).toBeNull();
-    });
-});
-
-describe('settings', () => {
-    it('saves and merges', () => {
-        const s = fakeStorage();
-        saveSettings({ clock12: false }, s);
-        saveSettings({ hints: false }, s);
-        expect(loadSettings(s)).toEqual({ clock12: false, hints: false });
-    });
-    it('copes with broken storage', () => {
-        const s = fakeStorage(); s.setItem('sourdoughSettings', '{bad');
-        expect(loadSettings(s)).toEqual({});
-    });
-    it('remembers the loaf and feed choices', () => {
-        const s = fakeStorage();
-        rememberChoices({ loaves: 2, size: 'large', hydration: 75, feedMode: 'deadline', feedHave: 120, currentStep: 4 }, s);
-        expect(loadSettings(s).lastBake).toEqual({ loaves: 2, size: 'large', hydration: 75, feedMode: 'deadline', feedHave: 120 });
-    });
-    it('applies hints and text size to the page', () => {
-        const root = { dataset: {} };
-        applyDisplaySettings({ hints: false, textSize: 'large' }, root);
-        expect(root.dataset).toEqual({ hints: 'off', text: 'large' });
-        applyDisplaySettings({}, root);
-        expect(root.dataset).toEqual({ hints: 'on', text: 'normal' });
-        applyDisplaySettings({ textSize: 'huge' }, root);
-        expect(root.dataset.text).toBe('normal');
     });
 });

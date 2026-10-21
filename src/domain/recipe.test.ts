@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { HYDRATIONS, bakePlan, loafDescription, recipeFor } from './recipe.js';
+import { HYDRATIONS, bakePlan, loafDescription, recipeFor } from './recipe';
 
-const one = (size, hydration, loaves = 1) => recipeFor({ size, hydration, loaves });
+const one = (size: string, hydration: number, loaves = 1) => recipeFor({ size, hydration, loaves });
 
 describe('recipeFor', () => {
     it('regular loaf at 70% is 450 flour, 300 water, 150 starter', () => {
@@ -49,7 +49,7 @@ describe('recipeFor', () => {
     it('two loaves double every amount', () => {
         const single = one('large', 75);
         const double = one('large', 75, 2);
-        for (const key of Object.keys(single)) expect(double[key]).toBe(single[key] * 2);
+        for (const key of Object.keys(single) as (keyof typeof single)[]) expect(double[key]).toBe(single[key] * 2);
     });
 
     it('defaults to a regular loaf at 70% for older saved bakes', () => {

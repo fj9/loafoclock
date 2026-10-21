@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, restEnd, restText, tidyRest } from './timing.js';
+import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, restEnd, restText, tidyRest } from './timing';
 
 describe('tidyRest', () => {
     it('keeps the full hour when it already ends on the half hour', () => {
