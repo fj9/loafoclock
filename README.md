@@ -17,7 +17,6 @@ src/domain/    the logic: feeding chart and ratio fit, recipe amounts, rest leng
                saved settings and bake. Pure TypeScript with tests (the plan model arrives in milestone 1)
 src/app/       the Preact app (a placeholder shell for now)
 src/styles/    design tokens (the Flour and Ember themes) and base styles
-legacy/        the first app's UI, parked for reference. Not built. See legacy/README.md
 docs/          the build plan
 public/        favicon and app icons
 ```

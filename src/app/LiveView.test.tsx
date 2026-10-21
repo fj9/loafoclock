@@ -147,3 +147,17 @@ describe('steps in the live view', () => {
         expect(screen.getByText('900g flour')).toBeTruthy();
     });
 });
+
+describe('the when-did-you-do-this sheet', () => {
+    it('takes focus, closes on Escape and gives focus back', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        render(<Harness start={rec} at={plan.byId.autolyse} />);
+        const button = screen.getByText('I have started the autolyse');
+        button.focus();
+        fireEvent.click(button);
+        expect(document.activeElement?.textContent).toBe('Just now');
+        fireEvent.keyDown(document, { key: 'Escape' });
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect(document.activeElement).toBe(button);
+    });
+});
