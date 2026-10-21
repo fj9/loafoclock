@@ -1,45 +1,45 @@
-/* Theme: "tea towel" light (cream, terracotta, rust) and "ember" dark (warm brown, ember orange).
-   Light by default; dark via data-theme or the phone's setting. */
+/* Themes. Flour (light): flour, crust brown and starter green. Ember (dark): the same, by the oven.
+   Starter green is only for "ready" and success states. Light by default; dark via data-theme or the phone's setting. */
 :root {
     --ts: 1; /* text size multiplier, see Settings */
-    --page-bg: #F3DDB8; --page-dot: #FBF5E9;
-    --card: #FBF5E9; --wash: #F5EAD2; --line: #E6D2AE; --dot: #D2622B;
-    --ink: #4A2B20; --label: #5E3A2C; --muted: #7A5A4B;
-    --accent: #9E3326; --accent-strong: #B8501F; --accent-hover: #9C4119; --on-accent: #FBF5E9;
-    --header-bg: #9E3326; --header-ink: #FBF5E9; --header-shadow: #4A2B20; --header-rule: #D2622B;
-    --fill-a: #D2622B; --fill-b: #9E3326;
-    --danger: #B3261E; --good: #557A5C; --good-ink: #2F4F36; --good-bg: #E4EADF;
-    --info: #6F8A78; --info-ink: #35493C; --info-bg: #E3EAE0;
-    --warn: #D9A21B; --warn-ink: #7A4B0C; --warn-bg: #FBEBC4; --calc-bg: #F7E3C2;
-    --glow: rgba(210, 98, 43, .28);
+    --page-bg: #EEDFC9; --page-dot: #FBF5EA;
+    --card: #FBF5EA; --wash: #F4EBDA; --line: #E4D6BF; --dot: #C98F66;
+    --ink: #2B211C; --label: #3E322B; --muted: #6B5B51;
+    --accent: #9A4A22; --accent-strong: #9A4A22; --accent-hover: #823C19; --on-accent: #FBF5EA;
+    --header-bg: #9A4A22; --header-ink: #FBF5EA; --header-shadow: #2B211C; --header-rule: #D9A67C;
+    --fill-a: #C57A47; --fill-b: #9A4A22;
+    --danger: #B3261E; --good: #5E7F5A; --good-ink: #3C5A39; --good-bg: #E3EBDD;
+    --info: #8A7565; --info-ink: #4A3D34; --info-bg: #EFE5D6;
+    --warn: #C98A1B; --warn-ink: #6E4A07; --warn-bg: #F8E7C1; --calc-bg: #F5E4CC;
+    --glow: rgba(154, 74, 34, .25);
     --font-display: 'Alfa Slab One', Georgia, 'Times New Roman', serif;
     color-scheme: light;
 }
 :root[data-theme="dark"] {
-    --page-bg: #1A110E; --page-dot: #271A15;
-    --card: #231915; --wash: #30231D; --line: #4A372D; --dot: #7A4A33;
-    --ink: #F5E9D3; --label: #E2D2BA; --muted: #C9B5A0;
-    --accent: #E8803F; --accent-strong: #E8803F; --accent-hover: #F09656; --on-accent: #231915;
-    --header-bg: #30231D; --header-ink: #E8803F; --header-shadow: #120B09; --header-rule: #C25A3F;
-    --fill-a: #E8803F; --fill-b: #C25A3F;
-    --danger: #FF8F7A; --good: #8FB89A; --good-ink: #BFD9C4; --good-bg: #26332B;
-    --info: #8FA58F; --info-ink: #C5D5C5; --info-bg: #25302A;
-    --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3A271C;
-    --glow: rgba(232, 128, 63, .3);
+    --page-bg: #1B1411; --page-dot: #251B16;
+    --card: #2B211C; --wash: #372B24; --line: #4D3D33; --dot: #85553A;
+    --ink: #F5EBDD; --label: #E4D5C3; --muted: #C2B0A0;
+    --accent: #E39A66; --accent-strong: #E39A66; --accent-hover: #EDAE82; --on-accent: #2B211C;
+    --header-bg: #372B24; --header-ink: #E8A272; --header-shadow: #14100D; --header-rule: #9A4A22;
+    --fill-a: #E39A66; --fill-b: #C2703A;
+    --danger: #FF9484; --good: #8FB68A; --good-ink: #BCD8B8; --good-bg: #26332A;
+    --info: #B7A394; --info-ink: #DCCBBB; --info-bg: #3A2F28;
+    --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3C2B20;
+    --glow: rgba(227, 154, 102, .3);
     color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-        --page-bg: #1A110E; --page-dot: #271A15;
-        --card: #231915; --wash: #30231D; --line: #4A372D; --dot: #7A4A33;
-        --ink: #F5E9D3; --label: #E2D2BA; --muted: #C9B5A0;
-        --accent: #E8803F; --accent-strong: #E8803F; --accent-hover: #F09656; --on-accent: #231915;
-        --header-bg: #30231D; --header-ink: #E8803F; --header-shadow: #120B09; --header-rule: #C25A3F;
-        --fill-a: #E8803F; --fill-b: #C25A3F;
-        --danger: #FF8F7A; --good: #8FB89A; --good-ink: #BFD9C4; --good-bg: #26332B;
-        --info: #8FA58F; --info-ink: #C5D5C5; --info-bg: #25302A;
-        --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3A271C;
-        --glow: rgba(232, 128, 63, .3);
+        --page-bg: #1B1411; --page-dot: #251B16;
+        --card: #2B211C; --wash: #372B24; --line: #4D3D33; --dot: #85553A;
+        --ink: #F5EBDD; --label: #E4D5C3; --muted: #C2B0A0;
+        --accent: #E39A66; --accent-strong: #E39A66; --accent-hover: #EDAE82; --on-accent: #2B211C;
+        --header-bg: #372B24; --header-ink: #E8A272; --header-shadow: #14100D; --header-rule: #9A4A22;
+        --fill-a: #E39A66; --fill-b: #C2703A;
+        --danger: #FF9484; --good: #8FB68A; --good-ink: #BCD8B8; --good-bg: #26332A;
+        --info: #B7A394; --info-ink: #DCCBBB; --info-bg: #3A2F28;
+        --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3C2B20;
+        --glow: rgba(227, 154, 102, .3);
         color-scheme: dark;
     }
 }
@@ -66,7 +66,7 @@ body {
     margin: 0 auto;
     background: var(--card);
     border-radius: 16px;
-    box-shadow: 0 6px 24px rgba(74, 43, 32, 0.18);
+    box-shadow: 0 6px 24px rgba(43, 33, 28, 0.18);
     overflow: hidden;
 }
 
@@ -529,7 +529,7 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
     color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .site-footer .links { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; }
 .site-footer a { color: var(--accent); font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; }
-:focus-visible { outline: 3px solid var(--warn); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; } /* accent, not amber: it must show up on flour */
 
 /* First-run tutorial */
 .overlay { position: fixed; inset: 0; background: rgba(10, 12, 20, .55); display: flex; align-items: flex-end;
@@ -582,7 +582,7 @@ details.faq summary { cursor: pointer; font-weight: 600; min-height: 32px; }
 .tl-settings input, .tl-settings select { padding: 8px; border: 2px solid var(--line); border-radius: 8px; font-size: calc(16px * var(--ts, 1)); }
 .timeline > .hint { margin: 10px 14px 14px; }
 
-/* Tea towel touches: slab headings with double rules, dotted dividers */
+/* Slab headings with double rules, dotted dividers */
 .tab-content h2, .panel h2 {
     font-family: var(--font-display);
     font-weight: 400;

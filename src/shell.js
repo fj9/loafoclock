@@ -8,7 +8,7 @@ import { applyDisplaySettings, loadSettings, saveSettings } from './settings.js'
 
 const THEME_KEY = 'sourdoughTheme';
 const LOG_KEY = 'sourdoughLogs';
-const PAGE_COLOURS = { light: '#9E3326', dark: '#30231D' }; // the header colour in each theme
+const PAGE_COLOURS = { light: '#9A4A22', dark: '#372B24' }; // the header colour in each theme
 
 // Add a LinkedIn URL here and it appears in the footer.
 const FOOTER_LINKS = [

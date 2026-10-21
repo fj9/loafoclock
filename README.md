@@ -35,7 +35,7 @@ A free sourdough planner that tells you what to do, and when. It's a mobile-frie
 - **Keeps your place.** The bake in progress is saved, so a reload or a locked phone doesn't lose it, and timers keep counting with the screen off.
 - **Logs your bakes** with outcome, notes and the timings you recorded, and lets you repeat any past bake.
 - **Is easy to follow.** Plain-English tips on every step and tricky term, sensible defaults, a first-run tutorial, a text size setting and a Help tab.
-- **Works offline** and installs as an app (a progressive web app), with light ("tea towel") and dark ("ember") themes.
+- **Works offline** and installs as an app (a progressive web app), with a light theme (Flour) and a dark one (Ember).
 
 ## The bake
 

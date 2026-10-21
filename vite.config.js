@@ -17,8 +17,8 @@ export default defineConfig({
                 name: "Loaf O'Clock",
                 short_name: "Loaf O'Clock",
                 description: 'A free sourdough planner that tells you what to do, and when.',
-                theme_color: '#9E3326',
-                background_color: '#FBF5E9',
+                theme_color: '#9A4A22',
+                background_color: '#FBF5EA',
                 display: 'standalone',
                 start_url: '.',
                 icons: [
