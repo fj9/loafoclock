@@ -232,7 +232,7 @@ Vitest runs every `src/*.test.js`. The tests cover the recipe amounts, the feedi
 
 ## Credits and licence
 
-- The recipe began with a sourdough guide tea towel by [Stuart Gardiner](https://www.stuartgardiner.com), and the look of the app borrows its colours. This project is not affiliated with or endorsed by him.
+- The recipe began with a sourdough guide tea towel by [Stuart Gardiner](https://www.stuartgardiner.com). This project is not affiliated with or endorsed by him.
 - Heading font: [Alfa Slab One](https://fontsource.org/fonts/alfa-slab-one) (SIL Open Font Licence), bundled with `@fontsource`.
 - Built with [Vite](https://vitejs.dev), [Vitest](https://vitest.dev) and [vite-plugin-pwa](https://vite-pwa-org.netlify.app).
 
