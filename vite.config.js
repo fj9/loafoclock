@@ -14,9 +14,9 @@ export default defineConfig({
             workbox: { globPatterns: ['**/*.{js,css,html,woff2}'] }, // include the bundled heading font
             includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
             manifest: {
-                name: 'Sourdough Companion',
-                short_name: 'Sourdough',
-                description: 'Step-by-step sourdough baking guide with timers, calculators and a bake log.',
+                name: "Loaf O'Clock",
+                short_name: "Loaf O'Clock",
+                description: 'A free sourdough planner that tells you what to do, and when.',
                 theme_color: '#9E3326',
                 background_color: '#FBF5E9',
                 display: 'standalone',

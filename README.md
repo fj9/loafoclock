@@ -1,8 +1,10 @@
-# 🍞 Sourdough Companion
+# <img src="public/favicon.svg" alt="" width="44" align="absmiddle"> Loaf O'Clock
+
+*It's always Loaf O'Clock somewhere.*
 
 [![Deploy to GitHub Pages](https://github.com/fj9/sourdough/actions/workflows/deploy.yml/badge.svg)](https://github.com/fj9/sourdough/actions/workflows/deploy.yml)
 
-A free, mobile-friendly web app that walks you through a weekly sourdough bake, plans the whole thing backwards from when you want to start, and keeps a log of how each loaf turned out. It installs to your phone's home screen, works offline, and keeps everything on your own device.
+A free sourdough planner that tells you what to do, and when. It's a mobile-friendly web app that walks you through a weekly sourdough bake, plans the whole thing backwards from when you want to start, and keeps a log of how each loaf turned out. It installs to your phone's home screen, works offline, and keeps everything on your own device.
 
 **Use it:** https://fj9.github.io/sourdough/
 

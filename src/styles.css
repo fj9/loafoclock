@@ -682,3 +682,6 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .about ul { padding-left: 20px; margin-bottom: 8px; }
 .about .panel p, .about .panel li { line-height: 1.5; }
 .about a { color: var(--accent); font-weight: 600; }
+
+/* Header tagline */
+header .tagline { margin-top: 4px; font-size: calc(14px * var(--ts, 1)); color: var(--header-ink); opacity: .9; }

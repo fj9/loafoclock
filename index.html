@@ -7,16 +7,19 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Loaf O'Clock">
+    <meta name="description" content="A free sourdough planner that tells you what to do, and when.">
     <script>
         try { var t = localStorage.getItem('sourdoughTheme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
         try { var st = JSON.parse(localStorage.getItem('sourdoughSettings') || '{}'); document.documentElement.dataset.hints = st.hints === false ? 'off' : 'on'; if (st.textSize === 'large' || st.textSize === 'larger') document.documentElement.dataset.text = st.textSize; } catch (e) {}
     </script>
-    <title>Sourdough Companion</title>
+    <title>Loaf O'Clock · a sourdough planner</title>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🍞 Sourdough Companion</h1>
+            <h1>Loaf O'Clock</h1>
+            <p class="tagline">It's always Loaf O'Clock somewhere.</p>
         </header>
 
         <nav class="tabs">
@@ -171,15 +174,16 @@
             <section class="panel" id="faq"></section>
             <section class="panel">
                 <h2>About</h2>
-                <p>Who made this, and why. <button type="button" class="link-btn" id="help-about-link">About Sourdough Companion</button></p>
+                <p>Who made this, and why. <button type="button" class="link-btn" id="help-about-link">About Loaf O'Clock</button></p>
             </section>
         </div>
 
         <!-- About: opened from the footer or Help; the Help tab stays highlighted -->
         <div id="about-tab" class="tab-content about">
             <section class="panel">
-                <h2>About Sourdough Companion</h2>
-                <p>Hi, I'm Frankie, (fj9 on GitHub). This is a free sourdough app that tells you what to do, and when.</p>
+                <h2>About Loaf O'Clock</h2>
+                <p><em>It's always Loaf O'Clock somewhere.</em></p>
+                <p>Hi, I'm Frankie, (fj9 on GitHub). Loaf O'Clock is a free sourdough planner that tells you what to do, and when.</p>
             </section>
             <section class="panel">
                 <h2>Why I made it</h2>

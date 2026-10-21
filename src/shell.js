@@ -18,7 +18,7 @@ const FOOTER_LINKS = [
 ];
 
 const WELCOME_CARDS = [
-    { title: 'Start a bake', body: 'Pick one or two loaves and tap Start Baking. The recipe scales for you.' },
+    { title: "Welcome to Loaf O'Clock", body: "It's always Loaf O'Clock somewhere. Pick one or two loaves and tap Start Baking. The recipe scales for you." },
     { title: 'Follow the steps', body: 'Each step explains what to do. Timed steps have a timer, and calculators help with feeding your starter and working out bulk fermentation.' },
     { title: 'Log it', body: 'Finish the bake to save it with your notes and how it turned out. Find it again under Log.' },
     { title: 'Make it yours', body: 'In Settings you can switch between light and dark mode and turn on timer notifications.' }
@@ -156,7 +156,7 @@ function initSettings() {
     document.getElementById('backup-btn').addEventListener('click', () => {
         const data = localStorage.getItem(LOG_KEY) || '[]';
         const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
-        const a = Object.assign(document.createElement('a'), { href: url, download: `sourdough-log-${new Date().toISOString().slice(0, 10)}.json` });
+        const a = Object.assign(document.createElement('a'), { href: url, download: `loafoclock-log-${new Date().toISOString().slice(0, 10)}.json` });
         a.click();
         URL.revokeObjectURL(url);
         msg.textContent = 'Backup saved.';

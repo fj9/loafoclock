@@ -1480,9 +1480,9 @@ function playNotification() {
     
     // Audio notification (if supported)
     if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Sourdough Timer', {
+        new Notification("Loaf O'Clock timer", {
             body: 'Time for the next step!',
-            icon: '🍞'
+            icon: 'icon-192.png'
         });
     }
 }
