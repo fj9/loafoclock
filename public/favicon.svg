@@ -1,9 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#9E3326"/>
-  <g fill="#F3DDB8" opacity=".35"><circle cx="64" cy="64" r="16"/><circle cx="448" cy="64" r="16"/><circle cx="64" cy="448" r="16"/><circle cx="448" cy="448" r="16"/><circle cx="256" cy="56" r="12"/><circle cx="256" cy="456" r="12"/></g>
-  <path d="M96 300c0-80 70-132 160-132s160 52 160 132c0 36-22 56-52 56H148c-30 0-52-20-52-56z" fill="#e0a458"/>
-  <path d="M96 300c0-80 70-132 160-132s160 52 160 132c0 10-2 18-6 25-24-52-84-86-154-86s-130 34-154 86c-4-7-6-15-6-25z" fill="#f2c27b"/>
-  <g stroke="#b9772d" stroke-width="14" stroke-linecap="round" fill="none">
-    <path d="M196 226l-22 62"/><path d="M256 214v70"/><path d="M316 226l22 62"/>
+  <title>Loaf O'Clock</title>
+  <rect width="512" height="512" fill="#9A4A22"/>
+  <ellipse cx="256" cy="414" rx="150" ry="13" fill="#7E3A18"/>
+  <ellipse cx="256" cy="264" rx="176" ry="150" fill="#C98A52"/>
+  <ellipse cx="256" cy="258" rx="158" ry="132" fill="#E8B07A"/>
+  <g stroke="#FBF5EA" stroke-width="34" stroke-linecap="round" fill="none">
+    <path d="M256 268V160"/>
+    <path d="M256 268l70 41"/>
   </g>
+  <circle cx="256" cy="268" r="22" fill="#FBF5EA"/>
 </svg>
