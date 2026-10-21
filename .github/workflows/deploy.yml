@@ -2,7 +2,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  pull_request: # build and test pull requests, but never deploy them
   workflow_dispatch:
 permissions:
   contents: read
@@ -28,7 +27,6 @@ jobs:
         with:
           path: dist
   deploy:
-    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
