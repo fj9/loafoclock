@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { fmtShort, fmtTime, isClock12, setClock12 } from './clock.js';
+import { fmtShort, fmtTime, isClock12, setClock12 } from './clock';
 
 afterEach(() => setClock12(false));
 

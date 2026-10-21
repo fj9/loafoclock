@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findRatio } from './feeding.js';
+import { findRatio } from '../src/domain/feeding';
 import { feedBarHtml } from './feedbar.js';
 
 const r66 = findRatio('1:6:6'); // ready 9-11h after feeding

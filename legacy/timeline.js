@@ -1,7 +1,7 @@
 // HTML for the timeline shown under the progress bar. Pure: takes a schedule from schedule.js.
-import { fmtTime } from './clock.js';
+import { fmtTime } from '../src/domain/clock';
 import { BAKE_CHIPS, FEED_CHIPS, timePickerHtml } from './timepicker.js';
-import { FEEDING_RATIOS } from './feeding.js';
+import { FEEDING_RATIOS } from '../src/domain/feeding';
 import { PLAN_DEFAULTS } from './schedule.js';
 
 const TEMP_CHOICES = [

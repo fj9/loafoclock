@@ -1,7 +1,7 @@
 import { registerSW } from 'virtual:pwa-register';
-import { setClock12 } from './clock.js';
+import { setClock12 } from '../src/domain/clock';
 import { loadBakeLog, refreshTimeline, switchTab } from './app.js';
-import { applyDisplaySettings, loadSettings, saveSettings } from './settings.js';
+import { applyDisplaySettings, loadSettings, saveSettings } from '../src/domain/settings';
 
 // App shell: theme, first-run tutorial, help, settings and footer.
 // Kept apart from app.js (the baking workflow) so each file does one job.

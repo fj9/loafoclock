@@ -1,0 +1,45 @@
+/* Design tokens. Flour (light): flour, crust brown and starter green. Ember (dark): the same, by the oven.
+   Starter green is only for "ready" and success states. Light by default; dark via data-theme or the phone's setting. */
+:root {
+    --ts: 1; /* text size multiplier, see Settings */
+    --page-bg: #EEDFC9; --page-dot: #FBF5EA;
+    --card: #FBF5EA; --wash: #F4EBDA; --line: #E4D6BF; --dot: #C98F66;
+    --ink: #2B211C; --label: #3E322B; --muted: #6B5B51;
+    --accent: #9A4A22; --accent-strong: #9A4A22; --accent-hover: #823C19; --on-accent: #FBF5EA;
+    --header-bg: #9A4A22; --header-ink: #FBF5EA; --header-shadow: #2B211C; --header-rule: #D9A67C;
+    --fill-a: #C57A47; --fill-b: #9A4A22;
+    --danger: #B3261E; --good: #5E7F5A; --good-ink: #3C5A39; --good-bg: #E3EBDD;
+    --info: #8A7565; --info-ink: #4A3D34; --info-bg: #EFE5D6;
+    --warn: #C98A1B; --warn-ink: #6E4A07; --warn-bg: #F8E7C1; --calc-bg: #F5E4CC;
+    --glow: rgba(154, 74, 34, .25);
+    --font-display: 'Alfa Slab One', Georgia, 'Times New Roman', serif;
+    color-scheme: light;
+}
+:root[data-theme="dark"] {
+    --page-bg: #1B1411; --page-dot: #251B16;
+    --card: #2B211C; --wash: #372B24; --line: #4D3D33; --dot: #85553A;
+    --ink: #F5EBDD; --label: #E4D5C3; --muted: #C2B0A0;
+    --accent: #E39A66; --accent-strong: #E39A66; --accent-hover: #EDAE82; --on-accent: #2B211C;
+    --header-bg: #372B24; --header-ink: #E8A272; --header-shadow: #14100D; --header-rule: #9A4A22;
+    --fill-a: #E39A66; --fill-b: #C2703A;
+    --danger: #FF9484; --good: #8FB68A; --good-ink: #BCD8B8; --good-bg: #26332A;
+    --info: #B7A394; --info-ink: #DCCBBB; --info-bg: #3A2F28;
+    --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3C2B20;
+    --glow: rgba(227, 154, 102, .3);
+    color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --page-bg: #1B1411; --page-dot: #251B16;
+        --card: #2B211C; --wash: #372B24; --line: #4D3D33; --dot: #85553A;
+        --ink: #F5EBDD; --label: #E4D5C3; --muted: #C2B0A0;
+        --accent: #E39A66; --accent-strong: #E39A66; --accent-hover: #EDAE82; --on-accent: #2B211C;
+        --header-bg: #372B24; --header-ink: #E8A272; --header-shadow: #14100D; --header-rule: #9A4A22;
+        --fill-a: #E39A66; --fill-b: #C2703A;
+        --danger: #FF9484; --good: #8FB68A; --good-ink: #BCD8B8; --good-bg: #26332A;
+        --info: #B7A394; --info-ink: #DCCBBB; --info-bg: #3A2F28;
+        --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3C2B20;
+        --glow: rgba(227, 154, 102, .3);
+        color-scheme: dark;
+    }
+}

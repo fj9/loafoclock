@@ -1,4 +1,9 @@
 // Plain-English explanations for the jargon, shown as (i) tooltips next to the term.
+export interface Tip {
+    label: string;
+    text: string;
+}
+
 export const TIPS = {
     starter: {
         label: 'feeding the starter',
@@ -84,20 +89,22 @@ export const TIPS = {
         label: 'baking in a Dutch oven',
         text: 'A heavy pot with a lid, heated until very hot. The lid traps steam so the loaf can spring up. You take the lid off for the second half to brown the crust.'
     }
-};
+} as const satisfies Record<string, Tip>;
+
+export type TipKey = keyof typeof TIPS;
 
 let counter = 0;
 
-/** HTML for an (i) button and its tooltip. Hover, focus or tap shows it (see shell.js). */
-export function tipHtml(key) {
-    const tip = TIPS[key];
+/** @deprecated HTML for the parked legacy UI only. The new UI uses a Tip component. */
+export function tipHtml(key: TipKey): string {
+    const tip: Tip | undefined = TIPS[key];
     if (!tip) throw new Error(`Unknown tip: ${key}`);
     const id = `tip-${key}-${++counter}`;
     return `<span class="tip-wrap"><button type="button" class="info-btn" aria-label="What is ${tip.label}?" aria-describedby="${id}">i</button><span class="tip" role="tooltip" id="${id}">${tip.text}</span></span>`;
 }
 
 /** Which tip goes with each step, by step id. */
-export const STEP_TIPS = {
+export const STEP_TIPS: Record<number, TipKey> = {
     1: 'starter', 2: 'autolyse', 3: 'fermentolyse', 4: 'enrichments', 5: 'folds',
     6: 'bulk', 7: 'preShape', 8: 'finalShape', 9: 'retardation', 10: 'baking'
 };

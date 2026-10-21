@@ -1,6 +1,6 @@
 // Quick picks, a big readout and a slider: how you choose a time of day.
-import { fmtShort, fmtTime } from './clock.js';
-import { parseClock } from './feeding.js';
+import { fmtShort, fmtTime } from '../src/domain/clock';
+import { parseClock } from '../src/domain/feeding';
 
 // Both sliders cover the whole day in 15 minute steps, starting at `base` (minutes after midnight)
 export const SLIDERS = {

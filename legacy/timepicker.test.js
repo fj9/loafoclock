@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { setClock12 } from './clock.js';
+import { setClock12 } from '../src/domain/clock';
 import { AUTOLYSE_CHIPS, DAYS_BACK, FEED_CHIPS, JUST_NOW_CHIPS, SLIDERS, chipTime, clockToSlider, dateTimePickerHtml, dayOffsetOf, localDateTime, nearestMinutes, nearestQuarter, sliderToClock, timePickerHtml } from './timepicker.js';
 
 afterEach(() => setClock12(false));
