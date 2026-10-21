@@ -4,12 +4,15 @@ import {
     COOLING_CHOICES, COOLEST_TEMP, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, bulkFor, isQuickFeed, ratioFor,
     nudgeFridge, type Levers as LeverSet, type Zone
 } from '../domain/plan';
+import { QUICK_FEED_NUDGE_AT } from '../domain/bakeLog';
 import { lengthOf } from './format';
 
 interface Props {
     levers: LeverSet;
     zone?: Zone;
     onChange: (next: LeverSet) => void;
+    /** How many bakes in a row used a quick feed (from the log). */
+    quickStreak?: number;
     /** Levers that have already happened cannot change. */
     locked?: { feedRatio?: boolean; doughTemp?: boolean; fridge?: boolean };
 }
@@ -17,7 +20,7 @@ interface Props {
 const hoursText = (h: number) => lengthOf(h * 3_600_000);
 
 /** The things you can change, and what each does to your day. */
-export function Levers({ levers, zone, onChange, locked = {} }: Props) {
+export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }: Props) {
     const set = (over: Partial<LeverSet>) => onChange({ ...levers, ...over });
     const ratio = ratioFor(levers.ratioN);
     const bulk = bulkFor(levers.doughTemp);
@@ -61,7 +64,7 @@ export function Levers({ levers, zone, onChange, locked = {} }: Props) {
                     })}
                 </select>
                 {isQuickFeed(levers.ratioN) && (
-                    <p class="hint warn">Quick feeds are fine now and then to hurry a bake. For a starter you keep in the fridge, a steadier 1:6:6 is gentler.</p>
+                    <p class="hint warn">Quick feeds are fine now and then to hurry a bake. For a starter you keep in the fridge, a steadier 1:6:6 is gentler.{quickStreak >= QUICK_FEED_NUDGE_AT && ` Your last ${quickStreak} bakes all used quick feeds, so this might be a good time for a steady one.`}</p>
                 )}
             </div>
 

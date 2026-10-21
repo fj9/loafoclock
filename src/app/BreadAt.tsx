@@ -15,6 +15,7 @@ interface Props {
     now: number;
     zone?: Zone;
     onStart?: (levers: LeverSet) => void;
+    quickStreak?: number;
 }
 
 function blurb(c: Candidate, now: number, zone: Zone): string {
@@ -29,7 +30,7 @@ function blurb(c: Candidate, now: number, zone: Zone): string {
 }
 
 /** "I want bread at...": pick when, get plans that work backwards from it. */
-export function BreadAt({ now, zone, onStart }: Props) {
+export function BreadAt({ now, zone, onStart, quickStreak }: Props) {
     // Start on tomorrow's lunch... or, if that is too soon to make, the day after.
     const [carveAt, setCarveAt] = useState(() => atLocalTime(addLocalDays(startOfLocalDay(now, zone), 2, zone), 12 * 60 + 30, zone));
     const [chosen, setChosen] = useState<number | null>(null);
@@ -73,7 +74,7 @@ export function BreadAt({ now, zone, onStart }: Props) {
             {picked && edited && (
                 <section aria-label="Your plan">
                     <h2>{TITLES[picked.category]}</h2>
-                    <PlanDetail levers={edited} onChange={setEdited} now={now} zone={zone} carveAt={carveAt} onStart={onStart} />
+                    <PlanDetail levers={edited} onChange={setEdited} now={now} zone={zone} carveAt={carveAt} onStart={onStart} quickStreak={quickStreak} />
                 </section>
             )}
         </div>
