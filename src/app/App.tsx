@@ -1,10 +1,15 @@
+import { useState } from 'preact/hooks';
 import { Logo } from './Logo';
+import { StartNow } from './StartNow';
 import { UpdatePrompt } from './UpdatePrompt';
 
 declare const __APP_VERSION__: string;
 
-/** Placeholder shell for milestone 0. The timeline-first screens arrive in milestones 2 to 4. */
+/** Round up to the next 5 minutes so the plan does not change every second. */
+const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
+
 export function App() {
+    const [now] = useState(startingPoint);
     return (
         <div class="app">
             <header class="app-header">
@@ -15,11 +20,9 @@ export function App() {
                 <p class="tagline">It's always Loaf O'Clock somewhere.</p>
             </header>
             <main class="app-main">
-                <section class="panel">
-                    <h2>The new version is on its way</h2>
-                    <p>A multi-day timeline from your first feed to a loaf that's ready to carve, with levers you can pull to fit it around your day.</p>
-                    <p class="hint">Version {__APP_VERSION__} (work in progress)</p>
-                </section>
+                <h2>Start a loaf now</h2>
+                <StartNow now={now} />
+                <p class="hint">Version {__APP_VERSION__} (work in progress)</p>
             </main>
             <UpdatePrompt />
         </div>
