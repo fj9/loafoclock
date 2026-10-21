@@ -13,6 +13,7 @@ interface Props {
     carveAt?: number;
     /** Lock the plan and go to the live view. */
     onStart?: (levers: LeverSet) => void;
+    quickStreak?: number;
 }
 
 function describe(v: Violation, plan: Plan, zone: Zone): string {
@@ -25,7 +26,7 @@ function describe(v: Violation, plan: Plan, zone: Zone): string {
 }
 
 /** The timeline, the levers and the step list for one plan. */
-export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart }: Props) {
+export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak }: Props) {
     const plan = useMemo(() => buildPlan(levers), [levers]);
     const problems = violations(plan, { zone, carveAt });
     return (
@@ -36,7 +37,7 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart }: Pr
                 </ul>
             )}
             <Timeline plan={plan} zone={zone} now={now} />
-            <Levers levers={levers} zone={zone} onChange={onChange} />
+            <Levers levers={levers} zone={zone} onChange={onChange} quickStreak={quickStreak} />
             <section class="panel steps">
                 <h2>The steps</h2>
                 <ol>

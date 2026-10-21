@@ -12,6 +12,8 @@ interface Props {
     record: LiveRecord;
     onChange: (next: LiveRecord) => void;
     onFinish: () => void;
+    /** Stop without logging. Defaults to finishing. */
+    onStop?: () => void;
     /** The current time. Replaced in tests. */
     clock?: () => number;
     zone?: Zone;
@@ -33,7 +35,7 @@ const DONE_LABEL: Partial<Record<StepId, string>> = {
 const doneLabel = (s: LiveStep) => (s.id.startsWith('fold') ? `Fold ${s.id.slice(4)} done` : DONE_LABEL[s.id] ?? 'Done');
 
 /** The locked plan: where you are, what is next and how long you are free. */
-export function LiveView({ record, onChange, onFinish, clock = Date.now, zone }: Props) {
+export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock = Date.now, zone }: Props) {
     const [now, setNow] = useState(clock);
     useEffect(() => {
         const t = setInterval(() => setNow(clock()), 15_000);
@@ -130,7 +132,7 @@ export function LiveView({ record, onChange, onFinish, clock = Date.now, zone }:
                 <Levers levers={record.levers} zone={zone} locked={{ feedRatio: view.locked.feedRatio, doughTemp: view.locked.doughTemp, fridge: view.locked.fridge }}
                     onChange={(levers) => onChange({ ...record, levers })} />
             )}
-            <p><button type="button" class="link" onClick={() => { if (confirm('Stop this bake and throw away the plan?')) onFinish(); }}>Stop this bake</button></p>
+            <p><button type="button" class="link" onClick={() => { if (confirm('Stop this bake and throw away the plan?')) onStop(); }}>Stop this bake</button></p>
 
             {asking && (
                 <div class="overlay" role="dialog" aria-modal="true" aria-label="When did you do this?">

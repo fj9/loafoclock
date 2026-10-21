@@ -5,12 +5,16 @@ const SETTINGS_KEY = 'loafoclockSettings';
 export const TEXT_SIZES = ['normal', 'large', 'larger'] as const;
 export type TextSize = (typeof TEXT_SIZES)[number];
 
+export const THEMES = ['system', 'light', 'dark'] as const;
+export type Theme = (typeof THEMES)[number];
+
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 export interface Settings {
     hints?: boolean;
     textSize?: TextSize;
     clock12?: boolean;
+    theme?: Theme;
     welcomeSeen?: boolean;
     [key: string]: unknown;
 }
@@ -36,4 +40,11 @@ export function applyDisplaySettings(settings: Settings, root: { dataset: DOMStr
     if (!root) return;
     root.dataset.hints = settings.hints === false ? 'off' : 'on';
     root.dataset.text = TEXT_SIZES.includes(settings.textSize as TextSize) ? settings.textSize : 'normal';
+}
+
+/** Applies the light or dark choice. "system" follows the phone. */
+export function applyTheme(settings: Settings, root: { setAttribute(k: string, v: string): void; removeAttribute(k: string): void } | undefined = globalThis.document?.documentElement): void {
+    if (!root) return;
+    if (settings.theme === 'light' || settings.theme === 'dark') root.setAttribute('data-theme', settings.theme);
+    else root.removeAttribute('data-theme');
 }
