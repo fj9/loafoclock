@@ -119,5 +119,5 @@ Review points with the owner after milestones 2, 3 and 4.
 
 1. Quick feeds in a row before the nudge: suggested 3.
 2. Two loaves with different cold-ferment times: later.
-3. Reminders (for example a calendar file with an alert per step): later.
+3. ~~Reminders~~ Done: a calendar file with an alert 10 minutes before each step (branch `reminders`).
 4. Whether the new app is announced at its own address and the old app later redirects to it.
