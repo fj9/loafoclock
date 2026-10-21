@@ -209,6 +209,19 @@ function initUpdates() {
     });
 }
 
+// ---- About ----
+function openAbout() {
+    switchTab('about');
+    window.scrollTo(0, 0);
+}
+
+function initAbout() {
+    document.getElementById('help-about-link').addEventListener('click', openAbout);
+    // __APP_VERSION__ is filled in from package.json by the build
+    const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '';
+    document.getElementById('app-version').textContent = version ? `Version ${version}` : '';
+}
+
 // ---- Footer ----
 function renderFooter() {
     const links = FOOTER_LINKS.filter(l => l.url)
@@ -218,8 +231,7 @@ function renderFooter() {
         `<div>Made by fj9</div><div class="links">${links.join('')}</div>`;
     document.getElementById('footer-about').addEventListener('click', e => {
         e.preventDefault();
-        switchTab('help');
-        document.getElementById('about').scrollIntoView();
+        openAbout();
     });
 }
 
@@ -279,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSettings();
     initUpdates();
     renderHelp();
+    initAbout();
     renderFooter();
     if (!loadSettings().welcomeSeen) showTutorial();
 });

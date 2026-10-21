@@ -210,9 +210,10 @@ function initializeTabs() {
 }
 
 export function switchTab(tabName) {
-    // Update tab buttons
+    // Update tab buttons (the About page has no tab of its own, so Help stays lit)
+    const lit = tabName === 'about' ? 'help' : tabName;
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabName);
+        btn.classList.toggle('active', btn.dataset.tab === lit);
     });
     
     // Update tab content

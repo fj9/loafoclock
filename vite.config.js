@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+
 export default defineConfig({
+    define: { __APP_VERSION__: JSON.stringify(version) }, // shown on the About page
     // Relative base keeps the build working at any GitHub Pages repo path.
     base: './',
     plugins: [

@@ -677,3 +677,8 @@ input[type="radio"], input[type="checkbox"], input[type="range"] { accent-color:
 .resume-card small { color: var(--muted); }
 .resume-card .btn-row { margin-top: 10px; }
 .timer-note { color: var(--header-ink); margin: -6px 0 12px; font-size: calc(14px * var(--ts, 1)); }
+
+/* About page */
+.about ul { padding-left: 20px; margin-bottom: 8px; }
+.about .panel p, .about .panel li { line-height: 1.5; }
+.about a { color: var(--accent); font-weight: 600; }
