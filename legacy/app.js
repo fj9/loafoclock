@@ -1,13 +1,13 @@
-import { bakePlan, recipeFor, loafDescription } from './recipe.js';
-import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, REST_MAX, REST_MIN, restEnd, restText, tidyRest } from './timing.js';
-import { STEP_TIPS, tipHtml } from './tips.js';
+import { bakePlan, recipeFor, loafDescription } from '../src/domain/recipe';
+import { bulkHoursBeforeRemaining, clampRest, firstFoldMinutes, REST_DEFAULT, REST_MAX, REST_MIN, restEnd, restText, tidyRest } from '../src/domain/timing';
+import { STEP_TIPS, tipHtml } from '../src/domain/tips';
 import { BULK_FERMENTATION_TEMPS, PLAN_DEFAULTS, buildSchedule, feedAnchorMs } from './schedule.js';
 import { countdownText, progressLabel, timelineHtml } from './timeline.js';
-import { clearActiveBake, loadActiveBake, pausedTimer, saveActiveBake, savedAgo, startedTimer, timerNow } from './persist.js';
-import { loadSettings, rememberChoices } from './settings.js';
-import { FEEDING_RATIOS, clockAfter, defaultFeedOption, feedTimeOptions, findRatio, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from './feeding.js';
+import { clearActiveBake, loadActiveBake, pausedTimer, saveActiveBake, savedAgo, startedTimer, timerNow } from '../src/domain/persist';
+import { loadSettings, rememberChoices } from '../src/domain/settings';
+import { FEEDING_RATIOS, clockAfter, defaultFeedOption, feedTimeOptions, findRatio, isAwkwardHour, planAlreadyFed, planFeedForAutolyse, planLimitedStarter, riseLabel } from '../src/domain/feeding';
 import { feedBarHtml } from './feedbar.js';
-import { fmtShort, fmtTime } from './clock.js';
+import { fmtShort, fmtTime } from '../src/domain/clock';
 import { AUTOLYSE_CHIPS, DAYS_AHEAD, DAYS_BACK, FEED_CHIPS, JUST_NOW_CHIPS, bindDateTimePicker, bindTimePicker, dateTimePickerHtml, localDateTime, nearestMinutes, nearestQuarter, setDateTimePicker, setTimePicker, timePickerHtml } from './timepicker.js';
 
 // Sourdough Baking Steps

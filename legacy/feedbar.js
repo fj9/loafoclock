@@ -1,7 +1,7 @@
 // A small bar showing what a feed does over time: when you feed, when the starter is ready
 // (the green band), and when you start autolyse and add the starter to the dough.
-import { fmtTime } from './clock.js';
-import { clockAfter } from './feeding.js';
+import { fmtTime } from '../src/domain/clock';
+import { clockAfter } from '../src/domain/feeding';
 
 const dayText = (days) => (days === 0 ? '' : days === 1 ? ' (next day)' : ` (+${days} days)`);
 const clock = (feedTime, hours) => {

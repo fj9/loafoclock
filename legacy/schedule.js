@@ -1,5 +1,5 @@
 // The plan for the whole bake, worked out from when you feed your starter.
-import { clockAfter, hoursUntil, parseClock } from './feeding.js';
+import { clockAfter, hoursUntil, parseClock } from '../src/domain/feeding';
 
 // Bulk fermentation temperature chart
 export const BULK_FERMENTATION_TEMPS = [
