@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <title>Loaf O'Clock</title>
   <rect width="512" height="512" fill="#9A4A22"/>
-  <ellipse cx="256" cy="414" rx="150" ry="13" fill="#7E3A18"/>
-  <ellipse cx="256" cy="264" rx="176" ry="150" fill="#C98A52"/>
-  <ellipse cx="256" cy="258" rx="158" ry="132" fill="#E8B07A"/>
+  <ellipse cx="256" cy="410" rx="156" ry="14" fill="#7E3A18"/>
+  <path d="M88 322C88 188 164 106 256 106s168 82 168 216c0 52-36 84-90 84H178c-54 0-90-32-90-84z" fill="#C98A52"/>
+  <path d="M106 320C106 200 172 124 256 124s150 76 150 196c0 42-30 68-76 68H182c-46 0-76-26-76-68z" fill="#E8B07A"/>
   <g stroke="#FBF5EA" stroke-width="34" stroke-linecap="round" fill="none">
-    <path d="M256 268V160"/>
-    <path d="M256 268l70 41"/>
+    <path d="M256 276V160"/>
+    <path d="M256 276l72 42"/>
   </g>
-  <circle cx="256" cy="268" r="22" fill="#FBF5EA"/>
+  <circle cx="256" cy="276" r="22" fill="#FBF5EA"/>
 </svg>
