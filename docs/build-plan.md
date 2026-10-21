@@ -109,6 +109,7 @@ Review points with the owner after milestones 2, 3 and 4.
 
 - [x] **Milestone 1: plan model** (`src/domain/plan`). Zone-aware time helpers, levers, forward planner on real timestamps, rules (waking hours, fridge range, rest before carving), backward planner (fresh, more flavour, bedtime, no fridge), fit hints (range, fridge fit and nudge, start-now levers) and live reconcile (ticks, shifts, keep my bake time, locks). Tests include the clocks-going-back weekend of 25 October 2026. Rest before carving is counted from the loaf coming out of the oven.
 - [x] **Milestone 2: timeline and Start now** (branch `timeline-start-now`). Horizontal timeline with sleeping bands and a Now marker, the levers (feed, wait, dough temperature, fridge with nudge and the no-fridge unlock, cooling), the range line and a step list. Component tests added. Review with the owner next.
+- [x] **Milestone 3: Bread at…** (branch `bread-at`). Mode switch, carve picker (day chips, meal chips, slider that works out plans on release), plan cards from the backward planner (baked fresh, more flavour, bedtime, and a quiet no-fridge link), and the same timeline and levers underneath through a shared plan view.
 
 ## Open items
 
