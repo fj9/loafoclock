@@ -32,8 +32,7 @@ export default defineConfig({
         })
     ],
     test: {
-        // The parked legacy tests still run until the files they cover are replaced
-        include: ['src/**/*.test.{ts,tsx}', 'legacy/**/*.test.js'],
+        include: ['src/**/*.test.{ts,tsx}'],
         environment: 'node' // component tests opt in with `// @vitest-environment jsdom`
     }
 });

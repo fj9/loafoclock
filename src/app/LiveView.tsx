@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { LiveRecord } from '../domain/liveStore';
 import {
     FOLD_IDS, MINUTE, buildPlan, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type StepId, type Zone
@@ -45,6 +45,16 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     const [asking, setAsking] = useState<StepId | null>(null);
     const [editing, setEditing] = useState(false);
     const [open, setOpen] = useState<StepId | null>(null);
+    // The "when did you do this?" sheet takes focus when it opens, closes on Escape, and gives focus back.
+    const sheet = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (!asking) return;
+        const before = document.activeElement as HTMLElement | null;
+        sheet.current?.querySelector<HTMLElement>('button')?.focus();
+        const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setAsking(null); };
+        document.addEventListener('keydown', esc);
+        return () => { document.removeEventListener('keydown', esc); before?.focus?.(); };
+    }, [asking]);
 
     const original = buildPlan(record.original);
     const view = reconcile(original, record.levers, record.actuals, now);
@@ -136,7 +146,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
 
             {asking && (
                 <div class="overlay" role="dialog" aria-modal="true" aria-label="When did you do this?">
-                    <div class="sheet">
+                    <div class="sheet" ref={sheet}>
                         <h2>When did you do this?</h2>
                         <div class="chips">
                             {AGO.map((a) => (

@@ -32,9 +32,9 @@ export function Timeline({ plan, zone, now }: Props) {
     const noFridge = plan.levers.fridge.kind === 'none';
 
     return (
-        <div class="timeline" role="img" aria-label="Timeline of the whole bake. The steps are listed below.">
-            <div class="tl-scroll">
-                <div class="tl-track" style={{ width: `${width}px` }}>
+        <div class="timeline">
+            <div class="tl-scroll" tabIndex={0} role="region" aria-label="Timeline of the whole bake, scrolls sideways. The steps are listed below.">
+                <div class="tl-track" role="img" aria-label="The bake from the first feed to ready to carve" style={{ width: `${width}px` }}>
                     {days.map((d) => {
                         const night = atLocalTime(d, 23 * 60, zone);
                         const morning = atLocalTime(d, 6 * 60, zone);
@@ -42,9 +42,11 @@ export function Timeline({ plan, zone, now }: Props) {
                             <>
                                 <div class="tl-sleep" style={{ left: `${x(d)}px`, width: `${x(morning) - x(d)}px` }} />
                                 <div class="tl-sleep" style={{ left: `${x(night)}px`, width: `${x(addLocalDays(d, 1, zone)) - x(night)}px` }} />
-                                <div class="tl-day" style={{ left: `${Math.max(0, x(d))}px` }}>
-                                    {weekdayOf(d + 12 * HOUR, zone)} {partsOf(d + 12 * HOUR, zone).day}
-                                </div>
+                                {Math.min(end, addLocalDays(d, 1, zone)) - Math.max(start, d) >= 3 * HOUR && (
+                                    <div class="tl-day" style={{ left: `${Math.max(0, x(d))}px` }}>
+                                        {weekdayOf(d + 12 * HOUR, zone)} {partsOf(d + 12 * HOUR, zone).day}
+                                    </div>
+                                )}
                             </>
                         );
                     })}

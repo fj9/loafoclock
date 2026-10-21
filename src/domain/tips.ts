@@ -93,16 +93,6 @@ export const TIPS = {
 
 export type TipKey = keyof typeof TIPS;
 
-let counter = 0;
-
-/** @deprecated HTML for the parked legacy UI only. The new UI uses a Tip component. */
-export function tipHtml(key: TipKey): string {
-    const tip: Tip | undefined = TIPS[key];
-    if (!tip) throw new Error(`Unknown tip: ${key}`);
-    const id = `tip-${key}-${++counter}`;
-    return `<span class="tip-wrap"><button type="button" class="info-btn" aria-label="What is ${tip.label}?" aria-describedby="${id}">i</button><span class="tip" role="tooltip" id="${id}">${tip.text}</span></span>`;
-}
-
 /** Which tip goes with each step, by step id. */
 export const STEP_TIPS: Record<number, TipKey> = {
     1: 'starter', 2: 'autolyse', 3: 'fermentolyse', 4: 'enrichments', 5: 'folds',
