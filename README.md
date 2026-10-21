@@ -234,4 +234,4 @@ Vitest runs every `src/*.test.js`. The tests cover the recipe amounts, the feedi
 - Heading font: [Alfa Slab One](https://fontsource.org/fonts/alfa-slab-one) (SIL Open Font Licence), bundled with `@fontsource`.
 - Built with [Vite](https://vitejs.dev), [Vitest](https://vitest.dev) and [vite-plugin-pwa](https://vite-pwa-org.netlify.app).
 
-No licence has been chosen yet, so all rights are reserved by default. You're welcome to read the code and get in touch.
+The code is released under the [MIT licence](LICENSE): you can use, copy, change and share it, including commercially, as long as the copyright notice stays with it. The Alfa Slab One font keeps its own licence (above), and the tea towel and its artwork belong to their creator.
