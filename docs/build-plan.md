@@ -31,14 +31,15 @@ Out for now: reminders, accounts and syncing, other recipes, and two loaves with
 - **Rest before carving is at most 16 hours.**
 - **Bulk fermentation is counted from the moment the starter goes in** (the fermentolyse). Salt and the folds happen inside it. A late fold moves the later folds but not the end of bulk.
 - **The feed windows are the app's current chart** (`FEEDING_RATIOS` in `src/feeding.js`). That data is correct: for example 1:6:6 is ready 9 to 11 hours after feeding, 1:1:1 in 4 to 6 hours, 1:10:10 in 13 to 16 hours.
-- **Cooling before ready to carve:** a choice of 30 or 60 minutes, defaulting to 60. (Note to check: earlier you said "at least 45 minutes to an hour". 30 is below that. Confirm it is intended.)
+- **Cooling before ready to carve:** a choice of 30 or 60 minutes, defaulting to 60 (confirmed).
 - **Two loaves** are baked together for now. Two loaves with different cold-ferment times (one less sour, one more) is a good idea for later.
+- **The feed windows in the app are correct** and are the source of truth. Any other numbers mentioned in conversation were guesses.
 
 ### Healthy starter
 - A warning when a quick feed (1:3:3 or quicker) is chosen: quick feeds are fine now and then to hurry a bake, but for a weekly starter kept in the fridge a steadier routine of 1:6:6, with an occasional 1:9:9, is gentler.
 - A "Keeping a healthy starter" FAQ.
 - The log records the feed ratio used. The app can nudge after several quick feeds in a row (suggested: 3).
-- Wording is written to be modest and framed as a rule of thumb, because it is guidance rather than a measured fact.
+- Wording is chosen by the builder, kept modest and framed as a rule of thumb, because it is guidance rather than a measured fact. Written in milestone 6.
 
 ### Live view (after you lock a plan)
 - A **Now** marker on a horizontal timeline, a "Next up" card with a countdown, and a "you are free for..." card.
@@ -102,10 +103,13 @@ Review points with the owner after milestones 2, 3 and 4.
 - Keys use a `loafoclock` prefix, because browser storage is shared across `fj9.github.io` and must never read the first app's data.
 - The saved record is versioned. An optional one-off import reads old logs from `sourdoughLogs`.
 
+## Status
+
+- [x] **Milestone 0: set-up.** TypeScript (strict) and Preact in place, the carry-over modules ported to `src/domain` with their tests, the first app parked in `legacy/`, a placeholder Preact shell with the design tokens, PWA and update prompt, and CI that typechecks, tests and builds. Pages needs switching on once in the repository settings.
+
 ## Open items
 
-1. Cooling choices: confirm 30 minutes is intended (see Rules).
-2. Quick feeds in a row before the nudge: suggested 3.
-3. Two loaves with different cold-ferment times: later.
-4. Reminders (for example a calendar file with an alert per step): later.
-5. Whether the new app is announced at its own address and the old app later redirects to it.
+1. Quick feeds in a row before the nudge: suggested 3.
+2. Two loaves with different cold-ferment times: later.
+3. Reminders (for example a calendar file with an alert per step): later.
+4. Whether the new app is announced at its own address and the old app later redirects to it.
