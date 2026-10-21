@@ -18,16 +18,19 @@ const FOOTER_LINKS = [
 ];
 
 const WELCOME_CARDS = [
-    { title: "Welcome to Loaf O'Clock", body: "It's always Loaf O'Clock somewhere. Pick one or two loaves and tap Start Baking. The recipe scales for you." },
-    { title: 'Follow the steps', body: 'Each step explains what to do. Timed steps have a timer, and calculators help with feeding your starter and working out bulk fermentation.' },
-    { title: 'Log it', body: 'Finish the bake to save it with your notes and how it turned out. Find it again under Log.' },
-    { title: 'Make it yours', body: 'In Settings you can switch between light and dark mode and turn on timer notifications.' }
+    { title: "Welcome to Loaf O'Clock", body: "It's always Loaf O'Clock somewhere. This is a sourdough planner that shows how your choices move your bake, so you can fit it around your day. Pick one or two loaves and tap Start Baking." },
+    { title: 'Your timeline', body: "Once you've worked out your feed, a timeline lists when each step happens and how long until the next one. That's how you see when you need to be in the house, and when you're free." },
+    { title: 'Three levers', body: 'Feed ratio decides when your starter is ready. Dough temperature decides how long bulk fermentation takes. The fridge, from 8 to 72 hours, decides when you bake. Change one and watch the steps after it move.' },
+    { title: 'Times are estimates', body: 'They assume a kitchen around 21 to 22°C and the dough temperature you give. Use the plan as a guide, and trust how your dough looks and feels.' }
 ];
 
 const FAQ = [
+    { q: 'Why does the feed ratio matter?', a: 'The ratio is how much flour and water you add to your starter. A small feed, like 1:1:1, is ready in 4 to 6 hours. A big one, like 1:10:10, takes 13 to 16 hours. So the ratio lets you choose when your starter is ready, and Advanced mode lists the feed times that suit your autolyse.' },
+    { q: 'Why does dough temperature change bulk time?', a: "Warmer dough rises faster. In the app's table, a 24°C dough needs about 7 hours of bulk fermentation, a 21°C dough about 12, and an 18°C dough about 16. The target rise changes too, from 50% at 24°C to 75% at 21°C. Step 6 works it out, and the timeline uses it to place the end of bulk." },
+    { q: 'Why use the fridge?', a: 'After shaping, the dough goes in the fridge for 8 to 72 hours. The cold slows the rise right down, so you can bake when it suits you. Step 9 says longer stays give deeper flavour, with a risk of the gluten breaking down. The Bake Time Planner there turns your fridge time into a bake time.' },
     { q: 'Where is my bake log stored?', a: 'In this browser on this device only. Use Back up in Settings to save a file you can restore somewhere else.' },
-    { q: 'Why did my timer stop?', a: 'Phones can pause web pages in the background. Keep the app open on screen, and turn on notifications in Settings so you get an alert when a timer finishes.' },
-    { q: 'Can I change the recipe?', a: 'Not yet. The quantities are for one loaf and double for two.' }
+    { q: 'Why did my timer stop?', a: 'Phones can pause web pages in the background, so a timer may not ring while the screen is off. It still counts down to a saved end time, so it shows the right time when you come back. Turn on notifications in Settings to get an alert while the app is open.' },
+    { q: 'Can I change the recipe?', a: 'Not yet. You can choose one or two loaves, regular or large, and the hydration, but the rest of the recipe is fixed.' }
 ];
 
 // ---- Theme ----
