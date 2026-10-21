@@ -111,6 +111,7 @@ Review points with the owner after milestones 2, 3 and 4.
 - [x] **Milestone 2: timeline and Start now** (branch `timeline-start-now`). Horizontal timeline with sleeping bands and a Now marker, the levers (feed, wait, dough temperature, fridge with nudge and the no-fridge unlock, cooling), the range line and a step list. Component tests added. Review with the owner next.
 - [x] **Milestone 3: Bread at…** (branch `bread-at`). Mode switch, carve picker (day chips, meal chips, slider that works out plans on release), plan cards from the backward planner (baked fresh, more flavour, bedtime, and a quiet no-fridge link), and the same timeline and levers underneath through a shared plan view.
 - [x] **Milestone 4: live view** (branch `live-view`, built on `bread-at`). "Start this plan" locks the plan and saves it (`loafoclockLive`, versioned). The live view has the Now marker, a Next up card with countdown and free time, deliberate ticks, four fold ticks, "when did you do this?" at the autolyse and the starter going in, undo, keep my bake time, edit-after-lock with the locks, and resume after a reload. Reminders are still to do.
+- [x] **Milestone 5: steps** (branch `steps`). "Open the step" (from Next up or any step in the list) shows the amounts for your loaves, the instructions, the tip and a timer that is saved with the bake. The levers now include your loaf: one or two loaves, size and hydration.
 
 ## Open items
 

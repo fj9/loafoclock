@@ -1,4 +1,5 @@
 import { FEEDING_RATIOS } from '../domain/feeding';
+import { DEFAULT_HYDRATION, HYDRATIONS, LOAF_SIZES, type LoafSize } from '../domain/recipe';
 import {
     COOLING_CHOICES, COOLEST_TEMP, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, bulkFor, isQuickFeed, ratioFor,
     nudgeFridge, type Levers as LeverSet, type Zone
@@ -27,6 +28,29 @@ export function Levers({ levers, zone, onChange, locked = {} }: Props) {
 
     return (
         <section class="levers" aria-label="Levers">
+            <div class="lever">
+                <span class="label" id="lv-loaf">Your loaf</span>
+                <div class="seg-choice" role="group" aria-labelledby="lv-loaf">
+                    {([1, 2] as const).map((n) => (
+                        <button type="button" class={(levers.loaves ?? 1) === n ? 'on' : ''} aria-pressed={(levers.loaves ?? 1) === n} onClick={() => set({ loaves: n })}>
+                            {n} {n === 1 ? 'loaf' : 'loaves'}
+                        </button>
+                    ))}
+                </div>
+                <div class="seg-choice" role="group" aria-label="Loaf size">
+                    {(Object.keys(LOAF_SIZES) as LoafSize[]).map((k) => (
+                        <button type="button" class={levers.size === k ? 'on' : ''} aria-pressed={levers.size === k} onClick={() => set({ size: k })}>
+                            {LOAF_SIZES[k].label}
+                        </button>
+                    ))}
+                </div>
+                <label for="lv-hydration" class="sub">Hydration</label>
+                <select id="lv-hydration" value={levers.hydration ?? DEFAULT_HYDRATION} onChange={(e) => set({ hydration: Number((e.target as HTMLSelectElement).value) })}>
+                    {HYDRATIONS.map((h) => <option value={h}>{h}%</option>)}
+                </select>
+                <p class="hint">{LOAF_SIZES[levers.size].note}. Only the amounts change, apart from a larger loaf baking a little longer.</p>
+            </div>
+
             <div class="lever">
                 <label for="lv-ratio">Feed</label>
                 <select id="lv-ratio" value={levers.ratioN} disabled={locked.feedRatio}

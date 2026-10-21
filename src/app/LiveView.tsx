@@ -4,6 +4,7 @@ import {
     FOLD_IDS, MINUTE, buildPlan, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type StepId, type Zone
 } from '../domain/plan';
 import { Levers } from './Levers';
+import { StepGuide } from './StepGuide';
 import { Timeline } from './Timeline';
 import { clockOf, dayLabel, lengthOf } from './format';
 
@@ -41,6 +42,7 @@ export function LiveView({ record, onChange, onFinish, clock = Date.now, zone }:
 
     const [asking, setAsking] = useState<StepId | null>(null);
     const [editing, setEditing] = useState(false);
+    const [open, setOpen] = useState<StepId | null>(null);
 
     const original = buildPlan(record.original);
     const view = reconcile(original, record.levers, record.actuals, now);
@@ -70,6 +72,7 @@ export function LiveView({ record, onChange, onFinish, clock = Date.now, zone }:
                         </ol>
                     )}
                     <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next)}</button>
+                    <button type="button" class="link" onClick={() => setOpen(next.id)}>Open the step</button>
                     {view.freeMs! > 0 && next.status === 'upcoming' && <p class="hint free">You are free for {lengthOf(view.freeMs!)}.</p>}
                 </section>
             ) : (
@@ -79,6 +82,15 @@ export function LiveView({ record, onChange, onFinish, clock = Date.now, zone }:
                     <p class="hint">Let it cool, then enjoy it.</p>
                     <button type="button" class="btn big-btn" onClick={onFinish}>Finish this bake</button>
                 </section>
+            )}
+
+            {open && (
+                <StepGuide
+                    id={open} plan={view.plan} zone={zone} clock={clock} timerEnd={record.timers?.[open]}
+                    onStartTimer={(end) => onChange({ ...record, timers: { ...record.timers, [open]: end } })}
+                    onStopTimer={() => { const { [open]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, timers: rest }); }}
+                    onClose={() => setOpen(null)}
+                />
             )}
 
             {kept && (
@@ -102,6 +114,7 @@ export function LiveView({ record, onChange, onFinish, clock = Date.now, zone }:
                         <li class={s.status}>
                             <span class="when">{s.actualAt !== undefined ? `Done ${clockOf(s.actualAt, zone)}` : when(s.at)}</span> {s.label}
                             {s.status !== 'done' && s.shiftMin !== 0 && <em class="shift"> ({s.shiftMin > 0 ? '+' : ''}{s.shiftMin} min)</em>}
+                            <button type="button" class="link" onClick={() => setOpen(s.id)} aria-label={`Open ${s.label}`}>Open</button>
                             {s.status === 'done' && (
                                 <button type="button" class="link" onClick={() => onChange({ ...record, actuals: untick(record.actuals, s.id) })} aria-label={`Undo ${s.label}`}>Undo</button>
                             )}

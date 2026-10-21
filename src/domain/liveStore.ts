@@ -1,6 +1,6 @@
 // The locked plan and what you have ticked, saved so a reload or a locked phone loses nothing.
 // The key starts with "loafoclock" so it never reads another app's data on the same site.
-import type { Actuals, Levers } from './plan';
+import type { Actuals, Levers, StepId } from './plan';
 import type { StorageLike } from './settings';
 
 export const LIVE_KEY = 'loafoclockLive';
@@ -13,6 +13,8 @@ export interface LiveRecord {
     levers: Levers;
     actuals: Actuals;
     lockedAt: number;
+    /** When each running timer ends (a real moment), by step. */
+    timers?: Partial<Record<StepId, number>>;
 }
 
 export const lockPlan = (levers: Levers, now: number): LiveRecord => ({ original: levers, levers, actuals: {}, lockedAt: now });
@@ -48,6 +50,7 @@ export function loadLive(storage: StorageLike = globalThis.localStorage): LiveRe
         if (saved?.v !== VERSION || !r || !isLevers(r.original) || !isLevers(r.levers) || !Number.isFinite(r.lockedAt)) return null;
         if (!r.actuals || typeof r.actuals !== 'object') return null;
         for (const v of Object.values(r.actuals)) if (!Number.isFinite(v)) return null;
+        if (r.timers !== undefined && (typeof r.timers !== 'object' || Object.values(r.timers).some((v) => !Number.isFinite(v)))) return null;
         return r as LiveRecord;
     } catch {
         return null;

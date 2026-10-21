@@ -110,3 +110,40 @@ describe('live view', () => {
         expect(finished).toBe(true);
     });
 });
+
+describe('steps in the live view', () => {
+    it('opens the step with amounts and instructions, and starts a timer that is saved', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        let saved: LiveRecord = rec;
+        function Keep() {
+            const [r, setR] = useState(rec);
+            saved = r;
+            return <LiveView record={r} onChange={setR} onFinish={() => {}} clock={() => plan.byId.autolyse} zone={LONDON} />;
+        }
+        render(<Keep />);
+        fireEvent.click(screen.getByText('Open the step'));
+        expect(screen.getByRole('region', { name: 'Step: Autolyse' })).toBeTruthy();
+        expect(screen.getByText('450g flour')).toBeTruthy();
+        fireEvent.click(screen.getByText('Start a 60 minute timer'));
+        expect(saved.timers?.autolyse).toBe(plan.byId.autolyse + 60 * MINUTE);
+        expect(screen.getByRole('timer').textContent).toContain('1:00:00');
+        fireEvent.click(screen.getByText('Stop the timer'));
+        expect(saved.timers?.autolyse).toBeUndefined();
+    });
+
+    it('opens any step from the list and shows its tip', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
+        fireEvent.click(screen.getByLabelText('Open Add salt, honey and oil'));
+        expect(screen.getByText('10g salt')).toBeTruthy();
+        fireEvent.click(screen.getByLabelText('What is salt and enrichments?'));
+        expect(screen.getByRole('note').textContent).toContain('Salt adds flavour');
+    });
+
+    it('chooses the loaves from the levers', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
+        fireEvent.click(screen.getByText('Change the plan'));
+        fireEvent.click(screen.getByText('2 loaves'));
+        fireEvent.click(screen.getByLabelText('Open Start autolyse (mix flour and water)'));
+        expect(screen.getByText('900g flour')).toBeTruthy();
+    });
+});
