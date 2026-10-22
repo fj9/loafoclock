@@ -114,7 +114,7 @@ describe('live view', () => {
 });
 
 describe('steps in the live view', () => {
-    it('opens the step with amounts and instructions, and starts a timer that is saved', () => {
+    it('shows the how-to inside the Next up card, and starts a timer that is saved', () => {
         const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         let saved: LiveRecord = rec;
         function Keep() {
@@ -123,9 +123,8 @@ describe('steps in the live view', () => {
             return <LiveView record={r} onChange={setR} onFinish={() => {}} clock={() => plan.byId.autolyse} zone={LONDON} />;
         }
         render(<Keep />);
-        fireEvent.click(screen.getByText('Open the step'));
-        expect(screen.getByRole('region', { name: 'Step: Autolyse' })).toBeTruthy();
-        expect(screen.getByText('450g flour')).toBeTruthy();
+        // The step is due, so its how-to starts open, inside the one card
+        expect(within(nextUp()).getByText('450g flour')).toBeTruthy();
         fireEvent.click(screen.getByText('Start a 60 minute timer now'));
         expect(saved.timers?.autolyse).toBe(plan.byId.autolyse + 60 * MINUTE);
         expect(screen.getByRole('timer', { name: /Timer for/ }).textContent).toContain('1:00:00');
@@ -133,19 +132,21 @@ describe('steps in the live view', () => {
         expect(saved.timers?.autolyse).toBeUndefined();
     });
 
-    it('opens any step from the list and shows its tip', () => {
+    it('opens a step in its row in the list, and shows its tip', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
-        fireEvent.click(screen.getByLabelText('Open Add salt, honey and oil'));
+        fireEvent.click(screen.getByLabelText('Show how-to: Add salt, honey and oil'));
         expect(screen.getByText('10g salt')).toBeTruthy();
         fireEvent.click(screen.getByLabelText('What is salt and enrichments?'));
         expect(screen.getByRole('note').textContent).toContain('Salt adds flavour');
+        fireEvent.click(screen.getByLabelText('Hide how-to: Add salt, honey and oil'));
+        expect(screen.queryByText('10g salt')).toBeNull();
     });
 
     it('chooses the loaves from the levers', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
         fireEvent.click(screen.getByText('Change the plan'));
         fireEvent.click(screen.getByText('2 loaves'));
-        fireEvent.click(screen.getByLabelText('Open Start autolyse (mix flour and water)'));
+        fireEvent.click(screen.getByLabelText('Show how-to: Start autolyse (mix flour and water)'));
         expect(screen.getByText('900g flour')).toBeTruthy();
     });
 });
@@ -164,30 +165,47 @@ describe('the when-did-you-do-this sheet', () => {
     });
 });
 
-describe('done buttons, closing the panel and timers', () => {
-    it('has a done button in the step panel and in the list for every step not yet done', () => {
+describe('done buttons, the how-to and timers', () => {
+    it('has a done button in the list for every step not yet done', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
-        // Not the next step: no need to open it first
+        // Not the next step: no need to open anything first
         fireEvent.click(screen.getByLabelText('Mark Add salt, honey and oil done'));
         expect(screen.getByText(/Done /)).toBeTruthy();
-        fireEvent.click(screen.getByLabelText('Open Pre-shape'));
-        expect(screen.getByRole('region', { name: 'Step: Pre-shape' }).textContent).toContain('Pre-shaped');
     });
 
-    it('ticking from the step panel closes the panel', () => {
+    it('has one Done button for the next step, with the how-to open or closed', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
-        fireEvent.click(screen.getByText('Open the step'));
-        const panel = screen.getByRole('region', { name: 'Step: Feed your starter' });
-        fireEvent.click(within(panel).getByText('I have fed the starter'));
-        expect(screen.queryByRole('region', { name: 'Step: Feed your starter' })).toBeNull();
-        expect(nextUp().textContent).toContain('Start autolyse');
+        const count = () => screen.getAllByRole('button', { name: 'I have fed the starter' }).length;
+        expect(within(nextUp()).getByText('84g water')).toBeTruthy(); // due, so open
+        expect(count()).toBe(1);
+        fireEvent.click(screen.getByText('Hide the how-to'));
+        expect(within(nextUp()).queryByText('84g water')).toBeNull();
+        expect(count()).toBe(1);
     });
 
-    it('ticking from the next-up button closes its panel too', () => {
+    it('opens the how-to by default when the step is due, and not before', () => {
+        const { unmount } = render(<Harness start={lockPlan(levers, feedAt)} at={feedAt - 30 * MINUTE} />);
+        expect(screen.getByText('Show the how-to').getAttribute('aria-expanded')).toBe('false');
+        expect(screen.queryByText('84g water')).toBeNull();
+        unmount();
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
-        fireEvent.click(screen.getByText('Open the step'));
+        expect(screen.getByText('Hide the how-to').getAttribute('aria-expanded')).toBe('true');
+        expect(screen.getByText('84g water')).toBeTruthy();
+    });
+
+    it('can be opened and closed from the toggle row', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt - 30 * MINUTE} />);
+        fireEvent.click(screen.getByText('Show the how-to'));
+        expect(screen.getByText('84g water')).toBeTruthy();
+        fireEvent.click(screen.getByText('Hide the how-to'));
+        expect(screen.queryByText('84g water')).toBeNull();
+    });
+
+    it('ticking moves on to the next step, which shows its own how-to', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
         fireEvent.click(within(nextUp()).getByText('I have fed the starter'));
-        expect(screen.queryByRole('region', { name: /^Step:/ })).toBeNull();
+        expect(nextUp().textContent).toContain('Start autolyse');
+        expect(screen.queryByText('84g water')).toBeNull();
     });
 
     it('starts the wait timer when you tick a step that ends in a wait, and shows it above', () => {

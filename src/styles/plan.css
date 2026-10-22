@@ -89,9 +89,9 @@
 .info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1.5px solid var(--info); background: none; color: var(--muted); cursor: pointer; padding: 0; vertical-align: middle; }
 .info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
 .tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
-.guide .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
-.guide .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
-.guide .timer { margin: 8px 0; font-size: calc(20px * var(--ts, 1)); }
+.step-detail .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
+.step-detail .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
+.step-detail .timer { margin: 8px 0; font-size: calc(20px * var(--ts, 1)); }
 
 .tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--wash); }
 .tabs button { flex: 1; font: inherit; font-weight: 600; padding: 12px 4px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); cursor: pointer; }
@@ -111,7 +111,7 @@
 .timer-name { font-weight: 700; }
 .timer-time { font-family: var(--font-display); font-size: calc(26px * var(--ts, 1)); font-variant-numeric: tabular-nums; }
 .timer-row.up { color: var(--accent); }
-.guide .big-btn { margin: 8px 0; }
+.step-detail .btn { margin: 4px 0 8px; }
 
 /* Each slider takes the colour of the bar on the timeline it controls. */
 .lever #lv-feed { accent-color: var(--good); }
@@ -137,3 +137,12 @@
 .empty-bake .btn { margin-top: 4px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .reminders { margin: 8px 0 16px; }
+
+/* One card for the step that is next: the how-to opens inside it. */
+.how-toggle { display: flex; align-items: center; gap: 6px; font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 8px 0; min-height: 40px; cursor: pointer; }
+.how-toggle svg { transition: transform var(--dur-fast, .15s); }
+.how-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.next-up .step-detail { border-top: 1px solid var(--line); margin: 0 0 12px; padding-top: 10px; }
+.step-detail .what { margin: 0 0 8px; color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
+.row-detail { margin: 8px 0; padding: 10px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); }
+.next-up .big-btn { margin-top: 4px; }

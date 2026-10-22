@@ -6,7 +6,8 @@ import {
 import { guideFor } from '../domain/stepGuide';
 import { ConfirmSheet } from './ConfirmSheet';
 import { Levers } from './Levers';
-import { StepGuide } from './StepGuide';
+import { StepDetail } from './StepDetail';
+import { Tip } from './Tip';
 import { Timeline } from './Timeline';
 import { clockOf, countdownText, dayLabel, lengthOf } from './format';
 
@@ -56,7 +57,8 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
 
     const [asking, setAsking] = useState<StepId | null>(null);
     const [editing, setEditing] = useState(false);
-    const [open, setOpen] = useState<StepId | null>(null);
+    // Which steps have their how-to open. The step that is due starts open; the rest start closed.
+    const [how, setHow] = useState<Partial<Record<StepId, boolean>>>({});
     const [stopping, setStopping] = useState(false);
     // The "when did you do this?" sheet takes focus when it opens, closes on Escape, and gives focus back.
     const sheet = useRef<HTMLDivElement>(null);
@@ -76,7 +78,6 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     // Ticking a step closes its panel and, if the step ends in a wait (a rest, a preheat, cooling), starts that timer.
     const doTick = (id: StepId, at: number) => {
         setAsking(null);
-        if (open === id) setOpen(null);
         const minutes = guideFor(id, view.plan, (ms) => clockOf(ms, zone)).timerMinutes;
         const end = minutes === undefined ? undefined : at + minutes * MINUTE;
         const timers = end !== undefined && end > clock() ? { ...record.timers, [id]: end } : record.timers;
@@ -89,6 +90,15 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
 
     const countdown = (ms: number) => (ms >= 0 ? `in ${lengthOf(ms)}` : `${lengthOf(-ms)} late`);
     const kept = view.keepBakeTime;
+    const text = (ms: number) => clockOf(ms, zone);
+    const howOpen = (s: LiveStep, isNext: boolean) => how[s.id] ?? (isNext && s.status !== 'upcoming');
+    const detail = (s: LiveStep, showTip: boolean) => (
+        <StepDetail
+            id={s.id} plan={view.plan} zone={zone} clock={clock} timerEnd={record.timers?.[s.id]} showTip={showTip}
+            onStartTimer={(end) => onChange({ ...record, timers: { ...record.timers, [s.id]: end } })}
+            onStopTimer={() => clearTimer(s.id)}
+        />
+    );
 
     return (
         <div class="live">
@@ -115,7 +125,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
             {next ? (
                 <section class={`panel next-up ${next.status}`} aria-label="Next up">
                     <p class="eyebrow">Next up</p>
-                    <p class="big">{next.label}</p>
+                    <p class="big">{next.label} {guideFor(next.id, view.plan, text).tip && <Tip name={guideFor(next.id, view.plan, text).tip!} />}</p>
                     <p class="hint">{when(next.at)} · <strong>{countdown(view.untilNext!)}</strong></p>
                     {FOLD_IDS.includes(next.id) && (
                         <ol class="folds" aria-label="Folds">
@@ -124,8 +134,12 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                             ))}
                         </ol>
                     )}
+                    <button type="button" class="how-toggle" aria-expanded={howOpen(next, true)} aria-controls="next-how" onClick={() => setHow({ ...how, [next.id]: !howOpen(next, true) })}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        {howOpen(next, true) ? 'Hide the how-to' : 'Show the how-to'}
+                    </button>
+                    {howOpen(next, true) && <div id="next-how">{detail(next, false)}</div>}
                     <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next)}</button>
-                    <button type="button" class="link" onClick={() => setOpen(next.id)}>Open the step</button>
                     {view.freeMs! > 0 && next.status === 'upcoming' && <p class="hint free">You are free for {lengthOf(view.freeMs!)}.</p>}
                 </section>
             ) : (
@@ -135,18 +149,6 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                     <p class="hint">Let it cool, then enjoy it.</p>
                     <button type="button" class="btn big-btn" onClick={onFinish}>Finish this bake</button>
                 </section>
-            )}
-
-            {open && (
-                <StepGuide
-                    id={open} plan={view.plan} zone={zone} clock={clock} timerEnd={record.timers?.[open]}
-                    doneAt={record.actuals[open]}
-                    doneLabel={doneLabel(view.steps.find((x) => x.id === open)!)}
-                    onDone={() => press(view.steps.find((x) => x.id === open)!)}
-                    onStartTimer={(end) => onChange({ ...record, timers: { ...record.timers, [open]: end } })}
-                    onStopTimer={() => clearTimer(open)}
-                    onClose={() => setOpen(null)}
-                />
             )}
 
             {kept && (
@@ -166,16 +168,25 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
             <section class="panel steps live-steps">
                 <h2>The steps</h2>
                 <ol>
-                    {view.steps.filter((s) => s.id !== 'carve').map((s) => (
-                        <li class={s.status}>
-                            <span class="when">{s.actualAt !== undefined ? `Done ${clockOf(s.actualAt, zone)}` : when(s.at)}</span> {s.label}
-                            {s.status !== 'done' && s.shiftMin !== 0 && <em class="shift"> ({s.shiftMin > 0 ? '+' : ''}{s.shiftMin} min)</em>}
-                            <button type="button" class="link" onClick={() => setOpen(s.id)} aria-label={`Open ${s.label}`}>Open</button>
-                            {s.status === 'done'
-                                ? <button type="button" class="link" onClick={() => undo(s.id)} aria-label={`Undo ${s.label}`}>Undo</button>
-                                : <button type="button" class="link" onClick={() => press(s)} aria-label={`Mark ${s.label} done`}>Done</button>}
-                        </li>
-                    ))}
+                    {view.steps.filter((s) => s.id !== 'carve').map((s) => {
+                        const isNext = next?.id === s.id;
+                        const open = !isNext && howOpen(s, false);
+                        return (
+                            <li class={s.status}>
+                                <span class="when">{s.actualAt !== undefined ? `Done ${clockOf(s.actualAt, zone)}` : when(s.at)}</span> {s.label}
+                                {s.status !== 'done' && s.shiftMin !== 0 && <em class="shift"> ({s.shiftMin > 0 ? '+' : ''}{s.shiftMin} min)</em>}
+                                {!isNext && (
+                                    <button type="button" class="link" aria-expanded={open} onClick={() => setHow({ ...how, [s.id]: !open })} aria-label={`${open ? 'Hide' : 'Show'} how-to: ${s.label}`}>
+                                        {open ? 'Hide how-to' : 'How to'}
+                                    </button>
+                                )}
+                                {s.status === 'done'
+                                    ? <button type="button" class="link" onClick={() => undo(s.id)} aria-label={`Undo ${s.label}`}>Undo</button>
+                                    : <button type="button" class="link" onClick={() => press(s)} aria-label={`Mark ${s.label} done`}>Done</button>}
+                                {open && <div class="row-detail">{detail(s, true)}</div>}
+                            </li>
+                        );
+                    })}
                 </ol>
             </section>
 

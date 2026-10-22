@@ -14,16 +14,12 @@ interface Props {
     clock: () => number;
     onStartTimer: (endAt: number) => void;
     onStopTimer: () => void;
-    /** When the step was done, if it has been. */
-    doneAt?: number;
-    /** The label for the button that marks this step done. */
-    doneLabel: string;
-    onDone: () => void;
-    onClose: () => void;
+    /** Show the "what is this?" hint here. The Next up card has it beside its title instead. */
+    showTip?: boolean;
 }
 
-/** The amounts, instructions and timer for one step. */
-export function StepGuide({ id, plan, zone, timerEnd, clock, onStartTimer, onStopTimer, doneAt, doneLabel, onDone, onClose }: Props) {
+/** The amounts, the instructions and the timer for one step. It sits inside a card or a list row. */
+export function StepDetail({ id, plan, zone, timerEnd, clock, onStartTimer, onStopTimer, showTip }: Props) {
     const guide = guideFor(id, plan, (ms) => clockOf(ms, zone));
     const [now, setNow] = useState(clock);
     useEffect(() => {
@@ -34,8 +30,8 @@ export function StepGuide({ id, plan, zone, timerEnd, clock, onStartTimer, onSto
     const left = timerEnd === undefined ? null : timerEnd - now;
 
     return (
-        <section class="panel guide" aria-label={`Step: ${guide.title}`}>
-            <h2>{guide.title} {guide.tip && <Tip name={guide.tip} />}</h2>
+        <div class="step-detail">
+            {showTip && guide.tip && <p class="what">What is this? <Tip name={guide.tip} /></p>}
             {guide.ingredients.length > 0 && (
                 <ul class="ingredients" aria-label="You will need">{guide.ingredients.map((i) => <li>{i}</li>)}</ul>
             )}
@@ -53,10 +49,6 @@ export function StepGuide({ id, plan, zone, timerEnd, clock, onStartTimer, onSto
                     </p>
                 )
             )}
-            {doneAt === undefined
-                ? <button type="button" class="btn big-btn" onClick={onDone}>{doneLabel}</button>
-                : <p class="hint">Done at {clockOf(doneAt, zone)}.</p>}
-            <button type="button" class="link" onClick={onClose}>Close</button>
-        </section>
+        </div>
     );
 }
