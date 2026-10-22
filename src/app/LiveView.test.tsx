@@ -403,3 +403,16 @@ describe('the picker follows the Clock setting', () => {
         expect(hours).toHaveLength(24);
     });
 });
+
+describe('the timer controls are buttons', () => {
+    it('says Stop timer while it runs, and Clear when time is up, both as buttons, not links', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt, autolyse: feedAt }, timers: { autolyse: feedAt + 30 * MINUTE } };
+        const { unmount } = render(<Harness start={rec} at={feedAt + 10 * MINUTE} />);
+        const stop = screen.getByRole('button', { name: 'Stop timer' });
+        expect(stop.className).toContain('outline');
+        expect(screen.queryByRole('button', { name: 'Stop' })).toBeNull(); // not confusable with Stop this bake
+        unmount();
+        render(<Harness start={rec} at={feedAt + 40 * MINUTE} />);
+        expect(screen.getByRole('button', { name: 'Clear' }).className).toContain('outline');
+    });
+});

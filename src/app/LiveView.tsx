@@ -90,7 +90,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                                 {left > 0
                                     ? <><strong class="timer-time">{countdownText(left)}</strong> <span class="hint">left, until {clockOf(end, zone)}</span></>
                                     : <strong class="timer-time">Time is up</strong>}
-                                {' '}<button type="button" class="link" onClick={() => clearTimer(id)}>{left > 0 ? 'Stop' : 'Clear'}</button>
+                                {' '}<button type="button" class="btn outline small" onClick={() => clearTimer(id)}>{left > 0 ? 'Stop timer' : 'Clear'}</button>
                             </p>
                         );
                     })}
