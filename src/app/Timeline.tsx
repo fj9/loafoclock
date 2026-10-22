@@ -104,8 +104,8 @@ export function Timeline({ plan, zone, now }: Props) {
     }
 
     return (
-        <div class="timeline" ref={frame}>
-            <div class="tl-scroll">
+        <div class="timeline">
+            <div class="tl-scroll" ref={frame}>
                 <div class="tl-track" role="img" aria-label="The bake from the first feed to ready to carve. The steps are listed below." style={{ width: `${width}px` }}>
                     {days.map((d) => (
                         <>
@@ -142,7 +142,7 @@ export function Timeline({ plan, zone, now }: Props) {
                         <span class="tl-lab" style={{ left: `${l.left}px`, top: `${88 + (l.row ?? 0) * 17}px` }}>{l.swatch && <i class={`sw ${l.swatch}`} />}{l.text}</span>
                     ))}
                     {now !== undefined && now >= start && now <= end && (
-                        <div class="tl-now" style={{ left: `${x(now)}px` }}><span>Now</span></div>
+                        <div class={`tl-now${x(now) > width - 52 ? ' flip' : ''}`} style={{ left: `${x(now)}px` }}><span>Now</span></div>
                     )}
                 </div>
             </div>

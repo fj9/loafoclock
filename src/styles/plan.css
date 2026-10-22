@@ -32,8 +32,6 @@
 .tl-lab .bulk { background: var(--fill-a); }
 .tl-lab .fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
 .tl-lab .proof { background: var(--warn); }
-.tl-now { position: absolute; top: 24px; bottom: 0; width: 2px; background: var(--accent); }
-.tl-now span { position: absolute; top: -2px; left: 4px; font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
 
 .levers { display: grid; gap: 14px; margin: 0 0 16px; }
 .lever { display: grid; gap: 4px; }
@@ -200,3 +198,8 @@
 .rows .expand .step-detail { margin: 0 0 10px; }
 .rows .expand .ingredients { list-style: disc; }
 .rows .expand .done-row { margin-top: 0; }
+
+/* Now: a line through the whole bar, labelled at the bottom. */
+.tl-now { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--accent); z-index: 2; }
+.tl-now span { position: absolute; bottom: 4px; left: 5px; padding: 0 4px; border-radius: var(--radius-xs); background: var(--card); font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
+.tl-now.flip span { left: auto; right: 5px; }

@@ -410,11 +410,11 @@ describe('the picker follows the Clock setting', () => {
         // The hours go 1 to 12, not 0 to 23
         const hours = [...(within(picker).getByLabelText('Hour') as HTMLSelectElement).options].map((o) => o.value);
         expect(hours).toEqual(Array.from({ length: 12 }, (_, i) => String(i + 1)));
-        // Pick 6:10 am
-        fireEvent.change(within(picker).getByLabelText('Hour'), { target: { value: '6' } });
+        // Pick 11:10 am, which is after the feed it follows
+        fireEvent.change(within(picker).getByLabelText('Hour'), { target: { value: '11' } });
         fireEvent.change(within(picker).getByLabelText('am or pm'), { target: { value: 'am' } });
         fireEvent.change(within(picker).getByLabelText('Minute'), { target: { value: '10' } });
-        expect(within(picker).getByText(/^Save 6:10 am$/)).toBeTruthy();
+        expect(within(picker).getByText(/^Save 11:10 am$/)).toBeTruthy();
     });
 
     it('shows only hour and minute in 24-hour mode', () => {
@@ -511,5 +511,52 @@ describe('the progress list rows', () => {
         fireEvent.click(row('Feed your starter'));
         const buttons = within(rowPanel('Feed your starter')).getAllByRole('button').map((b) => b.textContent);
         expect(buttons).toEqual(['Change time', 'Undo']);
+    });
+});
+
+describe('times always run in order', () => {
+    it('a step cannot be recorded earlier than the step before it', () => {
+        const feedTime = feedAt + HOUR; // the feed was recorded at 10:00
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedTime } };
+        render(<Harness start={rec} at={feedTime + 3 * HOUR} />);
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        const earlier = screen.getByRole('button', { name: '5 minutes earlier' }) as HTMLButtonElement;
+        for (let i = 0; i < 60 && !earlier.disabled; i++) fireEvent.click(earlier);
+        expect(earlier.disabled).toBe(true); // stopped at the feed time
+        expect(shownTime()).toBe(hhmm(feedTime));
+        // Picking an earlier time is allowed to move through, but cannot be saved, and says why
+        typeTime('06:00');
+        expect((screen.getByText(/^Save /) as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByRole('alert').textContent).toContain(`before ${clockOf(feedTime, LONDON)}`);
+        typeTime(hhmm(feedTime + 30 * MINUTE));
+        expect((screen.getByText(/^Save /) as HTMLButtonElement).disabled).toBe(false);
+        expect(screen.queryByRole('alert')).toBeNull();
+    });
+
+    it('ticking a step "earlier" than the one before it records it at that limit', () => {
+        const feedTime = feedAt + 2 * HOUR;
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedTime } };
+        let saved: LiveRecord = rec;
+        function Keep() {
+            const [r, setR] = useState(rec);
+            saved = r;
+            return <LiveView record={r} onChange={setR} onFinish={() => {}} clock={() => feedTime + 2 * HOUR} zone={LONDON} />;
+        }
+        render(<Keep />);
+        fireEvent.click(row('Add salt, honey and oil'));
+        fireEvent.click(within(rowPanel('Add salt, honey and oil')).getByRole('button', { name: 'Done' }));
+        expect(saved.actuals.salt).toBe(feedTime + 2 * HOUR);
+        expect(saved.actuals.salt!).toBeGreaterThanOrEqual(saved.actuals.feed!);
+    });
+
+    it('a finished step cannot be moved later than the step after it', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt + HOUR, autolyse: feedAt + 2 * HOUR } };
+        render(<Harness start={rec} at={feedAt + 5 * HOUR} />);
+        fireEvent.click(row('Feed your starter'));
+        fireEvent.click(within(rowPanel('Feed your starter')).getByRole('button', { name: 'Change time' }));
+        const later = screen.getByRole('button', { name: '5 minutes later' }) as HTMLButtonElement;
+        for (let i = 0; i < 60 && !later.disabled; i++) fireEvent.click(later);
+        expect(later.disabled).toBe(true);
+        expect(shownTime()).toBe(hhmm(feedAt + 2 * HOUR)); // no later than the autolyse
     });
 });
