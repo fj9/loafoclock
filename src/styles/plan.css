@@ -82,7 +82,7 @@
 .live-steps li.overdue { color: var(--danger); }
 .live-steps .shift { color: var(--muted); font-style: normal; }
 .live-steps .link { margin-left: 8px; font-size: calc(13px * var(--ts, 1)); }
-.sheet .chips { margin: 12px 0; }
+
 
 .step-detail .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
 .step-detail .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
@@ -154,3 +154,30 @@
 .tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
 .reminders .btn { width: 100%; }
 .keep .btn { margin-top: 8px; }
+
+/* Done, with a clock button beside it for a step you forgot to tick, and the picker inside the card. */
+.done-row { display: flex; gap: 8px; align-items: stretch; margin-top: 4px; }
+.done-row .big-btn { flex: 1; width: auto; margin: 0; }
+.clock-btn { width: 56px; padding: 0; display: grid; place-items: center; }
+.earlier { margin: 10px 0 4px; padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+.earlier .hint { margin: 0 0 8px; }
+.stepper { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+.stepper .btn { min-width: 56px; min-height: 48px; padding: 0 8px; font-size: calc(18px * var(--ts, 1)); }
+.live-steps .when.link { margin: 0; font-weight: 700; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.earlier .btn-row .btn { flex: 1; min-height: 48px; }
+
+/* A time of day that follows the Clock setting: hour, minute and (in 12-hour mode) am/pm. */
+.time-field { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; }
+.time-field select { font: inherit; font-size: calc(18px * var(--ts, 1)); min-height: 48px; padding: 4px 6px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.stepper .time-field { flex: 1; }
+
+/* A smaller button for a secondary action inside a card, such as stopping a timer. */
+.btn.small { min-height: 40px; padding: 4px 14px; font-size: calc(14px * var(--ts, 1)); }
+.timer-row .btn { margin-left: auto; }
+.btn-row .btn { flex: 1; }
+.panel > .btn-row { margin-top: 12px; }
+
+/* A tick box for a simple on/off choice, such as skipping the fridge. */
+.check { display: flex; align-items: center; gap: 8px; min-height: 32px; margin-left: auto; font-weight: 600; font-size: calc(15px * var(--ts, 1)); cursor: pointer; }
+.check input { width: 22px; height: 22px; margin: 0; accent-color: var(--cold-edge); }
+.lever input[type="range"]:disabled { opacity: .45; }

@@ -247,7 +247,9 @@ describe('tabs, the menu and the bake', () => {
         fireEvent.click(within(dialog).getByText('Cancel'));
         expect(localStorage.getItem(LIVE_KEY)).toBe(before);
         fireEvent.click(screen.getByText('Start this plan'));
-        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Start this plan'));
+        const confirm = within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Replace bake' });
+        expect(confirm.className).toContain('danger-fill'); // red, and it says what is lost
+        fireEvent.click(confirm);
         expect(localStorage.getItem(LIVE_KEY)).not.toBe(before);
         expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
     });
@@ -282,5 +284,65 @@ describe('actions and links', () => {
         expect(screen.queryByText("About Loaf O'Clock")).toBeNull();
         menu('About');
         expect(screen.getByText('Why I made it')).toBeTruthy();
+    });
+});
+
+describe('time fields follow the Clock setting', () => {
+    it('no screen uses the phone\'s own time box', () => {
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        expect(document.querySelector('input[type="time"]')).toBeNull();
+        expect(screen.getByLabelText('Hour')).toBeTruthy();
+    });
+
+    it('the already-fed time shows am/pm with the 12-hour setting, and not with the 24-hour one', () => {
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        expect(screen.getByLabelText('am or pm')).toBeTruthy(); // 12-hour is the default
+        menu('Settings');
+        fireEvent.click(screen.getByText('19:30'));
+        tab('Plan');
+        expect(screen.queryByLabelText('am or pm')).toBeNull();
+    });
+});
+
+describe('button pairs: the safe action first, the primary or destructive one after', () => {
+    /** The labels of the buttons in the row that holds `name`, in screen order. */
+    const rowOf = (name: string | RegExp, root: ParentNode = document) => {
+        const b = [...root.querySelectorAll('button')].find((x) => (typeof name === 'string' ? x.textContent === name : name.test(x.textContent ?? '')))!;
+        return [...b.parentElement!.querySelectorAll('button')].map((x) => x.textContent!);
+    };
+
+    it('Skip the log comes before Save to the log, and both are buttons', () => {
+        const levers = leversAt(Date.now() - 40 * 3_600_000, { fridge: { kind: 'hours', hours: 12 } });
+        const plan = buildPlan(levers);
+        const actuals = Object.fromEntries(STEP_ORDER.filter((id) => id !== 'carve').map((id) => [id, plan.byId[id]]));
+        localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: { ...lockPlan(levers, 0), actuals } }));
+        render(<App />);
+        fireEvent.click(screen.getByText('Finish this bake'));
+        expect(rowOf('Skip the log')).toEqual(['Skip the log', 'Save to the log']);
+        expect(screen.getByRole('button', { name: 'Skip the log' }).className).toContain('outline');
+    });
+
+    it('Cancel comes before the confirm button on every confirmation', () => {
+        localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: 'Stop this bake' }));
+        expect(rowOf('Cancel', screen.getByRole('alertdialog'))).toEqual(['Cancel', 'Stop this bake']);
+    });
+
+    it('in the Change the plan and Stop this bake row, the red one is on the right', () => {
+        localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
+        render(<App />);
+        expect(rowOf('Change the plan')).toEqual(['Change the plan', 'Stop this bake']);
+    });
+
+    it('the time picker has Cancel before Save', () => {
+        localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: 'Done earlier' }));
+        const order = rowOf('Cancel', screen.getByRole('group', { name: 'Done earlier' }));
+        expect(order[0]).toBe('Cancel');
+        expect(order[1]).toMatch(/^Save /);
     });
 });

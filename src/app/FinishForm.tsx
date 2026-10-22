@@ -24,8 +24,10 @@ export function FinishForm({ entry, onSave, onSkip }: Props) {
                 <label for="log-notes">Notes</label>
                 <textarea id="log-notes" rows={3} value={notes} onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)} />
             </div>
-            <button type="button" class="btn big-btn" onClick={() => onSave({ ...entry, notes, ...(outcome ? { outcome } : {}) })}>Save to the log</button>
-            <p><button type="button" class="link" onClick={onSkip}>Skip the log</button></p>
+            <div class="btn-row">
+                <button type="button" class="btn outline" onClick={onSkip}>Skip the log</button>
+                <button type="button" class="btn" onClick={() => onSave({ ...entry, notes, ...(outcome ? { outcome } : {}) })}>Save to the log</button>
+            </div>
         </section>
     );
 }

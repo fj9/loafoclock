@@ -117,6 +117,14 @@ Review points with the owner after milestones 2, 3 and 4.
 - [x] **Waking hours setting.** Settings has "Up from" (5:00 to 10:00 am) and "In bed by" (8:00 to 11:30 pm), defaulting to 6:00 am and 11:00 pm. The plan, the nudges, the bedtime bake and the timeline's sleeping bands all follow it.
 - [x] **Plan, Bake and Log tabs; menu.** The top tabs are Plan, Bake (the running bake, with a dot while one is running) and Log. Settings, Help and About are in a menu button at the top right. Starting a plan opens Bake, and starting another while one is running asks first. The calendar reminders download is under Start this plan on the Plan page, not in the bake.
 
+## UI conventions
+
+- **Pairs of buttons:** the safe or secondary action goes on the left and the primary or destructive one on the right (Cancel | Save, Later | Reload, Skip the log | Save to the log). When buttons stack on a phone, the primary goes on top.
+- **Destructive actions** (Stop this bake, Remove, Replace) are red, and so is their confirm button. They always ask first, with an in-app sheet, because the browser's own popup is blocked in some browsers.
+- **Links** are for small in-line actions only. Anything that does something important is an outline or filled button.
+- **Times** follow the Clock setting everywhere, including the time fields.
+- **Durations** are "1 h 30 min" on screen and full words in sentences. **Dates** are "Tomorrow 5:49 am" in labels and "tomorrow at 5:49 am" in sentences.
+
 ## Open items
 
 1. Quick feeds in a row before the nudge: suggested 3.
