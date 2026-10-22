@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/preact';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/preact';
 import { useState } from 'preact/hooks';
 import { afterEach, describe, expect, it } from 'vitest';
 import { LiveView } from './LiveView';
@@ -124,9 +124,9 @@ describe('steps in the live view', () => {
         fireEvent.click(screen.getByText('Open the step'));
         expect(screen.getByRole('region', { name: 'Step: Autolyse' })).toBeTruthy();
         expect(screen.getByText('450g flour')).toBeTruthy();
-        fireEvent.click(screen.getByText('Start a 60 minute timer'));
+        fireEvent.click(screen.getByText('Start a 60 minute timer now'));
         expect(saved.timers?.autolyse).toBe(plan.byId.autolyse + 60 * MINUTE);
-        expect(screen.getByRole('timer').textContent).toContain('1:00:00');
+        expect(screen.getByRole('timer', { name: /Timer for/ }).textContent).toContain('1:00:00');
         fireEvent.click(screen.getByText('Stop the timer'));
         expect(saved.timers?.autolyse).toBeUndefined();
     });
@@ -176,5 +176,55 @@ describe('reminders', () => {
         expect(saved).toContain('BEGIN:VCALENDAR');
         expect(saved).toContain('Start autolyse');
         expect(saved).not.toContain('Feed your starter');
+    });
+});
+
+
+describe('done buttons, closing the panel and timers', () => {
+    it('has a done button in the step panel and in the list for every step not yet done', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
+        // Not the next step: no need to open it first
+        fireEvent.click(screen.getByLabelText('Mark Add salt, honey and oil done'));
+        expect(screen.getByText(/Done /)).toBeTruthy();
+        fireEvent.click(screen.getByLabelText('Open Pre-shape'));
+        expect(screen.getByRole('region', { name: 'Step: Pre-shape' }).textContent).toContain('Pre-shaped');
+    });
+
+    it('ticking from the step panel closes the panel', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
+        fireEvent.click(screen.getByText('Open the step'));
+        const panel = screen.getByRole('region', { name: 'Step: Feed your starter' });
+        fireEvent.click(within(panel).getByText('I have fed the starter'));
+        expect(screen.queryByRole('region', { name: 'Step: Feed your starter' })).toBeNull();
+        expect(nextUp().textContent).toContain('Start autolyse');
+    });
+
+    it('ticking from the next-up button closes its panel too', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
+        fireEvent.click(screen.getByText('Open the step'));
+        fireEvent.click(within(nextUp()).getByText('I have fed the starter'));
+        expect(screen.queryByRole('region', { name: /^Step:/ })).toBeNull();
+    });
+
+    it('starts the wait timer when you tick a step that ends in a wait, and shows it above', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        const at = plan.byId.autolyse;
+        render(<Harness start={rec} at={at} />);
+        fireEvent.click(screen.getByText('I have started the autolyse'));
+        fireEvent.click(screen.getByText('Just now'));
+        const timer = screen.getByRole('timer', { name: 'Timer for Start autolyse (mix flour and water)' });
+        expect(timer.textContent).toContain('1:00:00');
+        expect(timer.textContent).toContain('until');
+        // Undoing the step clears its timer
+        fireEvent.click(screen.getByLabelText('Undo Start autolyse (mix flour and water)'));
+        expect(screen.queryByRole('timer')).toBeNull();
+    });
+
+    it('shows time is up and lets you clear it', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt, autolyse: feedAt }, timers: { autolyse: feedAt + 10 * MINUTE } };
+        render(<Harness start={rec} at={feedAt + 20 * MINUTE} />);
+        expect(screen.getByRole('timer').textContent).toContain('Time is up');
+        fireEvent.click(screen.getByText('Clear'));
+        expect(screen.queryByRole('timer')).toBeNull();
     });
 });

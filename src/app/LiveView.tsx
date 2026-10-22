@@ -5,10 +5,11 @@ import {
 } from '../domain/plan';
 import { planToIcs } from '../domain/ics';
 import { downloadText } from './download';
+import { guideFor } from '../domain/stepGuide';
 import { Levers } from './Levers';
 import { StepGuide } from './StepGuide';
 import { Timeline } from './Timeline';
-import { clockOf, dayLabel, lengthOf } from './format';
+import { clockOf, countdownText, dayLabel, lengthOf } from './format';
 
 interface Props {
     record: LiveRecord;
@@ -44,6 +45,16 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
         return () => clearInterval(t);
     }, [clock]);
 
+    // Timers count down every second, so a faster clock runs only while one is running.
+    const [fast, setFast] = useState(clock);
+    const running = Object.keys(record.timers ?? {}).length > 0;
+    useEffect(() => {
+        if (!running) return;
+        setFast(clock());
+        const t = setInterval(() => setFast(clock()), 1000);
+        return () => clearInterval(t);
+    }, [running, clock]);
+
     const [asking, setAsking] = useState<StepId | null>(null);
     const [editing, setEditing] = useState(false);
     const [open, setOpen] = useState<StepId | null>(null);
@@ -62,7 +73,17 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     const view = reconcile(original, record.levers, record.actuals, now);
     const { next } = view;
 
-    const doTick = (id: StepId, at: number) => { setAsking(null); onChange({ ...record, actuals: tick(record.actuals, id, at) }); };
+    // Ticking a step closes its panel and, if the step ends in a wait (a rest, a preheat, cooling), starts that timer.
+    const doTick = (id: StepId, at: number) => {
+        setAsking(null);
+        if (open === id) setOpen(null);
+        const minutes = guideFor(id, view.plan, (ms) => clockOf(ms, zone)).timerMinutes;
+        const end = minutes === undefined ? undefined : at + minutes * MINUTE;
+        const timers = end !== undefined && end > clock() ? { ...record.timers, [id]: end } : record.timers;
+        onChange({ ...record, actuals: tick(record.actuals, id, at), ...(timers ? { timers } : {}) });
+    };
+    const clearTimer = (id: StepId) => { const { [id]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, timers: rest }); };
+    const undo = (id: StepId) => { const { [id]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, actuals: untick(record.actuals, id), timers: rest }); };
     const press = (s: LiveStep) => (ASK_WHEN.includes(s.id) ? setAsking(s.id) : doTick(s.id, clock()));
     const when = (ms: number) => `${dayLabel(ms, now, zone)}, ${clockOf(ms, zone)}`;
 
@@ -72,6 +93,24 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     return (
         <div class="live">
             <Timeline plan={view.plan} zone={zone} now={now} />
+
+            {running && (
+                <section class="panel timers" aria-label="Timers">
+                    {(Object.entries(record.timers ?? {}) as [StepId, number][]).map(([id, end]) => {
+                        const left = end - fast;
+                        const label = view.steps.find((x) => x.id === id)?.label ?? id;
+                        return (
+                            <p class={`timer-row${left <= 0 ? ' up' : ''}`} role="timer" aria-label={`Timer for ${label}`}>
+                                <span class="timer-name">{guideFor(id, view.plan, (ms) => clockOf(ms, zone)).title}</span>
+                                {left > 0
+                                    ? <><strong class="timer-time">{countdownText(left)}</strong> <span class="hint">left, until {clockOf(end, zone)}</span></>
+                                    : <strong class="timer-time">Time is up</strong>}
+                                {' '}<button type="button" class="link" onClick={() => clearTimer(id)}>{left > 0 ? 'Stop' : 'Clear'}</button>
+                            </p>
+                        );
+                    })}
+                </section>
+            )}
 
             {next ? (
                 <section class={`panel next-up ${next.status}`} aria-label="Next up">
@@ -101,8 +140,11 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
             {open && (
                 <StepGuide
                     id={open} plan={view.plan} zone={zone} clock={clock} timerEnd={record.timers?.[open]}
+                    doneAt={record.actuals[open]}
+                    doneLabel={doneLabel(view.steps.find((x) => x.id === open)!)}
+                    onDone={() => press(view.steps.find((x) => x.id === open)!)}
                     onStartTimer={(end) => onChange({ ...record, timers: { ...record.timers, [open]: end } })}
-                    onStopTimer={() => { const { [open]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, timers: rest }); }}
+                    onStopTimer={() => clearTimer(open)}
                     onClose={() => setOpen(null)}
                 />
             )}
@@ -129,9 +171,9 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                             <span class="when">{s.actualAt !== undefined ? `Done ${clockOf(s.actualAt, zone)}` : when(s.at)}</span> {s.label}
                             {s.status !== 'done' && s.shiftMin !== 0 && <em class="shift"> ({s.shiftMin > 0 ? '+' : ''}{s.shiftMin} min)</em>}
                             <button type="button" class="link" onClick={() => setOpen(s.id)} aria-label={`Open ${s.label}`}>Open</button>
-                            {s.status === 'done' && (
-                                <button type="button" class="link" onClick={() => onChange({ ...record, actuals: untick(record.actuals, s.id) })} aria-label={`Undo ${s.label}`}>Undo</button>
-                            )}
+                            {s.status === 'done'
+                                ? <button type="button" class="link" onClick={() => undo(s.id)} aria-label={`Undo ${s.label}`}>Undo</button>
+                                : <button type="button" class="link" onClick={() => press(s)} aria-label={`Mark ${s.label} done`}>Done</button>}
                         </li>
                     ))}
                 </ol>

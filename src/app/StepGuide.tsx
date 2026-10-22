@@ -3,7 +3,7 @@ import { guideFor } from '../domain/stepGuide';
 import type { Plan, StepId, Zone } from '../domain/plan';
 import { MINUTE } from '../domain/plan';
 import { Tip } from './Tip';
-import { clockOf } from './format';
+import { clockOf, countdownText } from './format';
 
 interface Props {
     id: StepId;
@@ -14,19 +14,16 @@ interface Props {
     clock: () => number;
     onStartTimer: (endAt: number) => void;
     onStopTimer: () => void;
+    /** When the step was done, if it has been. */
+    doneAt?: number;
+    /** The label for the button that marks this step done. */
+    doneLabel: string;
+    onDone: () => void;
     onClose: () => void;
 }
 
-const mmss = (ms: number) => {
-    const s = Math.max(0, Math.ceil(ms / 1000));
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const sec = s % 60;
-    return `${h ? `${h}:${String(m).padStart(2, '0')}` : m}:${String(sec).padStart(2, '0')}`;
-};
-
 /** The amounts, instructions and timer for one step. */
-export function StepGuide({ id, plan, zone, timerEnd, clock, onStartTimer, onStopTimer, onClose }: Props) {
+export function StepGuide({ id, plan, zone, timerEnd, clock, onStartTimer, onStopTimer, doneAt, doneLabel, onDone, onClose }: Props) {
     const guide = guideFor(id, plan, (ms) => clockOf(ms, zone));
     const [now, setNow] = useState(clock);
     useEffect(() => {
@@ -47,15 +44,18 @@ export function StepGuide({ id, plan, zone, timerEnd, clock, onStartTimer, onSto
             {guide.timerMinutes !== undefined && (
                 left === null ? (
                     <button type="button" class="btn outline" onClick={() => onStartTimer(clock() + guide.timerMinutes! * MINUTE)}>
-                        Start a {guide.timerMinutes} minute timer
+                        Start a {guide.timerMinutes} minute timer now
                     </button>
                 ) : (
-                    <p class="timer" role="timer">
-                        {left > 0 ? <>Timer: <strong>{mmss(left)}</strong></> : <strong>Time is up</strong>}{' '}
+                    <p class="timer">
+                        {left > 0 ? <>Timer: <strong>{countdownText(left)}</strong></> : <strong>Time is up</strong>}{' '}
                         <button type="button" class="link" onClick={onStopTimer}>{left > 0 ? 'Stop the timer' : 'Clear'}</button>
                     </p>
                 )
             )}
+            {doneAt === undefined
+                ? <button type="button" class="btn big-btn" onClick={onDone}>{doneLabel}</button>
+                : <p class="hint">Done at {clockOf(doneAt, zone)}.</p>}
             <button type="button" class="link" onClick={onClose}>Close</button>
         </section>
     );
