@@ -3,9 +3,11 @@ import { clockOf, weekdayOf } from './format';
 
 const PX_PER_HOUR = 14;
 
-const KEY_LABELS: Partial<Record<StepId, string>> = {
-    feed: 'Feed', starterIn: 'Starter in', fridge: 'Fridge', bake: 'Bake', carve: 'Carve'
-};
+/** Roughly how wide a label is, in pixels, at the chosen text size. */
+const textScale = () => ({ large: 1.15, larger: 1.3 } as Record<string, number>)[globalThis.document?.documentElement.dataset.text ?? ''] ?? 1;
+const labelWidth = (text: string, swatch: boolean) => Math.ceil(text.length * 6.6 * textScale()) + (swatch ? 16 : 0);
+
+interface Label { text: string; left: number; width: number; swatch?: string }
 
 interface Props {
     plan: Plan;
@@ -25,11 +27,45 @@ export function Timeline({ plan, zone, now }: Props) {
     const days: number[] = [];
     for (let d = startOfLocalDay(start, zone); d < end; d = addLocalDays(d, 1, zone)) days.push(d);
 
+    // A sleeping band is drawn only where it shows, and named if there is room.
+    const sleepBand = (from: number, to: number) => {
+        const a = Math.max(from, start);
+        const z = Math.min(to, end);
+        if (z <= a) return null;
+        return (
+            <div class="tl-sleep" style={{ left: `${x(a)}px`, width: `${x(z) - x(a)}px` }}>
+                {x(z) - x(a) >= 56 * textScale() && <span>Asleep</span>}
+            </div>
+        );
+    };
+
     const seg = (from: number, to: number, cls: string, label: string) => (
         <div class={`tl-seg ${cls}`} style={{ left: `${x(from)}px`, width: `${Math.max(0, x(to) - x(from))}px` }} title={label} />
     );
     const b = plan.byId;
     const noFridge = plan.levers.fridge.kind === 'none';
+
+    // Labels go in one row under the bars. The ends come first, then each bar if its name fits;
+    // anything that would touch another label is left out.
+    const wanted: Label[] = [];
+    const feedW = labelWidth('Feed', false);
+    wanted.push({ text: 'Feed', left: x(b.feed) - 5, width: feedW });
+    const carveW = labelWidth('Bake & carve', false);
+    wanted.push({ text: 'Bake & carve', left: x(b.carve) + 7 - carveW, width: carveW });
+    const bars: Array<[number, number, string, string]> = [
+        [b.feed, b.starterIn, 'Starter rising', 'rising'], [b.starterIn, plan.bulkEnd, 'Bulk', 'bulk'],
+        [b.fridge, b.ovenOn, noFridge ? 'Proof' : 'Fridge', noFridge ? 'proof' : 'fridge']
+    ];
+    for (const [from, to, text, swatch] of bars) {
+        const w = labelWidth(text, true);
+        if (x(to) - x(from) < w + 6) continue;
+        wanted.push({ text, swatch, width: w, left: (x(from) + x(to)) / 2 - w / 2 });
+    }
+    const placed: Label[] = [];
+    for (const l of wanted) {
+        if (l.left < 0 || l.left + l.width > width) continue;
+        if (placed.every((p) => l.left >= p.left + p.width + 8 || l.left + l.width + 8 <= p.left)) placed.push(l);
+    }
 
     return (
         <div class="timeline">
@@ -40,8 +76,8 @@ export function Timeline({ plan, zone, now }: Props) {
                         const morning = atLocalTime(d, getWaking().fromMin, zone);
                         return (
                             <>
-                                <div class="tl-sleep" style={{ left: `${x(d)}px`, width: `${x(morning) - x(d)}px` }} />
-                                <div class="tl-sleep" style={{ left: `${x(night)}px`, width: `${x(addLocalDays(d, 1, zone)) - x(night)}px` }} />
+                                {sleepBand(d, morning)}
+                                {sleepBand(night, addLocalDays(d, 1, zone))}
                                 {Math.min(end, addLocalDays(d, 1, zone)) - Math.max(start, d) >= 3 * HOUR && (
                                     <div class="tl-day" style={{ left: `${Math.max(0, x(d))}px` }}>
                                         {weekdayOf(d + 12 * HOUR, zone)} {partsOf(d + 12 * HOUR, zone).day}
@@ -57,7 +93,6 @@ export function Timeline({ plan, zone, now }: Props) {
                     {seg(b.out, b.carve, 'cool', 'Cooling')}
                     {plan.steps.map((s) => {
                         const asleep = s.needsYou && !isAwake(s.at, zone);
-                        const key = KEY_LABELS[s.id];
                         const isFold = s.id.startsWith('fold');
                         return (
                             <div
@@ -66,20 +101,17 @@ export function Timeline({ plan, zone, now }: Props) {
                                 style={{ left: `${x(s.at)}px` }}
                                 title={`${s.label}, ${clockOf(s.at, zone)}`}
                             >
-                                {key && <span class="tl-label">{key}</span>}
                             </div>
                         );
                     })}
+                    {placed.map((l) => (
+                        <span class="tl-lab" style={{ left: `${l.left}px` }}>{l.swatch && <i class={`sw ${l.swatch}`} />}{l.text}</span>
+                    ))}
                     {now !== undefined && now >= start && now <= end && (
                         <div class="tl-now" style={{ left: `${x(now)}px` }}><span>Now</span></div>
                     )}
                 </div>
             </div>
-            <ul class="tl-key" aria-hidden="true">
-                <li class="rising">Starter rising</li><li class="bulk">Bulk</li>
-                <li class={noFridge ? 'proof' : 'fridge'}>{noFridge ? 'Proof' : 'Fridge'}</li>
-                <li class="bake">Bake</li><li class="sleep">Asleep</li>
-            </ul>
         </div>
     );
 }

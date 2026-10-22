@@ -22,17 +22,15 @@
 .tl-mark.small::before { width: 6px; height: 6px; margin-top: 12px; }
 .tl-mark.carve::before { background: var(--good); width: 14px; height: 14px; margin-top: 8px; }
 .tl-mark.asleep::before { background: var(--danger); }
-.tl-label { position: absolute; top: 34px; font-size: calc(11px * var(--ts, 1)); white-space: nowrap; transform: translateX(-4px); color: var(--ink); font-weight: 600; }
+.tl-sleep span { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: calc(11px * var(--ts, 1)); color: var(--muted); }
+.tl-lab { position: absolute; top: 84px; display: inline-flex; align-items: center; gap: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 600; color: var(--ink); white-space: nowrap; }
+.tl-lab .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.tl-lab .rising { background: var(--good-bg); border: 1px solid var(--good); }
+.tl-lab .bulk { background: var(--fill-a); }
+.tl-lab .fridge { background: var(--info); }
+.tl-lab .proof { background: var(--warn); }
 .tl-now { position: absolute; top: 24px; bottom: 0; width: 2px; background: var(--accent); }
 .tl-now span { position: absolute; top: -2px; left: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 700; color: var(--accent); }
-.tl-key { display: flex; flex-wrap: wrap; gap: 4px 12px; list-style: none; padding: 6px 2px 0; margin: 0; font-size: calc(12px * var(--ts, 1)); color: var(--muted); }
-.tl-key li::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 2px; background: var(--line); }
-.tl-key .rising::before { background: var(--good-bg); border: 1px solid var(--good); }
-.tl-key .bulk::before { background: var(--fill-a); }
-.tl-key .fridge::before { background: var(--info); }
-.tl-key .proof::before { background: var(--warn); }
-.tl-key .bake::before { background: var(--fill-b); }
-.tl-key .sleep::before { background: var(--info-bg); border: 1px solid var(--line); }
 
 .levers { display: grid; gap: 14px; margin: 0 0 16px; }
 .lever { display: grid; gap: 4px; }
