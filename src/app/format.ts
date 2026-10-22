@@ -54,3 +54,12 @@ export function fullDay(ms: number, zone?: Zone): string {
     const month = new Date(Date.UTC(p.year, p.month - 1, p.day)).toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
     return `${name} ${p.day} ${month}`;
 }
+
+/** Time left on a timer: "42:10", or "1:05:00" for an hour or more. */
+export function countdownText(ms: number): string {
+    const s = Math.max(0, Math.ceil(ms / 1000));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${h ? `${h}:${String(m).padStart(2, '0')}` : m}:${String(sec).padStart(2, '0')}`;
+}

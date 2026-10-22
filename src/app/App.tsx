@@ -127,6 +127,7 @@ export function App() {
             </main>
             <footer class="app-footer">
                 <span>Made by fj9</span>
+                <a href="https://ko-fi.com/fjnine" target="_blank" rel="noopener noreferrer">Tip me on Ko-fi</a>
                 <button type="button" class="link" onClick={() => setTab('about')}>About</button>
             </footer>
             <UpdatePrompt />

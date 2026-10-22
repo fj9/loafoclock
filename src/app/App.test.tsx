@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/preact';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './App';
 import { LOG_KEY, loadLog } from '../domain/bakeLog';
@@ -95,7 +95,7 @@ describe('the log', () => {
         const q = (date: number) => ({ date, loaves: 1, size: 'regular', ratioN: 2, notes: '' });
         localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [q(3), q(2), q(1)] }));
         render(<App />);
-        fireEvent.change(screen.getByLabelText('Feed'), { target: { value: '2' } });
+        fireEvent.input(screen.getByLabelText(/^Starter feeding time/), { target: { value: '5' } });
         expect(screen.getByText(/last 3 bakes all used quick feeds/)).toBeTruthy();
     });
 });
@@ -105,8 +105,10 @@ describe('already fed', () => {
         render(<App />);
         fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
         expect(screen.getByText('When did you feed your starter?')).toBeTruthy();
-        // the feed ratio cannot change: it has already happened
-        expect((screen.getAllByLabelText('Feed').find((e) => e.id === 'lv-ratio') as HTMLSelectElement).disabled).toBe(true);
+        // the feed ratio cannot change: it has already happened, so the slider only covers that ratio's window
+        const wait = screen.getByLabelText(/^Starter feeding time/) as HTMLInputElement;
+        expect(Number(wait.max)).toBe(11);
+        expect(Number(wait.min)).toBeGreaterThanOrEqual(9);
         fireEvent.click(screen.getByText('Start this plan'));
         const rec = JSON.parse(localStorage.getItem(LIVE_KEY)!).rec;
         expect(rec.actuals.feed).toBe(rec.levers.feedAt);
@@ -124,5 +126,44 @@ describe('waking hours setting', () => {
         fireEvent.change(screen.getByLabelText(/In bed by/), { target: { value: String(22 * 60) } });
         expect(screen.getByText(/between 7:00 am and 10:00 pm/)).toBeTruthy();
         expect(JSON.parse(localStorage.getItem('loafoclockSettings')!)).toMatchObject({ wakeFrom: 420, wakeTo: 1320 });
+    });
+});
+
+describe('stopping and removing, without the browser popup', () => {
+    it('stopping a bake clears the plan', () => {
+        window.confirm = () => false;
+        localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
+        render(<App />);
+        fireEvent.click(screen.getByText('Stop this bake'));
+        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Stop this bake'));
+        expect(localStorage.getItem(LIVE_KEY)).toBeNull();
+        expect(screen.getByText('Start a loaf now')).toBeTruthy();
+    });
+
+    it('removing a bake from the log asks first', () => {
+        window.confirm = () => false;
+        localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [{ date: 5, loaves: 1, size: 'regular', notes: 'keep me' }] }));
+        render(<App />);
+        tab('Log');
+        fireEvent.click(screen.getByText('Remove'));
+        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Cancel'));
+        expect(loadLog()).toHaveLength(1);
+        fireEvent.click(screen.getByText('Remove'));
+        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Remove'));
+        expect(loadLog()).toHaveLength(0);
+    });
+});
+
+describe('footer', () => {
+    it('has the Ko-fi link on every page', () => {
+        render(<App />);
+        for (const name of ['Plan', 'Log', 'Settings', 'Help']) {
+            tab(name);
+            const link = screen.getByRole('link', { name: 'Tip me on Ko-fi' }) as HTMLAnchorElement;
+            expect(link.href).toBe('https://ko-fi.com/fjnine');
+            expect(link.rel).toContain('noopener');
+        }
+        fireEvent.click(screen.getByText("About Loaf O'Clock", { selector: 'button' }));
+        expect(screen.getAllByRole('link', { name: 'Tip me on Ko-fi' }).length).toBeGreaterThan(0);
     });
 });

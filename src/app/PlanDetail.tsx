@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useMemo } from 'preact/hooks';
 import { buildPlan, violations, type Levers as LeverSet, type Plan, type Violation, type Zone } from '../domain/plan';
 import { Levers } from './Levers';
@@ -16,6 +17,8 @@ interface Props {
     quickStreak?: number;
     /** The starter was fed before you opened the app: the feed is done and cannot change. */
     fed?: { minDelayMin: number };
+    /** Shown under the timeline and the levers: the answer the levers lead to. */
+    summary?: ComponentChildren;
 }
 
 function describe(v: Violation, plan: Plan, zone: Zone): string {
@@ -28,20 +31,23 @@ function describe(v: Violation, plan: Plan, zone: Zone): string {
 }
 
 /** The timeline, the levers and the step list for one plan. */
-export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed }: Props) {
+export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed, summary }: Props) {
     const plan = useMemo(() => buildPlan(levers), [levers]);
     // A feed that has already happened is not held to waking hours.
     const problems = violations(plan, { zone, carveAt }).filter((v) => !(fed && v.kind === 'asleep' && v.stepId === 'feed'));
     return (
         <>
+            <Levers part="timing" levers={levers} zone={zone} onChange={onChange} quickStreak={quickStreak}
+                locked={fed ? { feedRatio: true } : undefined} minDelayMin={fed?.minDelayMin} />
             {problems.length > 0 && (
                 <ul class="problems" aria-label="Problems">
                     {problems.map((v) => <li>{describe(v, plan, zone)}</li>)}
                 </ul>
             )}
             <Timeline plan={plan} zone={zone} now={now} />
-            <Levers levers={levers} zone={zone} onChange={onChange} quickStreak={quickStreak}
-                locked={fed ? { feedRatio: true } : undefined} minDelayMin={fed?.minDelayMin} />
+            <Levers part="cooling" levers={levers} zone={zone} onChange={onChange} />
+            {summary}
+            <Levers part="loaf" levers={levers} zone={zone} onChange={onChange} />
             <section class="panel steps">
                 <h2>The steps</h2>
                 <ol>

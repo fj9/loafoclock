@@ -1,5 +1,6 @@
 import { useRef, useState } from 'preact/hooks';
 import { exportLog, parseBackup, type LogEntry } from '../domain/bakeLog';
+import { ConfirmSheet } from './ConfirmSheet';
 import { downloadText } from './download';
 import { LOAF_SIZES, type LoafSize } from '../domain/recipe';
 
@@ -19,6 +20,7 @@ const sizeLabel = (s: string) => LOAF_SIZES[s as LoafSize]?.label ?? s;
 export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImportOld }: Props) {
     const file = useRef<HTMLInputElement>(null);
     const [message, setMessage] = useState('');
+    const [removing, setRemoving] = useState<number | null>(null);
 
     const download = () => downloadText('loaf-oclock-log.json', exportLog(entries), 'application/json');
     const restore = async (f: File | undefined) => {
@@ -45,7 +47,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
                         </p>
                         {e.notes && <p>{e.notes}</p>}
                         <button type="button" class="btn outline" onClick={() => onRepeat(e)}>Repeat this bake</button>{' '}
-                        <button type="button" class="link" onClick={() => { if (confirm('Remove this bake from the log?')) onRemove(i); }}>Remove</button>
+                        <button type="button" class="link" onClick={() => setRemoving(i)}>Remove</button>
                     </li>
                 ))}
             </ol>
@@ -65,6 +67,12 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
             </div>
             <input ref={file} type="file" accept="application/json" hidden aria-label="Backup file" onChange={(e) => restore((e.target as HTMLInputElement).files?.[0])} />
             {message && <p class="hint" role="status">{message}</p>}
+            {removing !== null && (
+                <ConfirmSheet
+                    title="Remove this bake?" body="It will be taken out of your log."
+                    confirmLabel="Remove" onCancel={() => setRemoving(null)} onConfirm={() => { onRemove(removing); setRemoving(null); }}
+                />
+            )}
         </div>
     );
 }

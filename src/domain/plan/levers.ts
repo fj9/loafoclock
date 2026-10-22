@@ -81,3 +81,29 @@ export const isQuickFeed = (n: number): boolean => n <= QUICK_FEED_MAX_N;
 export const bakeMinutesFor = (size: LoafSize): number => bakePlan({ size }).totalMinutes;
 export const minutes = (n: number): number => n * MINUTE;
 export const hours = (n: number): number => n * HOUR;
+
+// ---- One slider for the feed: hours from feeding to adding the starter ----
+/** The shortest and longest wait the chart covers: 1:1:1 is ready at 4 hours, 1:10:10 is still good at 16. */
+export const WAIT_MIN_HOURS = 4;
+export const WAIT_MAX_HOURS = 16;
+const WAIT_STEP_MIN = 15;
+
+/** Hours from the feed to the starter going into the dough. */
+export const waitHoursOf = (l: Pick<Levers, 'ratioN' | 'starterDelayMin'>): number => ratioFor(l.ratioN).minHours + l.starterDelayMin / 60;
+
+/**
+ * The feed that has the starter ready after this many hours: the ratio whose ready window is
+ * centred nearest, and how long after the window opens to add it. As the wait grows the ratio drifts up.
+ */
+export function feedForWait(hours: number): { ratioN: number; starterDelayMin: number } {
+    const h = Math.min(Math.max(hours, WAIT_MIN_HOURS), WAIT_MAX_HOURS);
+    let best = { n: 1, dist: Infinity };
+    for (let n = 1; n <= 10; n++) {
+        const r = ratioFor(n);
+        if (h < r.minHours - 1e-9 || h > r.maxHours + 1e-9) continue;
+        const dist = Math.abs((r.minHours + r.maxHours) / 2 - h);
+        if (dist < best.dist - 1e-9) best = { n, dist };
+    }
+    const delay = Math.round(((h - ratioFor(best.n).minHours) * 60) / WAIT_STEP_MIN) * WAIT_STEP_MIN;
+    return { ratioN: best.n, starterDelayMin: delay };
+}

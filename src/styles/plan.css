@@ -6,37 +6,42 @@
 .problems { list-style: none; margin: 0 0 16px; display: grid; gap: 4px; }
 
 .timeline { margin: 0 0 16px; }
-.tl-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--wash); }
-.tl-track { position: relative; height: 128px; }
+.tl-scroll { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--wash); }
+.tl-track { position: relative; height: 150px; }
 .tl-sleep { position: absolute; top: 0; bottom: 0; background: var(--info-bg); opacity: .9; background-image: repeating-linear-gradient(45deg, transparent 0 6px, var(--line) 6px 7px); }
 .tl-day { position: absolute; top: 4px; padding-left: 6px; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--muted); white-space: nowrap; }
 .tl-seg { position: absolute; top: 56px; height: 18px; border-radius: 4px; }
 .tl-seg.rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-seg.bulk { background: var(--fill-a); }
-.tl-seg.fridge { background: var(--info); }
+.tl-seg.fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
+.tl-break { position: absolute; top: 56px; height: 18px; }
+.tl-split { position: absolute; left: 0; top: 0; }
+.tl-split polygon { fill: var(--cold-fill); stroke: var(--cold-edge); stroke-width: 1.5; stroke-linejoin: round; }
+.tl-break-time { position: absolute; left: -10px; right: -10px; top: -22px; text-align: center; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--ink); white-space: nowrap; }
 .tl-seg.proof { background: var(--warn); }
 .tl-seg.bake { background: var(--fill-b); }
 .tl-seg.cool { background: var(--good); opacity: .6; }
-.tl-mark { position: absolute; top: 50px; width: 12px; height: 30px; margin-left: -6px; display: flex; flex-direction: column; align-items: center; }
-.tl-mark::before { content: ''; width: 10px; height: 10px; margin-top: 10px; border-radius: 50%; background: var(--ink); border: 2px solid var(--card); }
-.tl-mark.small::before { width: 6px; height: 6px; margin-top: 12px; }
-.tl-mark.carve::before { background: var(--good); width: 14px; height: 14px; margin-top: 8px; }
-.tl-mark.asleep::before { background: var(--danger); }
-.tl-label { position: absolute; top: 34px; font-size: calc(11px * var(--ts, 1)); white-space: nowrap; transform: translateX(-4px); color: var(--ink); font-weight: 600; }
+.tl-mark { position: absolute; top: 46px; width: 2px; height: 34px; margin-left: -1px; border-radius: 1px; background: var(--ink); box-shadow: 0 0 0 1px var(--card); }
+.tl-mark.small { top: 53px; height: 20px; }
+.tl-mark.carve { top: 43px; height: 40px; width: 4px; margin-left: -2px; background: var(--good); }
+.tl-mark.asleep { background: var(--danger); }
+.tl-sleep span { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: calc(11px * var(--ts, 1)); color: var(--muted); }
+.tl-lab { position: absolute; display: inline-flex; align-items: center; gap: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 600; color: var(--ink); white-space: nowrap; }
+.tl-lab .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.tl-lab .rising { background: var(--good-bg); border: 1px solid var(--good); }
+.tl-lab .bulk { background: var(--fill-a); }
+.tl-lab .fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
+.tl-lab .proof { background: var(--warn); }
 .tl-now { position: absolute; top: 24px; bottom: 0; width: 2px; background: var(--accent); }
 .tl-now span { position: absolute; top: -2px; left: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 700; color: var(--accent); }
-.tl-key { display: flex; flex-wrap: wrap; gap: 4px 12px; list-style: none; padding: 6px 2px 0; margin: 0; font-size: calc(12px * var(--ts, 1)); color: var(--muted); }
-.tl-key li::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 2px; background: var(--line); }
-.tl-key .rising::before { background: var(--good-bg); border: 1px solid var(--good); }
-.tl-key .bulk::before { background: var(--fill-a); }
-.tl-key .fridge::before { background: var(--info); }
-.tl-key .proof::before { background: var(--warn); }
-.tl-key .bake::before { background: var(--fill-b); }
-.tl-key .sleep::before { background: var(--info-bg); border: 1px solid var(--line); }
 
 .levers { display: grid; gap: 14px; margin: 0 0 16px; }
 .lever { display: grid; gap: 4px; }
 .lever label, .lever .label { font-weight: 700; }
+.lever-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.lever-head.spaced { margin-top: 8px; }
+.lever-head .tip-wrap { display: contents; }
+.lever-head .tip { flex-basis: 100%; margin-top: 2px; }
 .lever select, .lever input[type="range"] { width: 100%; font: inherit; accent-color: var(--accent); }
 .lever select { padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
 .lever output { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
@@ -81,7 +86,8 @@
 .live-steps .link { margin-left: 8px; font-size: calc(13px * var(--ts, 1)); }
 .sheet .chips { margin: 12px 0; }
 
-.info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 2px solid var(--accent); background: var(--card); color: var(--accent); cursor: pointer; padding: 0; vertical-align: middle; }
+.info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1.5px solid var(--info); background: none; color: var(--muted); cursor: pointer; padding: 0; vertical-align: middle; }
+.info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
 .tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
 .guide .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
 .guide .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
@@ -90,7 +96,6 @@
 .tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--wash); }
 .tabs button { flex: 1; font: inherit; font-weight: 600; padding: 12px 4px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); cursor: pointer; }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
-.app-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .log-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
 .log-list h3 { font-size: calc(18px * var(--ts, 1)); }
 .log-list p { margin: 4px 0; }
@@ -99,3 +104,22 @@
 .faq summary { font-weight: 700; cursor: pointer; }
 .about .panel h2, .help h2 { font-size: calc(20px * var(--ts, 1)); }
 .lever .sub { font-weight: 600; margin-top: 6px; }
+
+.timers { border-color: var(--accent); }
+.timer-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; }
+.timer-row + .timer-row { margin-top: 8px; }
+.timer-name { font-weight: 700; }
+.timer-time { font-family: var(--font-display); font-size: calc(26px * var(--ts, 1)); font-variant-numeric: tabular-nums; }
+.timer-row.up { color: var(--accent); }
+.guide .big-btn { margin: 8px 0; }
+
+/* Each slider takes the colour of the bar on the timeline it controls. */
+.lever #lv-feed { accent-color: var(--good); }
+.lever #lv-temp { accent-color: var(--fill-a); }
+.lever #lv-fridge { accent-color: var(--cold-edge); }
+
+/* Footer: name on the left, the tip link in the middle, About on the right, all on one line. */
+.app-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
+.app-footer > :first-child { justify-self: start; }
+.app-footer > :last-child { justify-self: end; }
+.app-footer a, .app-footer .link { font: inherit; font-weight: 600; line-height: 1.4; padding: 4px 2px; }
