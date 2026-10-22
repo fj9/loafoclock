@@ -114,13 +114,3 @@ export const STEP_TIPS: Record<number, TipKey> = {
     1: 'starter', 2: 'autolyse', 3: 'fermentolyse', 4: 'enrichments', 5: 'folds',
     6: 'bulk', 7: 'preShape', 8: 'finalShape', 9: 'retardation', 10: 'baking'
 };
-
-/** One short line shown under each lever, so nothing is hidden behind a tap. */
-export const LEVER_HELP = {
-    ratio: 'How long after feeding the starter goes into the dough. Slide right for a bigger feed, which takes longer to rise.',
-    doughTemp: 'Warmer dough rises faster. Use a thermometer if you have one, or pick the closest to your kitchen.',
-    retardation: 'A longer, colder rest builds more flavour and lets you bake when it suits you. 8 to 72 hours.',
-    cooling: 'The loaf is still cooking inside as it cools. Cutting too early gives a gummy crumb.',
-    loaf: 'How many loaves and how big. Mostly changes the amounts; a large loaf bakes a little longer.',
-    hydration: 'How wet the dough is. Higher is stickier, with a more open crumb. 70% is a good start.'
-} as const satisfies Partial<Record<TipKey, string>>;

@@ -46,16 +46,14 @@ describe('dates and times are written one way', () => {
     });
 });
 
-describe('lever help is inline', () => {
-    it('shows a line under each lever and has no (i) buttons', () => {
+describe('lever tips', () => {
+    it('are (i) buttons beside each label that open a short explanation, not lines of text', () => {
         render(<StartNow now={friday9} zone={LONDON} />);
-        expect(screen.getByText(/How long after feeding the starter goes into the dough/)).toBeTruthy();
-        expect(screen.getByText(/Warmer dough rises faster/)).toBeTruthy();
-        expect(screen.getByText(/A longer, colder rest builds more flavour/)).toBeTruthy();
-        expect(screen.getByText(/gummy crumb/)).toBeTruthy();
-        expect(screen.getByText(/How many loaves and how big/)).toBeTruthy();
-        expect(screen.getByText(/How wet the dough is/)).toBeTruthy();
-        expect(document.querySelector('.info-btn')).toBeNull();
+        expect(screen.queryByText(/How long after feeding the starter goes into the dough/)).toBeNull();
+        const tips = document.querySelectorAll('.info-btn');
+        expect(tips.length).toBe(6);
+        fireEvent.click(screen.getByLabelText('What is dough temperature?'));
+        expect(screen.getByRole('note').textContent).toContain('Warmer dough rises faster');
     });
 });
 
