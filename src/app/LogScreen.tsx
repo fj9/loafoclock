@@ -1,5 +1,6 @@
 import { useRef, useState } from 'preact/hooks';
 import { exportLog, parseBackup, type LogEntry } from '../domain/bakeLog';
+import { downloadText } from './download';
 import { LOAF_SIZES, type LoafSize } from '../domain/recipe';
 
 interface Props {
@@ -19,14 +20,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
     const file = useRef<HTMLInputElement>(null);
     const [message, setMessage] = useState('');
 
-    const download = () => {
-        const url = URL.createObjectURL(new Blob([exportLog(entries)], { type: 'application/json' }));
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'loaf-oclock-log.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    };
+    const download = () => downloadText('loaf-oclock-log.json', exportLog(entries), 'application/json');
     const restore = async (f: File | undefined) => {
         if (!f) return;
         const parsed = parseBackup(await f.text());
