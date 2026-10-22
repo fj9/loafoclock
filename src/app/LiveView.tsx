@@ -28,15 +28,8 @@ const AGO = [
     { label: '30 min ago', min: 30 }, { label: '1 h ago', min: 60 }
 ] as const;
 
-/** What the button says for each step: always "I've …", in the past tense. */
-const DONE_LABEL: Partial<Record<StepId, string>> = {
-    feed: "I've fed the starter", autolyse: "I've started the autolyse", starterIn: "I've added the starter",
-    salt: "I've added the salt", preShape: "I've pre-shaped", finalShape: "I've shaped the loaf",
-    fridge: "I've put it in the fridge", ovenOn: "I've turned the oven on", bake: "I've put it in the oven",
-    out: "I've taken the loaf out"
-};
-const doneLabel = (s: LiveStep, noFridge = false) =>
-    s.id.startsWith('fold') ? `I've done fold ${s.id.slice(4)}` : s.id === 'fridge' && noFridge ? "I've left it to proof" : DONE_LABEL[s.id] ?? "I've done this";
+/** What the button says: "Done", except a fold, where the number matters. */
+const doneLabel = (s: LiveStep) => (s.id.startsWith('fold') ? `I've done fold ${s.id.slice(4)}` : 'Done');
 
 /** The locked plan: where you are, what is next and how long you are free. */
 export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock = Date.now, zone }: Props) {
@@ -135,7 +128,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                         {howOpen(next, true) ? 'Hide how-to' : 'Show how-to'}
                     </button>
                     {howOpen(next, true) && <div id="next-how">{detail(next)}</div>}
-                    <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next, record.levers.fridge.kind === 'none')}</button>
+                    <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next)}</button>
                     {view.freeMs! > 0 && next.status === 'upcoming' && <p class="hint free">You are free for {lengthOf(view.freeMs!)}.</p>}
                 </section>
             ) : (
