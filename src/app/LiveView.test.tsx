@@ -37,7 +37,7 @@ describe('live view', () => {
     it('tapping done moves to the next step', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + 5 * MINUTE} />);
         fireEvent.click(screen.getByText('I have fed the starter'));
-        expect(nextUp().textContent).toContain('Start autolyse');
+        expect(nextUp().textContent).toContain('Start the autolyse');
     });
 
     it('asks when you did the autolyse, and a late one moves the plan', () => {
@@ -152,7 +152,7 @@ describe('steps in the live view', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
         fireEvent.click(screen.getByText('Change the plan'));
         fireEvent.click(screen.getByText('2 loaves'));
-        fireEvent.click(screen.getByLabelText('Show how-to: Start autolyse (mix flour and water)'));
+        fireEvent.click(screen.getByLabelText('Show how-to: Start the autolyse'));
         expect(screen.getByText('900g flour')).toBeTruthy();
     });
 });
@@ -184,33 +184,33 @@ describe('done buttons, the how-to and timers', () => {
         const count = () => screen.getAllByRole('button', { name: 'I have fed the starter' }).length;
         expect(within(nextUp()).getByText('84g water')).toBeTruthy(); // due, so open
         expect(count()).toBe(1);
-        fireEvent.click(screen.getByText('Hide the how-to'));
+        fireEvent.click(within(nextUp()).getByText('Hide how-to'));
         expect(within(nextUp()).queryByText('84g water')).toBeNull();
         expect(count()).toBe(1);
     });
 
     it('opens the how-to by default when the step is due, and not before', () => {
         const { unmount } = render(<Harness start={lockPlan(levers, feedAt)} at={feedAt - 30 * MINUTE} />);
-        expect(screen.getByText('Show the how-to').getAttribute('aria-expanded')).toBe('false');
+        expect(within(nextUp()).getByText('Show how-to').getAttribute('aria-expanded')).toBe('false');
         expect(screen.queryByText('84g water')).toBeNull();
         unmount();
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
-        expect(screen.getByText('Hide the how-to').getAttribute('aria-expanded')).toBe('true');
+        expect(within(nextUp()).getByText('Hide how-to').getAttribute('aria-expanded')).toBe('true');
         expect(screen.getByText('84g water')).toBeTruthy();
     });
 
     it('can be opened and closed from the toggle row', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt - 30 * MINUTE} />);
-        fireEvent.click(screen.getByText('Show the how-to'));
+        fireEvent.click(within(nextUp()).getByText('Show how-to'));
         expect(screen.getByText('84g water')).toBeTruthy();
-        fireEvent.click(screen.getByText('Hide the how-to'));
+        fireEvent.click(within(nextUp()).getByText('Hide how-to'));
         expect(screen.queryByText('84g water')).toBeNull();
     });
 
     it('ticking moves on to the next step, which shows its own how-to', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
         fireEvent.click(within(nextUp()).getByText('I have fed the starter'));
-        expect(nextUp().textContent).toContain('Start autolyse');
+        expect(nextUp().textContent).toContain('Start the autolyse');
         expect(screen.queryByText('84g water')).toBeNull();
     });
 
@@ -220,11 +220,11 @@ describe('done buttons, the how-to and timers', () => {
         render(<Harness start={rec} at={at} />);
         fireEvent.click(screen.getByText('I have started the autolyse'));
         fireEvent.click(screen.getByText('Just now'));
-        const timer = screen.getByRole('timer', { name: 'Timer for Start autolyse (mix flour and water)' });
+        const timer = screen.getByRole('timer', { name: 'Timer for Start the autolyse' });
         expect(timer.textContent).toContain('1:00:00');
         expect(timer.textContent).toContain('until');
         // Undoing the step clears its timer
-        fireEvent.click(screen.getByLabelText('Undo Start autolyse (mix flour and water)'));
+        fireEvent.click(screen.getByLabelText('Undo Start the autolyse'));
         expect(screen.queryByRole('timer')).toBeNull();
     });
 

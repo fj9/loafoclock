@@ -63,3 +63,21 @@ export function countdownText(ms: number): string {
     const sec = s % 60;
     return `${h ? `${h}:${String(m).padStart(2, '0')}` : m}:${String(sec).padStart(2, '0')}`;
 }
+
+/** A day and time as a label: "Tomorrow 5:49 am", "Sat 24 Oct 8:35 am". */
+export function dayTime(ms: number, now: number, zone?: Zone): string {
+    return `${dayLabel(ms, now, zone)} ${clockOf(ms, zone)}`;
+}
+
+/** A day inside a sentence: "today", "tomorrow", "Sat 24 Oct" (use with "at": "tomorrow at 5:49 am"). */
+export function dayInSentence(ms: number, now: number, zone?: Zone): string {
+    const label = dayLabel(ms, now, zone);
+    return label === 'Today' || label === 'Tomorrow' ? label.toLowerCase() : label;
+}
+
+/** A calendar date for the log: "Sat 24 Oct", with the year if it is not this year. */
+export function shortDate(ms: number, now: number, zone?: Zone): string {
+    const p = partsOf(ms, zone);
+    const base = `${weekdayOf(ms, zone)} ${p.day} ${MONTHS[p.month - 1]}`;
+    return p.year === partsOf(now, zone).year ? base : `${base} ${p.year}`;
+}

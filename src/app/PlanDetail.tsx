@@ -5,7 +5,7 @@ import { planToIcs } from '../domain/ics';
 import { downloadText } from './download';
 import { Levers } from './Levers';
 import { Timeline } from './Timeline';
-import { clockOf, dayLabel } from './format';
+import { clockOf, dayTime } from './format';
 
 interface Props {
     levers: LeverSet;
@@ -51,11 +51,11 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quic
             {summary}
             <Levers part="loaf" levers={levers} zone={zone} onChange={onChange} />
             <section class="panel steps">
-                <h2>The steps</h2>
+                <h2>Planned steps</h2>
                 <ol>
                     {plan.steps.map((s) => (
                         <li class={problems.some((v) => v.kind === 'asleep' && v.stepId === s.id) ? 'asleep' : ''}>
-                            <span class="when">{dayLabel(s.at, now, zone)}, {clockOf(s.at, zone)}</span> {s.label}
+                            <span class="when">{dayTime(s.at, now, zone)}</span> {s.label}
                         </li>
                     ))}
                 </ol>

@@ -40,7 +40,7 @@ export interface Plan {
 }
 
 const LABELS: Record<StepId, string> = {
-    feed: 'Feed your starter', autolyse: 'Start autolyse (mix flour and water)', starterIn: 'Add the starter',
+    feed: 'Feed your starter', autolyse: 'Start the autolyse', starterIn: 'Add the starter',
     salt: 'Add salt, honey and oil', fold1: 'Fold 1', fold2: 'Fold 2', fold3: 'Fold 3', fold4: 'Fold 4',
     preShape: 'Pre-shape', finalShape: 'Final shape', fridge: 'Into the fridge', ovenOn: 'Turn the oven on',
     bake: 'Into the oven', out: 'Loaf out', carve: 'Ready to carve'

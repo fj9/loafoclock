@@ -31,7 +31,7 @@ describe('calendar file', () => {
     it('leaves out steps that are done or past', () => {
         const some = planToIcs(plan, { now: NOW, done: ['feed', 'autolyse'], after: plan.byId.starterIn });
         expect(some).not.toContain('Feed your starter');
-        expect(some).not.toContain('Start autolyse');
+        expect(some).not.toContain('Start the autolyse');
         expect(some).toContain('Add the starter');
     });
     it('folds long lines and escapes commas and semicolons', () => {

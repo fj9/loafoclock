@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'preact/hooks';
 import { buildPlan, carveRange, leversAt, startNowLevers, totalHours, HOUR, type Levers as LeverSet, type Zone } from '../domain/plan';
 import { PlanDetail } from './PlanDetail';
-import { clockOf, dayLabel, lengthOf, whenOf } from './format';
+import { dayTime, lengthOf, whenOf } from './format';
 
 interface Props {
     now: number;
@@ -23,7 +23,7 @@ export function StartNow({ now, zone, onStart, quickStreak, base = {} }: Props) 
             <PlanDetail levers={levers} onChange={setLevers} now={now} zone={zone} onStart={onStart} quickStreak={quickStreak} summary={(
                     <section class="panel result" aria-live="polite">
                         <p class="eyebrow">Ready to carve</p>
-                        <p class="big">{dayLabel(plan.readyToCarve, now, zone)} at {clockOf(plan.readyToCarve, zone)}</p>
+                        <p class="big">{dayTime(plan.readyToCarve, now, zone)}</p>
                         <p class="hint">{lengthOf(plan.readyToCarve - plan.byId.feed)} from the first feed.</p>
                         <p class="hint range">
                             Fastest {whenOf(range.fastest.readyToCarve, zone)} ({lengthOf(totalHours(range.fastest) * HOUR)}).

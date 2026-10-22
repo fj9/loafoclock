@@ -178,7 +178,7 @@ export function App() {
             {replacing && (
                 <ConfirmSheet
                     title="Replace your current bake?" body="You already have a bake in progress. Starting this plan throws that one away."
-                    confirmLabel="Start this plan" onCancel={() => setReplacing(null)}
+                    confirmLabel="Start this plan" danger onCancel={() => setReplacing(null)}
                     onConfirm={() => { begin(replacing.levers, replacing.actuals); setReplacing(null); }}
                 />
             )}

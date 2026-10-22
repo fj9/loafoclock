@@ -14,6 +14,8 @@ body {
 }
 
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0 0 8px; }
+h2 { font-size: calc(22px * var(--ts, 1)); }
+h3 { font-size: calc(18px * var(--ts, 1)); }
 a { color: var(--accent); font-weight: 600; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 

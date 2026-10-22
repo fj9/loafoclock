@@ -40,8 +40,6 @@
 .lever label, .lever .label { font-weight: 700; }
 .lever-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
 .lever-head.spaced { margin-top: 8px; }
-.lever-head .tip-wrap { display: contents; }
-.lever-head .tip { flex-basis: 100%; margin-top: 2px; }
 .lever select, .lever input[type="range"] { width: 100%; font: inherit; accent-color: var(--accent); }
 .lever select { padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
 .lever output { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
@@ -86,9 +84,6 @@
 .live-steps .link { margin-left: 8px; font-size: calc(13px * var(--ts, 1)); }
 .sheet .chips { margin: 12px 0; }
 
-.info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1.5px solid var(--info); background: none; color: var(--muted); cursor: pointer; padding: 0; vertical-align: middle; }
-.info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
-.tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
 .step-detail .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
 .step-detail .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
 .step-detail .timer { margin: 8px 0; font-size: calc(20px * var(--ts, 1)); }
@@ -97,12 +92,10 @@
 .tabs button { flex: 1; font: inherit; font-weight: 600; padding: 12px 4px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); cursor: pointer; }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
 .log-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
-.log-list h3 { font-size: calc(18px * var(--ts, 1)); }
 .log-list p { margin: 4px 0; }
 .lever textarea { width: 100%; font: inherit; padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
 .faq { border-bottom: 1px solid var(--line); padding: 8px 0; }
 .faq summary { font-weight: 700; cursor: pointer; }
-.about .panel h2, .help h2 { font-size: calc(20px * var(--ts, 1)); }
 .lever .sub { font-weight: 600; margin-top: 6px; }
 
 .timers { border-color: var(--accent); }

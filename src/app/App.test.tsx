@@ -144,6 +144,17 @@ describe('stopping and removing, without the browser popup', () => {
         expect(screen.getByText('No bake running')).toBeTruthy();
     });
 
+    it('Remove is a red button like Stop this bake, and its confirm is red', () => {
+        localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [{ date: 5, loaves: 1, size: 'regular', notes: '' }] }));
+        render(<App />);
+        tab('Log');
+        const remove = screen.getByRole('button', { name: 'Remove' });
+        expect(remove.className).toContain('danger');
+        fireEvent.click(remove);
+        expect(within(screen.getByRole('alertdialog')).getByText('Remove', { selector: 'button' }).className).toContain('danger-fill');
+        expect(screen.getByRole('heading', { name: /^Sat 01 Jan 1970|1970/ })).toBeTruthy();
+    });
+
     it('removing a bake from the log asks first', () => {
         window.confirm = () => false;
         localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [{ date: 5, loaves: 1, size: 'regular', notes: 'keep me' }] }));
@@ -215,6 +226,15 @@ describe('tabs, the menu and the bake', () => {
         expect(scrolled).toEqual([0]);
         tab('Log');
         expect(scrolled).toEqual([0, 0]);
+    });
+
+    it('the headings say what they are: planned steps on Plan, your progress on Bake', () => {
+        plant();
+        render(<App />);
+        expect(screen.getByRole('heading', { name: 'Your progress' })).toBeTruthy();
+        tab('Plan');
+        expect(screen.getByRole('heading', { name: 'Planned steps' })).toBeTruthy();
+        expect(screen.queryByRole('heading', { name: 'The steps' })).toBeNull();
     });
 
     it('asks before a new plan replaces the bake in progress', () => {

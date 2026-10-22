@@ -8,7 +8,7 @@ import { ConfirmSheet } from './ConfirmSheet';
 import { Levers } from './Levers';
 import { StepDetail } from './StepDetail';
 import { Timeline } from './Timeline';
-import { clockOf, countdownText, dayLabel, lengthOf } from './format';
+import { clockOf, countdownText, dayTime, lengthOf } from './format';
 
 interface Props {
     record: LiveRecord;
@@ -87,7 +87,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     const clearTimer = (id: StepId) => { const { [id]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, timers: rest }); };
     const undo = (id: StepId) => { const { [id]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, actuals: untick(record.actuals, id), timers: rest }); };
     const press = (s: LiveStep) => (ASK_WHEN.includes(s.id) ? setAsking(s.id) : doTick(s.id, clock()));
-    const when = (ms: number) => `${dayLabel(ms, now, zone)}, ${clockOf(ms, zone)}`;
+    const when = (ms: number) => dayTime(ms, now, zone);
 
     const countdown = (ms: number) => (ms >= 0 ? `in ${lengthOf(ms)}` : `${lengthOf(-ms)} late`);
     const kept = view.keepBakeTime;
@@ -105,7 +105,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                         const label = view.steps.find((x) => x.id === id)?.label ?? id;
                         return (
                             <p class={`timer-row${left <= 0 ? ' up' : ''}`} role="timer" aria-label={`Timer for ${label}`}>
-                                <span class="timer-name">{guideFor(id, view.plan, (ms) => clockOf(ms, zone)).title}</span>
+                                <span class="timer-name">{label}</span>
                                 {left > 0
                                     ? <><strong class="timer-time">{countdownText(left)}</strong> <span class="hint">left, until {clockOf(end, zone)}</span></>
                                     : <strong class="timer-time">Time is up</strong>}
@@ -130,7 +130,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                     )}
                     <button type="button" class="how-toggle" aria-expanded={howOpen(next, true)} aria-controls="next-how" onClick={() => setHow({ ...how, [next.id]: !howOpen(next, true) })}>
                         <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                        {howOpen(next, true) ? 'Hide the how-to' : 'Show the how-to'}
+                        {howOpen(next, true) ? 'Hide how-to' : 'Show how-to'}
                     </button>
                     {howOpen(next, true) && <div id="next-how">{detail(next)}</div>}
                     <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next)}</button>
@@ -163,7 +163,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
             })()}
 
             <section class="panel steps live-steps">
-                <h2>The steps</h2>
+                <h2>Your progress</h2>
                 <ol>
                     {view.steps.filter((s) => s.id !== 'carve').map((s) => {
                         const isNext = next?.id === s.id;
@@ -174,7 +174,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                                 {s.status !== 'done' && s.shiftMin !== 0 && <em class="shift"> ({s.shiftMin > 0 ? '+' : ''}{s.shiftMin} min)</em>}
                                 {!isNext && (
                                     <button type="button" class="link" aria-expanded={open} onClick={() => setHow({ ...how, [s.id]: !open })} aria-label={`${open ? 'Hide' : 'Show'} how-to: ${s.label}`}>
-                                        {open ? 'Hide how-to' : 'How to'}
+                                        {open ? 'Hide how-to' : 'Show how-to'}
                                     </button>
                                 )}
                                 {s.status === 'done'
@@ -189,7 +189,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
 
             <div class="actions-row">
                 <button type="button" class="btn outline" onClick={() => setEditing(!editing)} aria-expanded={editing}>
-                    {editing ? 'Hide the levers' : 'Change the plan'}
+                    {editing ? 'Hide changes' : 'Change the plan'}
                 </button>
                 <button type="button" class="btn outline danger" onClick={() => setStopping(true)}>Stop this bake</button>
             </div>

@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/preact';
 import { afterEach, describe, expect, it } from 'vitest';
 import { StartNow } from './StartNow';
-import { lengthOf, dayLabel, clockOf } from './format';
+import { lengthOf, dayLabel, clockOf, dayTime, dayInSentence, shortDate } from './format';
 import { zonedToMs } from '../domain/plan';
 
 const LONDON = 'Europe/London';
@@ -18,6 +18,44 @@ describe('format', () => {
         expect(dayLabel(friday9 + 30 * 3_600_000, friday9, LONDON)).toBe('Tomorrow');
         expect(dayLabel(friday9 + 3 * 86_400_000, friday9, LONDON)).toBe('Mon 26 Oct');
         expect(clockOf(friday9, LONDON)).toMatch(/9:00 am|09:00/);
+    });
+});
+
+describe('dates and times are written one way', () => {
+    it('labels: "Tomorrow 5:49 am", with no comma and no "at"', () => {
+        const t = friday9 + 24 * 3_600_000;
+        expect(dayTime(friday9, friday9, LONDON)).toMatch(/^Today 9:00 am$|^Today 09:00$/);
+        expect(dayTime(t, friday9, LONDON)).toMatch(/^Tomorrow /);
+        expect(dayTime(friday9 + 3 * 86_400_000, friday9, LONDON)).toMatch(/^Mon 26 Oct /);
+        expect(dayTime(t, friday9, LONDON)).not.toMatch(/,| at /);
+    });
+    it('sentences use "today", "tomorrow" or the date', () => {
+        expect(dayInSentence(friday9, friday9, LONDON)).toBe('today');
+        expect(dayInSentence(friday9 + 24 * 3_600_000, friday9, LONDON)).toBe('tomorrow');
+        expect(dayInSentence(friday9 + 3 * 86_400_000, friday9, LONDON)).toBe('Mon 26 Oct');
+    });
+    it('the log shows "Sat 24 Oct", and the year only when it is not this year', () => {
+        expect(shortDate(zonedToMs({ year: 2026, month: 10, day: 24, hour: 12 }, LONDON), friday9, LONDON)).toBe('Sat 24 Oct');
+        expect(shortDate(zonedToMs({ year: 2025, month: 12, day: 25, hour: 12 }, LONDON), friday9, LONDON)).toBe('Thu 25 Dec 2025');
+    });
+    it('Start now writes the carve time the same way', () => {
+        render(<StartNow now={friday9} zone={LONDON} />);
+        const big = document.querySelector('.result .big')!.textContent!;
+        expect(big).toMatch(/^(Today|Tomorrow|[A-Z][a-z]{2} \d+ [A-Z][a-z]{2}) /);
+        expect(big).not.toContain(' at ');
+    });
+});
+
+describe('lever help is inline', () => {
+    it('shows a line under each lever and has no (i) buttons', () => {
+        render(<StartNow now={friday9} zone={LONDON} />);
+        expect(screen.getByText(/How long after feeding the starter goes into the dough/)).toBeTruthy();
+        expect(screen.getByText(/Warmer dough rises faster/)).toBeTruthy();
+        expect(screen.getByText(/A longer, colder rest builds more flavour/)).toBeTruthy();
+        expect(screen.getByText(/gummy crumb/)).toBeTruthy();
+        expect(screen.getByText(/How many loaves and how big/)).toBeTruthy();
+        expect(screen.getByText(/How wet the dough is/)).toBeTruthy();
+        expect(document.querySelector('.info-btn')).toBeNull();
     });
 });
 
