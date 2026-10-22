@@ -83,8 +83,8 @@ export function Timeline({ plan, zone, now }: Props) {
     // Labels go under the bars: the end first, then each bar's name at its start. A label that
     // would touch another goes on a second row; one that fits nowhere is left out.
     const wanted: Label[] = [];
-    const carveW = labelWidth('Bake and carve', false);
-    wanted.push({ text: 'Bake and carve', left: x(b.carve) + 7 - carveW, width: carveW });
+    const carveW = labelWidth('Bake', false);
+    wanted.push({ text: 'Bake', left: x(b.carve) + 7 - carveW, width: carveW });
     const bars: Array<[number, number, string, string]> = [
         [b.feed, b.starterIn, 'Starter rising', 'rising'], [b.starterIn, plan.bulkEnd, 'Bulk', 'bulk'],
         [b.fridge, b.ovenOn, noFridge ? 'Proof' : 'Fridge', noFridge ? 'proof' : 'fridge']
