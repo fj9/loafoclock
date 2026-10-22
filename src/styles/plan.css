@@ -113,3 +113,8 @@
 .timer-time { font-family: var(--font-display); font-size: calc(26px * var(--ts, 1)); font-variant-numeric: tabular-nums; }
 .timer-row.up { color: var(--accent); }
 .guide .big-btn { margin: 8px 0; }
+
+/* Each slider takes the colour of the bar on the timeline it controls. */
+.lever #lv-feed { accent-color: var(--good); }
+.lever #lv-temp { accent-color: var(--fill-a); }
+.lever #lv-fridge { accent-color: var(--cold-edge); }
