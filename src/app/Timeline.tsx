@@ -5,7 +5,7 @@ import { layoutTimeline } from './timelineLayout';
 
 /** Roughly how wide a label is, in pixels, at the chosen text size. */
 const textScale = () => ({ large: 1.15, larger: 1.3 } as Record<string, number>)[globalThis.document?.documentElement.dataset.text ?? ''] ?? 1;
-const labelWidth = (text: string, swatch: boolean) => Math.ceil(text.length * 6.6 * textScale()) + (swatch ? 16 : 0);
+const labelWidth = (text: string, swatch: boolean) => Math.ceil(text.length * 7.2 * textScale()) + (swatch ? 16 : 0);
 
 interface Label { text: string; left: number; width: number; swatch?: string; row?: number }
 

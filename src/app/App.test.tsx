@@ -23,7 +23,8 @@ describe('App shell', () => {
     it('moves between the sections', () => {
         render(<App />);
         tab('Log');
-        expect(screen.getByText('No bakes yet. When you finish a bake you can log how it went here.')).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'No bakes yet' })).toBeTruthy();
+        expect(screen.getByText('When you finish a bake you can log how it went here.')).toBeTruthy();
         tab('Bake');
         expect(screen.getByText('No bake running')).toBeTruthy();
         menu('Help');
@@ -354,5 +355,36 @@ describe('page titles match their tabs', () => {
         tab('Log');
         expect(screen.getByRole('heading', { level: 2, name: 'Log' })).toBeTruthy();
         expect(screen.queryByRole('heading', { name: 'Your bakes' })).toBeNull();
+    });
+});
+
+describe('empty states look the same', () => {
+    const empty = () => document.querySelector('.empty-state')!;
+
+    it('the empty Log has a heading, one sentence and a button to plan a loaf', () => {
+        render(<App />);
+        tab('Log');
+        expect(empty().querySelector('h2')!.textContent).toBe('No bakes yet');
+        expect(empty().querySelectorAll('p')).toHaveLength(1);
+        fireEvent.click(within(empty() as HTMLElement).getByRole('button', { name: 'Plan a loaf' }));
+        expect(screen.getByText('Start a loaf now')).toBeTruthy(); // now on the Plan tab
+    });
+
+    it('the empty Bake tab uses the same pattern', () => {
+        render(<App />);
+        tab('Bake');
+        expect(empty().querySelector('h2')!.textContent).toBe('No bake running');
+        expect(empty().querySelectorAll('p')).toHaveLength(1);
+        expect(empty().querySelector('button')!.textContent).toBe('Plan a loaf');
+    });
+
+    it('"I want bread at…" with no plan that fits uses it too, announced as a status, with no button', () => {
+        render(<App />);
+        fireEvent.click(screen.getByText('I want bread at…'));
+        fireEvent.click(screen.getByText('Today'));
+        const status = screen.getByRole('status');
+        expect(status.className).toContain('empty-state');
+        expect(status.querySelector('h2')!.textContent).toBe('No plan fits that time');
+        expect(status.querySelector('button')).toBeNull();
     });
 });

@@ -9,6 +9,7 @@ import { About } from './About';
 import { AlreadyFed } from './AlreadyFed';
 import { BreadAt } from './BreadAt';
 import { ConfirmSheet } from './ConfirmSheet';
+import { EmptyState } from './EmptyState';
 import { FinishForm } from './FinishForm';
 import { Help } from './Help';
 import { LiveView } from './LiveView';
@@ -93,11 +94,9 @@ export function App() {
     ) : live ? (
         <LiveView record={live} onChange={update} onFinish={() => setFinishing(live)} onStop={discard} />
     ) : (
-        <section class="panel empty-bake" aria-label="No bake running">
-            <h2>No bake running</h2>
-            <p>Plan a loaf and press Start this plan. It will show up here, with what to do next and how long you are free.</p>
-            <button type="button" class="btn" onClick={() => setTab('plan')}>Plan a loaf</button>
-        </section>
+        <EmptyState title="No bake running" action={{ label: 'Plan a loaf', onClick: () => setTab('plan') }}>
+            Plan a loaf and press Start this plan. It will show up here, with what to do next and how long you are free.
+        </EmptyState>
     );
 
     const plan = (
@@ -160,7 +159,7 @@ export function App() {
                 {tab === 'bake' && bake}
                 {tab === 'log' && (
                     <LogScreen
-                        entries={log} oldCount={oldCount} onRepeat={repeatBake}
+                        entries={log} oldCount={oldCount} onRepeat={repeatBake} onPlan={() => setTab('plan')}
                         onRemove={(i) => setLog(removeFromLog(i))}
                         onAdd={(entries) => { for (const e of [...entries].reverse()) if (!log.some((l) => l.date === e.date)) addToLog(e); setLog(loadLog().sort((a, b) => b.date - a.date)); }}
                         onImportOld={() => { importOldLog(); setLog(loadLog()); refreshOld(); }}

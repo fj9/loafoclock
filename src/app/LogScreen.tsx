@@ -1,6 +1,7 @@
 import { useRef, useState } from 'preact/hooks';
 import { exportLog, parseBackup, type LogEntry } from '../domain/bakeLog';
 import { ConfirmSheet } from './ConfirmSheet';
+import { EmptyState } from './EmptyState';
 import { downloadText } from './download';
 import { shortDate } from './format';
 import { LOAF_SIZES, type LoafSize } from '../domain/recipe';
@@ -14,11 +15,13 @@ interface Props {
     /** Whether the first app has bakes that are not here yet. */
     oldCount: number;
     onImportOld: () => void;
+    /** Go to the Plan tab, from the empty log. */
+    onPlan: () => void;
 }
 
 const sizeLabel = (s: string) => LOAF_SIZES[s as LoafSize]?.label ?? s;
 
-export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImportOld }: Props) {
+export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImportOld, onPlan }: Props) {
     const file = useRef<HTMLInputElement>(null);
     const [message, setMessage] = useState('');
     const [removing, setRemoving] = useState<number | null>(null);
@@ -35,7 +38,11 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
     return (
         <div class="log">
             <h2>Log</h2>
-            {entries.length === 0 && <p class="hint">No bakes yet. When you finish a bake you can log how it went here.</p>}
+            {entries.length === 0 && (
+                <EmptyState title="No bakes yet" action={{ label: 'Plan a loaf', onClick: onPlan }}>
+                    When you finish a bake you can log how it went here.
+                </EmptyState>
+            )}
             <ol class="log-list">
                 {entries.map((e, i) => (
                     <li class="panel">

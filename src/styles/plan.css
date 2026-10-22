@@ -1,23 +1,23 @@
 /* Timeline, levers and the Start now screen. Colours come from tokens.css. */
-.eyebrow { margin: 0; font-size: calc(13px * var(--ts, 1)); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.big { margin: 2px 0 4px; font-family: var(--font-display); font-size: calc(22px * var(--ts, 1)); }
+.eyebrow { margin: 0; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.big { margin: 2px 0 4px; font-family: var(--font-display); font-size: var(--fs-lg); }
 .result .range { margin: 8px 0 0; }
-.hint.warn, .problems { color: var(--warn-ink); background: var(--warn-bg); border-radius: 8px; padding: 8px 12px; }
+.hint.warn, .problems { color: var(--warn-ink); background: var(--warn-bg); border-radius: var(--radius-sm); padding: 8px 12px; }
 .problems { list-style: none; margin: 0 0 16px; display: grid; gap: 4px; }
 
 .timeline { margin: 0 0 16px; }
-.tl-scroll { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--wash); }
+.tl-scroll { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--wash); }
 .tl-track { position: relative; height: 150px; }
 .tl-sleep { position: absolute; top: 0; bottom: 0; background: var(--info-bg); opacity: .9; background-image: repeating-linear-gradient(45deg, transparent 0 6px, var(--line) 6px 7px); }
-.tl-day { position: absolute; top: 4px; padding-left: 6px; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--muted); white-space: nowrap; }
-.tl-seg { position: absolute; top: 56px; height: 18px; border-radius: 4px; }
+.tl-day { position: absolute; top: 4px; padding-left: 6px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); white-space: nowrap; }
+.tl-seg { position: absolute; top: 56px; height: 18px; border-radius: var(--radius-xs); }
 .tl-seg.rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-seg.bulk { background: var(--fill-a); }
 .tl-seg.fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
 .tl-break { position: absolute; top: 56px; height: 18px; }
 .tl-split { position: absolute; left: 0; top: 0; }
 .tl-split polygon { fill: var(--cold-fill); stroke: var(--cold-edge); stroke-width: 1.5; stroke-linejoin: round; }
-.tl-break-time { position: absolute; left: -10px; right: -10px; top: -22px; text-align: center; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tl-break-time { position: absolute; left: -10px; right: -10px; top: -22px; text-align: center; font-size: var(--fs-xs); font-weight: 700; color: var(--ink); white-space: nowrap; }
 .tl-seg.proof { background: var(--warn); }
 .tl-seg.bake { background: var(--fill-b); }
 .tl-seg.cool { background: var(--good); opacity: .6; }
@@ -25,15 +25,15 @@
 .tl-mark.small { top: 53px; height: 20px; }
 .tl-mark.carve { top: 43px; height: 40px; width: 4px; margin-left: -2px; background: var(--good); }
 .tl-mark.asleep { background: var(--danger); }
-.tl-sleep span { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: calc(11px * var(--ts, 1)); color: var(--muted); }
-.tl-lab { position: absolute; display: inline-flex; align-items: center; gap: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 600; color: var(--ink); white-space: nowrap; }
+.tl-sleep span { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: var(--fs-xs); color: var(--muted); }
+.tl-lab { position: absolute; display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: 600; color: var(--ink); white-space: nowrap; }
 .tl-lab .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
 .tl-lab .rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-lab .bulk { background: var(--fill-a); }
 .tl-lab .fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
 .tl-lab .proof { background: var(--warn); }
 .tl-now { position: absolute; top: 24px; bottom: 0; width: 2px; background: var(--accent); }
-.tl-now span { position: absolute; top: -2px; left: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 700; color: var(--accent); }
+.tl-now span { position: absolute; top: -2px; left: 4px; font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
 
 .levers { display: grid; gap: 14px; margin: 0 0 16px; }
 .lever { display: grid; gap: 4px; }
@@ -41,12 +41,12 @@
 .lever-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
 .lever-head.spaced { margin-top: 8px; }
 .lever select, .lever input[type="range"] { width: 100%; font: inherit; accent-color: var(--accent); }
-.lever select { padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
-.lever output { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
+.lever select { padding: 8px; border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.lever output { color: var(--muted); font-size: var(--fs-sm); }
 .lever .hint { margin: 2px 0 0; }
 .link { font: inherit; font-weight: 600; background: none; border: 0; padding: 4px 2px; min-height: 24px; color: var(--accent); text-decoration: underline; cursor: pointer; }
 .seg-choice { display: flex; gap: 8px; }
-.seg-choice button { flex: 1; font: inherit; font-weight: 600; padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); cursor: pointer; }
+.seg-choice button { flex: 1; font: inherit; font-weight: 600; padding: 8px; border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); cursor: pointer; }
 .seg-choice button.on { background: var(--accent-strong); color: var(--on-accent); border-color: var(--accent-strong); }
 
 .steps ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
@@ -56,18 +56,18 @@
 
 .mode { margin: 0 0 16px; flex-wrap: wrap; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
-.chip { font: inherit; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--info); background: var(--card); color: var(--ink); cursor: pointer; }
+.chip { font: inherit; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-pill); border: 2px solid var(--info); background: var(--card); color: var(--ink); cursor: pointer; }
 .chip.on { background: var(--accent-strong); color: var(--on-accent); border-color: var(--accent-strong); }
 .carve-picker { margin: 0 0 16px; }
 .cards { display: grid; gap: 10px; margin: 0 0 12px; }
-.plan-card { display: grid; gap: 4px; text-align: left; font: inherit; color: var(--ink); background: var(--wash); border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; }
+.plan-card { display: grid; gap: 4px; text-align: left; font: inherit; color: var(--ink); background: var(--wash); border: 2px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px; cursor: pointer; }
 .plan-card.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
-.card-title { font-family: var(--font-display); font-size: calc(18px * var(--ts, 1)); }
-.card-line { font-weight: 600; font-size: calc(14px * var(--ts, 1)); }
-.card-blurb { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
-.card-warn { color: var(--warn-ink); background: var(--warn-bg); border-radius: 6px; padding: 2px 8px; justify-self: start; font-size: calc(13px * var(--ts, 1)); }
+.card-title { font-family: var(--font-display); font-size: var(--fs-md); }
+.card-line { font-weight: 600; font-size: var(--fs-sm); }
+.card-blurb { color: var(--muted); font-size: var(--fs-sm); }
+.card-warn { color: var(--warn-ink); background: var(--warn-bg); border-radius: var(--radius-sm); padding: 2px 8px; justify-self: start; font-size: var(--fs-sm); }
 
-.big-btn { width: 100%; padding: 14px 16px; font-size: calc(18px * var(--ts, 1)); margin: 8px 0 0; }
+.big-btn { width: 100%; padding: 14px 16px; font-size: var(--fs-md); margin: 8px 0 0; }
 .next-up { margin: 0 0 16px; }
 .next-up.overdue { border-color: var(--danger); }
 .next-up.due { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
@@ -81,19 +81,19 @@
 .live-steps li.done { color: var(--muted); text-decoration: line-through; }
 .live-steps li.overdue { color: var(--danger); }
 .live-steps .shift { color: var(--muted); font-style: normal; }
-.live-steps .link { margin-left: 8px; font-size: calc(13px * var(--ts, 1)); }
+.live-steps .link { margin-left: 8px; font-size: var(--fs-sm); }
 
 
 .step-detail .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
 .step-detail .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
-.step-detail .timer { margin: 8px 0; font-size: calc(20px * var(--ts, 1)); }
+.step-detail .timer { margin: 8px 0; font-size: var(--fs-md); }
 
 .tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--wash); }
 .tabs button { flex: 1; font: inherit; font-weight: 600; padding: 12px 4px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); cursor: pointer; }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
 .log-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
 .log-list p { margin: 4px 0; }
-.lever textarea { width: 100%; font: inherit; padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.lever textarea { width: 100%; font: inherit; padding: 8px; border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); }
 .faq { border-bottom: 1px solid var(--line); padding: 8px 0; }
 .faq summary { font-weight: 700; cursor: pointer; }
 .lever .sub { font-weight: 600; margin-top: 6px; }
@@ -102,7 +102,7 @@
 .timer-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; }
 .timer-row + .timer-row { margin-top: 8px; }
 .timer-name { font-weight: 700; }
-.timer-time { font-family: var(--font-display); font-size: calc(26px * var(--ts, 1)); font-variant-numeric: tabular-nums; }
+.timer-time { font-family: var(--font-display); font-size: var(--fs-title); font-variant-numeric: tabular-nums; }
 .timer-row.up { color: var(--accent); }
 .step-detail .btn { margin: 4px 0 8px; }
 
@@ -112,22 +112,24 @@
 .lever #lv-fridge { accent-color: var(--cold-edge); }
 
 /* Footer: name on the left, the tip link in the middle, About on the right, all on one line. */
-.app-footer { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); white-space: nowrap; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
+.app-footer { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); white-space: nowrap; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: var(--fs-sm); }
 .app-footer > :first-child { justify-self: start; }
 .app-footer > :last-child { justify-self: end; }
 .app-footer a, .app-footer .link { font: inherit; font-weight: 600; line-height: 1.4; padding: 4px 2px; }
 
 /* Tabs, the menu at the top right, and the in-progress dot on Bake. */
 .app-header { position: relative; }
-.menu-btn { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; color: var(--header-ink); cursor: pointer; }
+.menu-btn { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--header-ink); cursor: pointer; }
 .menu-btn:hover, .menu-btn[aria-expanded="true"] { background: rgba(255, 255, 255, .14); }
 .menu-scrim { position: fixed; inset: 0; z-index: 30; }
-.menu { position: absolute; top: 58px; right: 10px; z-index: 31; list-style: none; margin: 0; padding: 6px; min-width: 160px; background: var(--card); color: var(--ink); border: 1px solid var(--info); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); text-align: left; }
-.menu button { display: block; width: 100%; text-align: left; font: inherit; font-weight: 600; padding: 10px 12px; border: 0; border-radius: 8px; background: none; color: inherit; cursor: pointer; }
+.menu { position: absolute; top: 58px; right: 10px; z-index: 31; list-style: none; margin: 0; padding: 6px; min-width: 160px; background: var(--card); color: var(--ink); border: 1px solid var(--info); border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0, 0, 0, .25); text-align: left; }
+.menu button { display: block; width: 100%; text-align: left; font: inherit; font-weight: 600; padding: 10px 12px; border: 0; border-radius: var(--radius-sm); background: none; color: inherit; cursor: pointer; }
 .menu button:hover, .menu button.on { background: var(--wash); }
 .tabs .dot { display: inline-block; width: 8px; height: 8px; margin: 0 0 8px 6px; border-radius: 50%; background: var(--good); }
 .bake-banner { margin: 0 0 16px; }
-.empty-bake .btn { margin-top: 4px; }
+.empty-state { margin: 0 0 16px; }
+.empty-state p { margin: 0 0 12px; }
+.empty-state .btn { margin-top: 4px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .reminders { margin: 8px 0 16px; }
 
@@ -136,8 +138,8 @@
 .how-toggle svg { transition: transform var(--dur-fast, .15s); }
 .how-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 .next-up .step-detail { border-top: 1px solid var(--line); margin: 0 0 12px; padding-top: 10px; }
-.step-detail .about { margin: 0 0 10px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-size: calc(14px * var(--ts, 1)); }
-.row-detail { margin: 8px 0; padding: 10px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); }
+.step-detail .about { margin: 0 0 10px; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--info-bg); color: var(--info-ink); font-size: var(--fs-sm); }
+.row-detail { margin: 8px 0; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--card); border: 1px solid var(--line); }
 .next-up .big-btn { margin-top: 4px; }
 
 /* Two matching actions side by side. Stop is the warning red, and so is its confirm button. */
@@ -151,7 +153,7 @@
 .lever-head .tip { flex-basis: 100%; margin-top: 2px; }
 .info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1.5px solid var(--info); background: none; color: var(--muted); cursor: pointer; padding: 0; vertical-align: middle; }
 .info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
-.tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
+.tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: var(--fs-sm); font-weight: 400; }
 .reminders .btn { width: 100%; }
 .keep .btn { margin-top: 8px; }
 
@@ -159,7 +161,7 @@
 .done-row { display: flex; gap: 8px; align-items: stretch; margin-top: 4px; }
 .done-row .big-btn { flex: 1; width: auto; margin: 0; }
 .clock-btn { width: 56px; padding: 0; display: grid; place-items: center; }
-.earlier { margin: 10px 0 4px; padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+.earlier { margin: 10px 0 4px; padding: 12px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--line); }
 .earlier .hint { margin: 0 0 8px; }
 .stepper { display: flex; flex-direction: column; gap: 8px; margin: 0 0 10px; }
 .nudge { display: flex; gap: 8px; }
@@ -171,15 +173,16 @@
 
 /* A time of day that follows the Clock setting: hour, minute and (in 12-hour mode) am/pm. */
 .time-field { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; }
-.time-field select { font: inherit; font-size: calc(18px * var(--ts, 1)); min-height: 48px; padding: 4px 6px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.time-field select { font: inherit; font-size: var(--fs-md); min-height: 48px; padding: 4px 6px; border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); }
 
 /* A smaller button for a secondary action inside a card, such as stopping a timer. */
-.btn.small { min-height: 40px; padding: 4px 14px; font-size: calc(14px * var(--ts, 1)); }
+.btn.small { min-height: 40px; padding: 4px 14px; font-size: var(--fs-sm); }
 .timer-row .btn { margin-left: auto; }
 .btn-row .btn { flex: 1; }
 .panel > .btn-row { margin-top: 12px; }
 
 /* A tick box for a simple on/off choice, such as skipping the fridge. */
-.check { display: flex; align-items: center; gap: 8px; min-height: 32px; margin-left: auto; font-weight: 600; font-size: calc(15px * var(--ts, 1)); cursor: pointer; }
+.check { display: flex; align-items: center; gap: 8px; min-height: 32px; margin-left: auto; font-weight: 600; font-size: var(--fs-sm); cursor: pointer; }
 .check input { width: 22px; height: 22px; margin: 0; accent-color: var(--cold-edge); }
 .lever input[type="range"]:disabled { opacity: .45; }
+.empty-state h2 { font-size: var(--fs-md); }

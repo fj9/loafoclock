@@ -13,3 +13,17 @@ describe('typography', () => {
         expect(bad).toEqual([]);
     });
 });
+
+describe('sizes and corners', () => {
+    const styles = Object.entries(sources).filter(([file]) => file.endsWith('.css') && !file.endsWith('tokens.css'));
+
+    it('every font size comes from the named sizes, never a number', () => {
+        const bad = styles.flatMap(([file, text]) => [...text.matchAll(/font-size:\s*(?!var\(--fs-|inherit|\.7em)[^;}]+/g)].map((m) => `${file}: ${m[0]}`));
+        expect(bad).toEqual([]);
+    });
+
+    it('every corner radius comes from the named radii, except the 1 and 2 pixel ticks and swatches', () => {
+        const bad = styles.flatMap(([file, text]) => [...text.matchAll(/border-radius:\s*(?!var\(--radius-|[12]px\b|50%)[^;}]+/g)].map((m) => `${file}: ${m[0]}`));
+        expect(bad).toEqual([]);
+    });
+});

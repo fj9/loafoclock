@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'preact/hooks';
 import { planBackward, atLocalTime, addLocalDays, startOfLocalDay, type Candidate, type Category, type Levers as LeverSet, type Zone } from '../domain/plan';
 import { CarvePicker } from './CarvePicker';
+import { EmptyState } from './EmptyState';
 import { PlanDetail } from './PlanDetail';
 import { clockOf, dayInSentence, lengthOf } from './format';
 
@@ -29,7 +30,7 @@ function blurb(c: Candidate, now: number, zone: Zone): string {
     }
 }
 
-/** "I want bread at...": pick when, get plans that work backwards from it. */
+/** "I want bread at…": pick when, get plans that work backwards from it. */
 export function BreadAt({ now, zone, onStart, quickStreak }: Props) {
     // Start on tomorrow's lunch... or, if that is too soon to make, the day after.
     const [carveAt, setCarveAt] = useState(() => atLocalTime(addLocalDays(startOfLocalDay(now, zone), 2, zone), 12 * 60 + 30, zone));
@@ -49,9 +50,9 @@ export function BreadAt({ now, zone, onStart, quickStreak }: Props) {
             <CarvePicker value={carveAt} now={now} zone={zone} onChange={change} />
 
             {candidates.length === 0 && (
-                <p class="problems" role="status">
+                <EmptyState role="status" title="No plan fits that time">
                     There is no way to fit a loaf in before then while keeping every step in your waking hours. Try a later time or day.
-                </p>
+                </EmptyState>
             )}
 
             <div class="cards">
