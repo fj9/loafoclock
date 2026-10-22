@@ -19,13 +19,15 @@ import { UpdatePrompt } from './UpdatePrompt';
 /** Round up to the next 5 minutes so the plan does not change every second. */
 const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
 
-type Mode = 'now' | 'at' | 'fed';
+type Mode = 'now' | 'at';
 type Tab = 'plan' | 'log' | 'settings' | 'help' | 'about';
 const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['log', 'Log'], ['settings', 'Settings'], ['help', 'Help']];
 
 export function App() {
     const [now] = useState(startingPoint);
     const [mode, setMode] = useState<Mode>('now');
+    // Under "Start a loaf now": feed the starter now, or say it was already fed.
+    const [alreadyFed, setAlreadyFed] = useState(false);
     const [tab, setTab] = useState<Tab>('plan');
     const [settings, setSettings] = useState<Settings>(() => loadSettings());
     // A saved plan means a bake is under way: go straight back to it.
@@ -49,6 +51,7 @@ export function App() {
     const repeatBake = (e: LogEntry) => {
         setRepeat({ key: Date.now(), base: { loaves: e.loaves === 2 ? 2 : 1, size: e.size === 'large' ? 'large' : 'regular', ...(e.hydration ? { hydration: e.hydration } : {}), ...(e.doughTemp ? { doughTemp: e.doughTemp } : {}) } });
         setMode('now');
+        setAlreadyFed(false);
         setTab('plan');
     };
     const streak = quickFeedStreak(log);
@@ -74,13 +77,18 @@ export function App() {
                 <div class="seg-choice mode" role="group" aria-label="How do you want to plan?">
                     <button type="button" class={mode === 'now' ? 'on' : ''} aria-pressed={mode === 'now'} onClick={() => setMode('now')}>Start a loaf now</button>
                     <button type="button" class={mode === 'at' ? 'on' : ''} aria-pressed={mode === 'at'} onClick={() => setMode('at')}>I want bread at…</button>
-                    <button type="button" class={mode === 'fed' ? 'on' : ''} aria-pressed={mode === 'fed'} onClick={() => setMode('fed')}>I've already fed my starter</button>
                 </div>
-                {mode === 'now'
-                    ? <StartNow key={repeat?.key ?? 0} now={now} onStart={start} quickStreak={streak} base={repeat?.base} />
-                    : mode === 'at'
-                        ? <BreadAt now={now} onStart={start} quickStreak={streak} />
-                        : <AlreadyFed now={now} onStart={start} quickStreak={streak} />}
+                {mode === 'now' && (
+                    <div class="seg-choice mode" role="group" aria-label="Your starter">
+                        <button type="button" class={!alreadyFed ? 'on' : ''} aria-pressed={!alreadyFed} onClick={() => setAlreadyFed(false)}>Feed it now</button>
+                        <button type="button" class={alreadyFed ? 'on' : ''} aria-pressed={alreadyFed} onClick={() => setAlreadyFed(true)}>I've already fed my starter</button>
+                    </div>
+                )}
+                {mode === 'at'
+                    ? <BreadAt now={now} onStart={start} quickStreak={streak} />
+                    : alreadyFed
+                        ? <AlreadyFed now={now} onStart={start} quickStreak={streak} />
+                        : <StartNow key={repeat?.key ?? 0} now={now} onStart={start} quickStreak={streak} base={repeat?.base} />}
             </>
         )
     );
