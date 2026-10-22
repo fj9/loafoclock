@@ -20,16 +20,17 @@ export function StartNow({ now, zone, onStart, quickStreak, base = {} }: Props) 
 
     return (
         <div class="start-now">
-            <section class="panel result" aria-live="polite">
-                <p class="eyebrow">Ready to carve</p>
-                <p class="big">{dayLabel(plan.readyToCarve, now, zone)} at {clockOf(plan.readyToCarve, zone)}</p>
-                <p class="hint">{lengthOf(plan.readyToCarve - plan.byId.feed)} from the first feed.</p>
-                <p class="hint range">
-                    Fastest {whenOf(range.fastest.readyToCarve, zone)} ({lengthOf(totalHours(range.fastest) * HOUR)}).
-                    {' '}With no fridge, {whenOf(range.noFridge.readyToCarve, zone)}, but less sourdough.
-                </p>
-            </section>
-            <PlanDetail levers={levers} onChange={setLevers} now={now} zone={zone} onStart={onStart} quickStreak={quickStreak} />
+            <PlanDetail levers={levers} onChange={setLevers} now={now} zone={zone} onStart={onStart} quickStreak={quickStreak} summary={(
+                    <section class="panel result" aria-live="polite">
+                        <p class="eyebrow">Ready to carve</p>
+                        <p class="big">{dayLabel(plan.readyToCarve, now, zone)} at {clockOf(plan.readyToCarve, zone)}</p>
+                        <p class="hint">{lengthOf(plan.readyToCarve - plan.byId.feed)} from the first feed.</p>
+                        <p class="hint range">
+                            Fastest {whenOf(range.fastest.readyToCarve, zone)} ({lengthOf(totalHours(range.fastest) * HOUR)}).
+                            {' '}With no fridge, {whenOf(range.noFridge.readyToCarve, zone)}, but less sourdough.
+                        </p>
+                    </section>
+            )} />
             <button type="button" class="btn outline" onClick={() => setLevers(startNowLevers(now, base, zone) ?? leversAt(now, base))}>
                 Suggest levers again
             </button>

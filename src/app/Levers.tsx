@@ -17,12 +17,14 @@ interface Props {
     locked?: { feedRatio?: boolean; doughTemp?: boolean; fridge?: boolean };
     /** The shortest wait before adding the starter (minutes after it is ready), for a starter already fed. */
     minDelayMin?: number;
+    /** Show only the levers that move the timeline, or only the rest (cooling and your loaf). Both if not set. */
+    part?: 'timing' | 'other';
 }
 
 const hoursText = (h: number) => lengthOf(h * 3_600_000);
 
 /** The things you can change, and what each does to your day. */
-export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, minDelayMin = 0 }: Props) {
+export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, minDelayMin = 0, part }: Props) {
     const set = (over: Partial<LeverSet>) => onChange({ ...levers, ...over });
     const ratio = ratioFor(levers.ratioN);
     const bulk = bulkFor(levers.doughTemp);
@@ -33,7 +35,8 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
     const nudgeNeeded = nudge !== null && fridgeHours !== null && Math.abs(nudge - fridgeHours) > 1e-6;
 
     return (
-        <section class="levers" aria-label="Levers">
+        <section class="levers" aria-label={part === 'timing' ? 'Timing levers' : part === 'other' ? 'Cooling and loaf' : 'Levers'}>
+            {part !== 'other' && (<>
             <div class="lever">
                 <div class="lever-head"><label for="lv-feed">Feed and starter timing</label> <Tip name="ratio" /></div>
                 <input id="lv-feed" type="range" step={0.25} aria-valuetext={`${hoursText(wait)} after feeding, a ${ratio.ratio} feed`}
@@ -87,6 +90,8 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
                 )}
             </div>
 
+            </>)}
+            {part !== 'timing' && (<>
             <div class="lever">
                 <div class="lever-head"><span class="label" id="lv-cool">Cooling before carving</span> <Tip name="cooling" /></div>
                 <div class="seg-choice" role="group" aria-labelledby="lv-cool">
@@ -118,6 +123,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
                     {HYDRATIONS.map((h) => <option value={h}>{h}%</option>)}
                 </select>
             </div>
+            </>)}
         </section>
     );
 }
