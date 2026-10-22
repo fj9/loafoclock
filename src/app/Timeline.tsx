@@ -7,7 +7,7 @@ const PX_PER_HOUR = 14;
 const textScale = () => ({ large: 1.15, larger: 1.3 } as Record<string, number>)[globalThis.document?.documentElement.dataset.text ?? ''] ?? 1;
 const labelWidth = (text: string, swatch: boolean) => Math.ceil(text.length * 6.6 * textScale()) + (swatch ? 16 : 0);
 
-interface Label { text: string; left: number; width: number; swatch?: string }
+interface Label { text: string; left: number; width: number; swatch?: string; row?: number }
 
 interface Props {
     plan: Plan;
@@ -45,11 +45,9 @@ export function Timeline({ plan, zone, now }: Props) {
     const b = plan.byId;
     const noFridge = plan.levers.fridge.kind === 'none';
 
-    // Labels go in one row under the bars. The ends come first, then each bar if its name fits;
-    // anything that would touch another label is left out.
+    // Labels go under the bars: the end first, then each bar's name at its start. A label that
+    // would touch another goes on a second row; one that fits nowhere is left out.
     const wanted: Label[] = [];
-    const feedW = labelWidth('Feed', false);
-    wanted.push({ text: 'Feed', left: x(b.feed) - 5, width: feedW });
     const carveW = labelWidth('Bake & carve', false);
     wanted.push({ text: 'Bake & carve', left: x(b.carve) + 7 - carveW, width: carveW });
     const bars: Array<[number, number, string, string]> = [
@@ -58,13 +56,16 @@ export function Timeline({ plan, zone, now }: Props) {
     ];
     for (const [from, to, text, swatch] of bars) {
         const w = labelWidth(text, true);
-        if (x(to) - x(from) < w + 6) continue;
-        wanted.push({ text, swatch, width: w, left: (x(from) + x(to)) / 2 - w / 2 });
+        if (x(to) - x(from) < w * 0.7) continue; // the bar is too short to name
+        wanted.push({ text, swatch, width: w, left: x(from) + 2 });
     }
     const placed: Label[] = [];
     for (const l of wanted) {
-        if (l.left < 0 || l.left + l.width > width) continue;
-        if (placed.every((p) => l.left >= p.left + p.width + 8 || l.left + l.width + 8 <= p.left)) placed.push(l);
+        const left = Math.min(Math.max(l.left, 2), width - l.width - 2);
+        for (const row of [0, 1]) {
+            const clear = placed.every((p) => p.row !== row || left >= p.left + p.width + 8 || left + l.width + 8 <= p.left);
+            if (clear) { placed.push({ ...l, left, row }); break; }
+        }
     }
 
     return (
@@ -105,7 +106,7 @@ export function Timeline({ plan, zone, now }: Props) {
                         );
                     })}
                     {placed.map((l) => (
-                        <span class="tl-lab" style={{ left: `${l.left}px` }}>{l.swatch && <i class={`sw ${l.swatch}`} />}{l.text}</span>
+                        <span class="tl-lab" style={{ left: `${l.left}px`, top: `${88 + (l.row ?? 0) * 17}px` }}>{l.swatch && <i class={`sw ${l.swatch}`} />}{l.text}</span>
                     ))}
                     {now !== undefined && now >= start && now <= end && (
                         <div class="tl-now" style={{ left: `${x(now)}px` }}><span>Now</span></div>

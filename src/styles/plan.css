@@ -7,7 +7,7 @@
 
 .timeline { margin: 0 0 16px; }
 .tl-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--wash); }
-.tl-track { position: relative; height: 128px; }
+.tl-track { position: relative; height: 150px; }
 .tl-sleep { position: absolute; top: 0; bottom: 0; background: var(--info-bg); opacity: .9; background-image: repeating-linear-gradient(45deg, transparent 0 6px, var(--line) 6px 7px); }
 .tl-day { position: absolute; top: 4px; padding-left: 6px; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--muted); white-space: nowrap; }
 .tl-seg { position: absolute; top: 56px; height: 18px; border-radius: 4px; }
@@ -17,13 +17,12 @@
 .tl-seg.proof { background: var(--warn); }
 .tl-seg.bake { background: var(--fill-b); }
 .tl-seg.cool { background: var(--good); opacity: .6; }
-.tl-mark { position: absolute; top: 50px; width: 12px; height: 30px; margin-left: -6px; display: flex; flex-direction: column; align-items: center; }
-.tl-mark::before { content: ''; width: 10px; height: 10px; margin-top: 10px; border-radius: 50%; background: var(--ink); border: 2px solid var(--card); }
-.tl-mark.small::before { width: 6px; height: 6px; margin-top: 12px; }
-.tl-mark.carve::before { background: var(--good); width: 14px; height: 14px; margin-top: 8px; }
-.tl-mark.asleep::before { background: var(--danger); }
+.tl-mark { position: absolute; top: 46px; width: 2px; height: 34px; margin-left: -1px; border-radius: 1px; background: var(--ink); box-shadow: 0 0 0 1px var(--card); }
+.tl-mark.small { top: 53px; height: 20px; }
+.tl-mark.carve { top: 43px; height: 40px; width: 4px; margin-left: -2px; background: var(--good); }
+.tl-mark.asleep { background: var(--danger); }
 .tl-sleep span { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: calc(11px * var(--ts, 1)); color: var(--muted); }
-.tl-lab { position: absolute; top: 84px; display: inline-flex; align-items: center; gap: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 600; color: var(--ink); white-space: nowrap; }
+.tl-lab { position: absolute; display: inline-flex; align-items: center; gap: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 600; color: var(--ink); white-space: nowrap; }
 .tl-lab .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
 .tl-lab .rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-lab .bulk { background: var(--fill-a); }
