@@ -4,7 +4,7 @@ import {
     addLocalDays, atLocalTime, buildPlan, fedActuals, fedLevers, leversAt, minDelayFor, minutesOfDay, starterState, startOfLocalDay,
     type Actuals, type Levers as LeverSet, type Zone
 } from '../domain/plan';
-import { PlanDetail } from './PlanDetail';
+import { PlanView, type Layout } from './PlanView';
 import { TimeField } from './TimeField';
 import { clockOf, dayInSentence, dayTime } from './format';
 
@@ -13,6 +13,7 @@ interface Props {
     zone?: Zone;
     onStart?: (levers: LeverSet, actuals: Actuals) => void;
     quickStreak?: number;
+    layout?: Layout;
 }
 
 interface Fed { dayBack: 0 | 1; min: number; ratioN: number }
@@ -28,7 +29,7 @@ function startingLevers(f: Fed, now: number, zone?: Zone): LeverSet {
 }
 
 /** "I have already fed my starter": say when and how, then plan the rest of the bake from there. */
-export function AlreadyFed({ now, zone, onStart, quickStreak }: Props) {
+export function AlreadyFed({ now, zone, onStart, quickStreak, layout }: Props) {
     const [fed, setFed] = useState<Fed>(DEFAULT_FED);
     const [levers, setLevers] = useState<LeverSet>(() => startingLevers(DEFAULT_FED, now, zone));
     const fedAt = fedAtOf(fed, now, zone);
@@ -84,7 +85,8 @@ export function AlreadyFed({ now, zone, onStart, quickStreak }: Props) {
                         </p>
                         <p class="hint">Ready to carve {dayTime(plan.readyToCarve, now, zone)}.</p>
                     </section>
-                    <PlanDetail
+                    <PlanView
+                        layout={layout}
                         levers={levers} onChange={setLevers} now={now} zone={zone} quickStreak={quickStreak}
                         fed={{ minDelayMin: minDelayFor(fedAt, fed.ratioN, levers.autolyseMin, now) }}
                         onStart={onStart && ((l) => onStart(l, fedActuals(fedAt)))}

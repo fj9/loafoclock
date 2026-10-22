@@ -2,6 +2,7 @@ import '@fontsource/alfa-slab-one/latin-400.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/plan.css';
+import './styles/rail.css';
 import { render } from 'preact';
 import { App } from './app/App';
 

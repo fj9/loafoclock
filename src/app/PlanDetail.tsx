@@ -7,7 +7,7 @@ import { Levers } from './Levers';
 import { Timeline } from './Timeline';
 import { clockOf, dayTime } from './format';
 
-interface Props {
+export interface PlanDetailProps {
     levers: LeverSet;
     onChange: (next: LeverSet) => void;
     now: number;
@@ -21,9 +21,11 @@ interface Props {
     fed?: { minDelayMin: number };
     /** Shown under the timeline and the levers: the answer the levers lead to. */
     summary?: ComponentChildren;
+    /** What the New plan layout shows under its pinned answer: the fastest and no-fridge times. The classic layout ignores it. */
+    range?: ComponentChildren;
 }
 
-function describe(v: Violation, plan: Plan, zone: Zone): string {
+export function describe(v: Violation, plan: Plan, zone: Zone): string {
     if (v.kind === 'asleep') {
         const step = plan.steps.find((s) => s.id === v.stepId)!;
         return `${step.label} falls at ${clockOf(v.at, zone)}, in your sleeping hours.`;
@@ -33,7 +35,7 @@ function describe(v: Violation, plan: Plan, zone: Zone): string {
 }
 
 /** The timeline, the levers and the step list for one plan. */
-export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed, summary }: Props) {
+export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed, summary }: PlanDetailProps) {
     const plan = useMemo(() => buildPlan(levers), [levers]);
     // A feed that has already happened is not held to waking hours.
     const problems = violations(plan, { zone, carveAt }).filter((v) => !(fed && v.kind === 'asleep' && v.stepId === 'feed'));

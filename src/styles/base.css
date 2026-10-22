@@ -26,6 +26,7 @@ a { color: var(--accent); font-weight: 600; }
     border-radius: var(--radius-lg);
     box-shadow: 0 6px 24px rgba(43, 33, 28, 0.18);
     overflow: hidden;
+    overflow: clip; /* clips the corners like hidden, but lets pinned bars inside stick to the screen */
 }
 
 .app-header {
