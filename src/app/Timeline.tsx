@@ -9,6 +9,18 @@ const labelWidth = (text: string, swatch: boolean) => Math.ceil(text.length * 6.
 
 interface Label { text: string; left: number; width: number; swatch?: string; row?: number }
 
+/** The fridge bar, snapped in the middle by a slanted gap: a long wait that is not drawn to scale. */
+function SplitBar({ width }: { width: number }) {
+    const h = 18, gap = 10, slant = 6, mid = width / 2;
+    const left = `0,0 ${mid - gap / 2 + slant / 2},0 ${mid - gap / 2 - slant / 2},${h} 0,${h}`;
+    const right = `${mid + gap / 2 + slant / 2},0 ${width},0 ${width},${h} ${mid + gap / 2 - slant / 2},${h}`;
+    return (
+        <svg class="tl-split" width={width} height={h} viewBox={`0 0 ${width} ${h}`} aria-hidden="true">
+            <polygon points={left} /><polygon points={right} />
+        </svg>
+    );
+}
+
 interface Props {
     plan: Plan;
     zone?: Zone;
@@ -109,11 +121,7 @@ export function Timeline({ plan, zone, now }: Props) {
                     {noFridge ? seg(b.fridge, b.ovenOn, 'proof', 'Proofing') : brk ? (
                         <div class="tl-break" style={{ left: `${brk.x0}px`, width: `${brk.x1 - brk.x0}px` }} title="In the fridge">
                             <span class="tl-break-time">{lengthOf(b.ovenOn - b.fridge)}</span>
-                            {[0, 1].map((side) => (
-                                <svg class="tl-slash" style={{ [side ? 'right' : 'left']: '-6px' }} width="12" height="36" viewBox="0 0 12 36" aria-hidden="true">
-                                    <path d="M2 34 L10 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg>
-                            ))}
+                            <SplitBar width={brk.x1 - brk.x0} />
                         </div>
                     ) : seg(b.fridge, b.ovenOn, 'fridge', 'In the fridge')}
                     {seg(b.bake, b.out, 'bake', 'Baking')}

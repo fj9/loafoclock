@@ -13,11 +13,11 @@
 .tl-seg { position: absolute; top: 56px; height: 18px; border-radius: 4px; }
 .tl-seg.rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-seg.bulk { background: var(--fill-a); }
-.tl-seg.fridge { background: var(--info-bg); border: 1.5px solid var(--info); }
+.tl-seg.fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
 .tl-break { position: absolute; top: 56px; height: 18px; }
-.tl-break::before { content: ''; position: absolute; left: 6px; right: 6px; top: 8px; border-top: 2px dashed var(--info); }
+.tl-split { position: absolute; left: 0; top: 0; }
+.tl-split polygon { fill: var(--cold-fill); stroke: var(--cold-edge); stroke-width: 1.5; stroke-linejoin: round; }
 .tl-break-time { position: absolute; left: -10px; right: -10px; top: -22px; text-align: center; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--ink); white-space: nowrap; }
-.tl-slash { position: absolute; top: -9px; color: var(--ink); }
 .tl-seg.proof { background: var(--warn); }
 .tl-seg.bake { background: var(--fill-b); }
 .tl-seg.cool { background: var(--good); opacity: .6; }
@@ -30,7 +30,7 @@
 .tl-lab .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
 .tl-lab .rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-lab .bulk { background: var(--fill-a); }
-.tl-lab .fridge { background: var(--info-bg); border: 1.5px solid var(--info); }
+.tl-lab .fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
 .tl-lab .proof { background: var(--warn); }
 .tl-now { position: absolute; top: 24px; bottom: 0; width: 2px; background: var(--accent); }
 .tl-now span { position: absolute; top: -2px; left: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 700; color: var(--accent); }
