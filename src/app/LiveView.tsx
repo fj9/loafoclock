@@ -6,6 +6,7 @@ import {
 import { planToIcs } from '../domain/ics';
 import { downloadText } from './download';
 import { guideFor } from '../domain/stepGuide';
+import { ConfirmSheet } from './ConfirmSheet';
 import { Levers } from './Levers';
 import { StepGuide } from './StepGuide';
 import { Timeline } from './Timeline';
@@ -58,6 +59,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     const [asking, setAsking] = useState<StepId | null>(null);
     const [editing, setEditing] = useState(false);
     const [open, setOpen] = useState<StepId | null>(null);
+    const [stopping, setStopping] = useState(false);
     // The "when did you do this?" sheet takes focus when it opens, closes on Escape, and gives focus back.
     const sheet = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -192,7 +194,14 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                 <Levers levers={record.levers} zone={zone} locked={{ feedRatio: view.locked.feedRatio, doughTemp: view.locked.doughTemp, fridge: view.locked.fridge }}
                     onChange={(levers) => onChange({ ...record, levers })} />
             )}
-            <p><button type="button" class="link" onClick={() => { if (confirm('Stop this bake and throw away the plan?')) onStop(); }}>Stop this bake</button></p>
+            <p><button type="button" class="link" onClick={() => setStopping(true)}>Stop this bake</button></p>
+
+            {stopping && (
+                <ConfirmSheet
+                    title="Stop this bake?" body="The plan and any timers will be thrown away. Nothing is added to your log."
+                    confirmLabel="Stop this bake" onCancel={() => setStopping(false)} onConfirm={() => { setStopping(false); onStop(); }}
+                />
+            )}
 
             {asking && (
                 <div class="overlay" role="dialog" aria-modal="true" aria-label="When did you do this?">

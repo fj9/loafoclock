@@ -230,3 +230,33 @@ describe('done buttons, closing the panel and timers', () => {
         expect(screen.queryByRole('timer')).toBeNull();
     });
 });
+
+describe('stopping a bake', () => {
+    // The browser's own confirm popup is blocked in some browsers: the app must not depend on it.
+    const blockConfirm = () => { window.confirm = () => false; };
+
+    it('asks in the app, and stops only when you say so', () => {
+        blockConfirm();
+        let stopped = 0;
+        render(<LiveView record={lockPlan(levers, feedAt)} onChange={() => {}} onFinish={() => {}} onStop={() => { stopped++; }} clock={() => feedAt} zone={LONDON} />);
+        fireEvent.click(screen.getByText('Stop this bake'));
+        const dialog = screen.getByRole('alertdialog', { name: 'Stop this bake?' });
+        expect(document.activeElement?.textContent).toBe('Cancel');
+        fireEvent.click(within(dialog).getByText('Cancel'));
+        expect(stopped).toBe(0);
+        expect(screen.queryByRole('alertdialog')).toBeNull();
+        fireEvent.click(screen.getByText('Stop this bake'));
+        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Stop this bake'));
+        expect(stopped).toBe(1);
+        expect(screen.queryByRole('alertdialog')).toBeNull();
+    });
+
+    it('cancels on Escape', () => {
+        let stopped = 0;
+        render(<LiveView record={lockPlan(levers, feedAt)} onChange={() => {}} onFinish={() => {}} onStop={() => { stopped++; }} clock={() => feedAt} zone={LONDON} />);
+        fireEvent.click(screen.getByText('Stop this bake'));
+        fireEvent.keyDown(document, { key: 'Escape' });
+        expect(screen.queryByRole('alertdialog')).toBeNull();
+        expect(stopped).toBe(0);
+    });
+});

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/preact';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './App';
 import { LOG_KEY, loadLog } from '../domain/bakeLog';
@@ -126,5 +126,30 @@ describe('waking hours setting', () => {
         fireEvent.change(screen.getByLabelText(/In bed by/), { target: { value: String(22 * 60) } });
         expect(screen.getByText(/between 7:00 am and 10:00 pm/)).toBeTruthy();
         expect(JSON.parse(localStorage.getItem('loafoclockSettings')!)).toMatchObject({ wakeFrom: 420, wakeTo: 1320 });
+    });
+});
+
+describe('stopping and removing, without the browser popup', () => {
+    it('stopping a bake clears the plan', () => {
+        window.confirm = () => false;
+        localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
+        render(<App />);
+        fireEvent.click(screen.getByText('Stop this bake'));
+        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Stop this bake'));
+        expect(localStorage.getItem(LIVE_KEY)).toBeNull();
+        expect(screen.getByText('Start a loaf now')).toBeTruthy();
+    });
+
+    it('removing a bake from the log asks first', () => {
+        window.confirm = () => false;
+        localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [{ date: 5, loaves: 1, size: 'regular', notes: 'keep me' }] }));
+        render(<App />);
+        tab('Log');
+        fireEvent.click(screen.getByText('Remove'));
+        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Cancel'));
+        expect(loadLog()).toHaveLength(1);
+        fireEvent.click(screen.getByText('Remove'));
+        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Remove'));
+        expect(loadLog()).toHaveLength(0);
     });
 });
