@@ -34,6 +34,10 @@ const typeTime = (hhmmValue: string) => {
     fireEvent.change(screen.getByLabelText('Hour'), { target: { value: String(h) } });
     fireEvent.change(screen.getByLabelText('Minute'), { target: { value: String(m) } });
 };
+/** A row in the progress list: the whole row is a button that opens it. */
+const row = (label: string) => screen.getByRole('button', { name: new RegExp(`^${label}`) });
+/** The open part of a row. */
+const rowPanel = (label: string) => document.getElementById(row(label).getAttribute('aria-controls')!)!;
 const nextUp = () => screen.getByRole('region', { name: 'Next up' });
 /** The Done button in the Next up card. */
 const done = () => within(nextUp()).getByRole('button', { name: 'Done' });
@@ -113,7 +117,8 @@ describe('live view', () => {
     it('the time on a finished step can be changed afterwards', () => {
         const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt + 20 * MINUTE } };
         render(<Harness start={rec} at={feedAt + 40 * MINUTE} />);
-        fireEvent.click(screen.getByRole('button', { name: 'Change the time for Feed your starter' }));
+        fireEvent.click(row('Feed your starter'));
+        fireEvent.click(within(rowPanel('Feed your starter')).getByRole('button', { name: 'Change time' }));
         const picker = screen.getByRole('group', { name: 'Change the time for Feed your starter' });
         expect(shownTime(picker)).toBe(hhmm(feedAt + 20 * MINUTE));
         fireEvent.click(within(picker).getByRole('button', { name: '5 minutes earlier' }));
@@ -135,7 +140,8 @@ describe('live view', () => {
     it('undoes a tick', () => {
         const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={feedAt + MINUTE} />);
-        fireEvent.click(screen.getByLabelText('Undo Feed your starter'));
+        fireEvent.click(row('Feed your starter'));
+        fireEvent.click(within(rowPanel('Feed your starter')).getByRole('button', { name: 'Undo' }));
         expect(nextUp().textContent).toContain('Feed your starter');
     });
 
@@ -207,12 +213,12 @@ describe('steps in the live view', () => {
 
     it('opens a step in its row in the list, with what it is', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
-        fireEvent.click(screen.getByLabelText('Show how-to: Add salt, honey and oil'));
+        fireEvent.click(row('Add salt, honey and oil'));
         expect(screen.getByText('10g salt')).toBeTruthy();
         // What the step is comes with it, in the same place: no separate (i) to tap
         expect(screen.getByText(/Salt adds flavour/)).toBeTruthy();
         expect(screen.queryByLabelText(/^What is /)).toBeNull();
-        fireEvent.click(screen.getByLabelText('Hide how-to: Add salt, honey and oil'));
+        fireEvent.click(row('Add salt, honey and oil')); // tap the row again to close it
         expect(screen.queryByText('10g salt')).toBeNull();
     });
 
@@ -220,7 +226,7 @@ describe('steps in the live view', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
         fireEvent.click(screen.getByText('Change the plan'));
         fireEvent.click(screen.getByText('2 loaves'));
-        fireEvent.click(screen.getByLabelText('Show how-to: Start the autolyse'));
+        fireEvent.click(row('Start the autolyse'));
         expect(screen.getByText('900g flour')).toBeTruthy();
     });
 });
@@ -239,7 +245,7 @@ describe('the done-earlier picker', () => {
         render(<Harness start={rec} at={feedAt} />);
         const shifts = [...document.querySelectorAll('.shift')].map((e) => e.textContent!);
         expect(shifts.length).toBeGreaterThan(0);
-        for (const t of shifts) { expect(t).toMatch(/^ \([−+]\d+ min\)$/); expect(t).not.toContain('-'); }
+        for (const t of shifts) { expect(t).toMatch(/^ [−+]\d+ min$/); expect(t).not.toContain('-'); }
     });
 
     it('closes on Escape, and ticks nothing', () => {
@@ -261,9 +267,10 @@ describe('the done-earlier picker', () => {
 describe('done buttons, the how-to and timers', () => {
     it('has a done button in the list for every step not yet done', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
-        // Not the next step: no need to open anything first
-        fireEvent.click(screen.getByLabelText('Mark Add salt, honey and oil done'));
-        expect(screen.getByText(/Done /)).toBeTruthy();
+        // Not the next step: open its row and press Done there
+        fireEvent.click(row('Add salt, honey and oil'));
+        fireEvent.click(within(rowPanel('Add salt, honey and oil')).getByRole('button', { name: 'Done' }));
+        expect(screen.getByText(/^Done /)).toBeTruthy();
     });
 
     it('has one Done button for the next step, with the how-to open or closed', () => {
@@ -310,7 +317,8 @@ describe('done buttons, the how-to and timers', () => {
         expect(timer.textContent).toContain('1:00:00');
         expect(timer.textContent).toContain('until');
         // Undoing the step clears its timer
-        fireEvent.click(screen.getByLabelText('Undo Start the autolyse'));
+        fireEvent.click(row('Start the autolyse'));
+        fireEvent.click(within(rowPanel('Start the autolyse')).getByRole('button', { name: 'Undo' }));
         expect(screen.queryByRole('timer')).toBeNull();
     });
 
@@ -440,5 +448,68 @@ describe('skipping the fridge in a running bake', () => {
         fireEvent.click(screen.getByText('Change the plan'));
         expect((screen.getByLabelText('Time in the fridge') as HTMLInputElement).disabled).toBe(true);
         expect(screen.queryByLabelText('Skip the fridge')).toBeNull();
+    });
+});
+
+describe('the progress list rows', () => {
+    it('are whole-row buttons, with no small links left in the list', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        render(<Harness start={rec} at={feedAt + MINUTE} />);
+        const list = document.querySelector('.rows')!;
+        expect(list.querySelectorAll('.link')).toHaveLength(0);
+        expect(within(list as HTMLElement).getAllByRole('button').length).toBeGreaterThan(10);
+        // Each row says what it is and when, in one button
+        expect(row('Add salt, honey and oil').textContent).toMatch(/Add salt, honey and oil.*(Tomorrow|Today|Sat)/);
+    });
+
+    it('start closed, and opening one does not open another', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt - 30 * MINUTE} />);
+        expect(row('Add the starter').getAttribute('aria-expanded')).toBe('false');
+        fireEvent.click(row('Add the starter'));
+        expect(row('Add the starter').getAttribute('aria-expanded')).toBe('true');
+        expect(row('Add salt, honey and oil').getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('the next step is marked, not a second Done button', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt - 30 * MINUTE} />);
+        const first = document.querySelector('.rows li.is-next')!;
+        expect(first.textContent).toContain('Feed your starter');
+        expect(first.textContent).toContain('Next up');
+        expect(first.querySelector('button')).toBeNull(); // the card above has its Done button
+    });
+
+    it('an open row has the how-to, then the same Done and clock buttons as the card', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt - 30 * MINUTE} />);
+        fireEvent.click(row('Add salt, honey and oil'));
+        const panel = within(rowPanel('Add salt, honey and oil'));
+        expect(panel.getByText('10g salt')).toBeTruthy();
+        expect(panel.getByRole('button', { name: 'Done' }).className).toContain('big-btn');
+        expect(panel.getByRole('button', { name: 'Done earlier' })).toBeTruthy();
+    });
+
+    it('Done earlier inside a row opens the picker there, and saves the time you pick', () => {
+        const t = feedAt + HOUR;
+        render(<Harness start={lockPlan(levers, feedAt)} at={t} />);
+        fireEvent.click(row('Add salt, honey and oil'));
+        const panel = within(rowPanel('Add salt, honey and oil'));
+        fireEvent.click(panel.getByRole('button', { name: 'Done earlier' }));
+        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
+        fireEvent.click(screen.getByText(`Save ${clockOf(t - 5 * MINUTE, LONDON)}`));
+        expect(screen.getByText(new RegExp(`^Done ${clockOf(t - 5 * MINUTE, LONDON)}`))).toBeTruthy();
+    });
+
+    it('closes the row when you tick it', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
+        fireEvent.click(row('Add salt, honey and oil'));
+        fireEvent.click(within(rowPanel('Add salt, honey and oil')).getByRole('button', { name: 'Done' }));
+        expect(row('Add salt, honey and oil').getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('a finished row opens to Change time and Undo, in that order', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        render(<Harness start={rec} at={feedAt + MINUTE} />);
+        fireEvent.click(row('Feed your starter'));
+        const buttons = within(rowPanel('Feed your starter')).getAllByRole('button').map((b) => b.textContent);
+        expect(buttons).toEqual(['Change time', 'Undo']);
     });
 });

@@ -78,10 +78,6 @@
 .folds li.now { box-shadow: 0 0 0 3px var(--glow); }
 .free { margin: 8px 0 0; }
 .keep .link { color: inherit; }
-.live-steps li.done { color: var(--muted); text-decoration: line-through; }
-.live-steps li.overdue { color: var(--danger); }
-.live-steps .shift { color: var(--muted); font-style: normal; }
-.live-steps .link { margin-left: 8px; font-size: var(--fs-sm); }
 
 
 .step-detail .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
@@ -139,7 +135,6 @@
 .how-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 .next-up .step-detail { border-top: 1px solid var(--line); margin: 0 0 12px; padding-top: 10px; }
 .step-detail .about { margin: 0 0 10px; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--info-bg); color: var(--info-ink); font-size: var(--fs-sm); }
-.row-detail { margin: 8px 0; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--card); border: 1px solid var(--line); }
 .next-up .big-btn { margin-top: 4px; }
 
 /* Two matching actions side by side. Stop is the warning red, and so is its confirm button. */
@@ -166,7 +161,6 @@
 .stepper { display: flex; flex-direction: column; gap: 8px; margin: 0 0 10px; }
 .nudge { display: flex; gap: 8px; }
 .nudge .btn { flex: 1; min-height: 48px; }
-.live-steps .when.link { margin: 0; font-weight: 700; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
 .earlier .btn-row .btn { min-height: 48px; white-space: nowrap; }
 .earlier .btn-row .btn:first-child { flex: 0 0 auto; padding-inline: 20px; }
 .earlier .btn-row .btn:last-child { flex: 1; }
@@ -186,3 +180,23 @@
 .check input { width: 22px; height: 22px; margin: 0; accent-color: var(--cold-edge); }
 .lever input[type="range"]:disabled { opacity: .45; }
 .empty-state h2 { font-size: var(--fs-md); }
+
+/* The progress list: whole-row buttons that open in place. */
+.rows { list-style: none; margin: 0; padding: 0; }
+.rows > li { border-top: 1px solid var(--line); }
+.rows > li:first-child { border-top: 0; }
+.rowbtn { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 2px; font: inherit; color: var(--ink); background: none; border: 0; text-align: left; cursor: pointer; }
+.rowbtn.static { cursor: default; }
+.rowtext { display: block; min-width: 0; }
+.rowbtn .title { display: block; font-weight: 700; }
+.rowbtn .sub { display: block; color: var(--muted); font-size: var(--fs-sm); font-weight: 400; }
+.rowbtn .shift { color: var(--muted); font-weight: 400; font-size: var(--fs-sm); }
+.rowbtn .chev { margin-left: auto; color: var(--muted); transition: transform var(--dur-fast, .15s); flex: none; }
+.rowbtn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.rowbtn .tag { margin-left: auto; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); flex: none; }
+.rows li.done .title { color: var(--muted); text-decoration: line-through; font-weight: 400; }
+.rows li.overdue .title { color: var(--danger); }
+.rows .expand { margin: 0 0 10px; padding: 12px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--line); }
+.rows .expand .step-detail { margin: 0 0 10px; }
+.rows .expand .ingredients { list-style: disc; }
+.rows .expand .done-row { margin-top: 0; }
