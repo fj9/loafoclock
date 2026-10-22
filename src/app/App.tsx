@@ -177,8 +177,8 @@ export function App() {
             </footer>
             {replacing && (
                 <ConfirmSheet
-                    title="Replace your current bake?" body="You already have a bake in progress. Starting this plan throws that one away."
-                    confirmLabel="Start this plan" danger onCancel={() => setReplacing(null)}
+                    title="Replace your current bake?" body="You already have a bake in progress. Replacing it throws that one away."
+                    confirmLabel="Replace bake" danger onCancel={() => setReplacing(null)}
                     onConfirm={() => { begin(replacing.levers, replacing.actuals); setReplacing(null); }}
                 />
             )}

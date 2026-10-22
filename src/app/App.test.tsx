@@ -247,7 +247,9 @@ describe('tabs, the menu and the bake', () => {
         fireEvent.click(within(dialog).getByText('Cancel'));
         expect(localStorage.getItem(LIVE_KEY)).toBe(before);
         fireEvent.click(screen.getByText('Start this plan'));
-        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Start this plan'));
+        const confirm = within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Replace bake' });
+        expect(confirm.className).toContain('danger-fill'); // red, and it says what is lost
+        fireEvent.click(confirm);
         expect(localStorage.getItem(LIVE_KEY)).not.toBe(before);
         expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
     });
