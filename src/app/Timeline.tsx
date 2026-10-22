@@ -106,16 +106,16 @@ export function Timeline({ plan, zone, now }: Props) {
                     ))}
                     {seg(b.feed, b.starterIn, 'rising', 'Starter rising')}
                     {seg(b.starterIn, plan.bulkEnd, 'bulk', 'Bulk fermentation')}
-                    {noFridge ? seg(b.fridge, b.ovenOn, 'proof', 'Proofing') : (
-                        <div class={`tl-seg fridge${brk ? ' folded' : ''}`} style={{ left: `${x(b.fridge)}px`, width: `${x(b.ovenOn) - x(b.fridge)}px` }} title="In the fridge">
-                            {brk && <span>{lengthOf(b.ovenOn - b.fridge)}</span>}
+                    {noFridge ? seg(b.fridge, b.ovenOn, 'proof', 'Proofing') : brk ? (
+                        <div class="tl-break" style={{ left: `${brk.x0}px`, width: `${brk.x1 - brk.x0}px` }} title="In the fridge">
+                            <span class="tl-break-time">{lengthOf(b.ovenOn - b.fridge)}</span>
+                            {[0, 1].map((side) => (
+                                <svg class="tl-slash" style={{ [side ? 'right' : 'left']: '-6px' }} width="12" height="36" viewBox="0 0 12 36" aria-hidden="true">
+                                    <path d="M2 34 L10 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            ))}
                         </div>
-                    )}
-                    {brk && [brk.x0, brk.x1].map((px) => (
-                        <svg class="tl-zig" style={{ left: `${px - 6}px` }} width="12" height="30" viewBox="0 0 12 30" aria-hidden="true">
-                            <path d="M3 0 L9 8 L3 15 L9 22 L3 30" fill="none" stroke="currentColor" stroke-width="1.6" />
-                        </svg>
-                    ))}
+                    ) : seg(b.fridge, b.ovenOn, 'fridge', 'In the fridge')}
                     {seg(b.bake, b.out, 'bake', 'Baking')}
                     {seg(b.out, b.carve, 'cool', 'Cooling')}
                     {plan.steps.map((s) => {

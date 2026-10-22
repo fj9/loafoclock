@@ -14,8 +14,10 @@
 .tl-seg.rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-seg.bulk { background: var(--fill-a); }
 .tl-seg.fridge { background: var(--info-bg); border: 1.5px solid var(--info); }
-.tl-seg.fridge span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: calc(11px * var(--ts, 1)); font-weight: 700; color: var(--ink); white-space: nowrap; }
-.tl-zig { position: absolute; top: 49px; color: var(--muted); }
+.tl-break { position: absolute; top: 56px; height: 18px; }
+.tl-break::before { content: ''; position: absolute; left: 6px; right: 6px; top: 8px; border-top: 2px dashed var(--info); }
+.tl-break-time { position: absolute; left: -10px; right: -10px; top: -22px; text-align: center; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tl-slash { position: absolute; top: -9px; color: var(--ink); }
 .tl-seg.proof { background: var(--warn); }
 .tl-seg.bake { background: var(--fill-b); }
 .tl-seg.cool { background: var(--good); opacity: .6; }
