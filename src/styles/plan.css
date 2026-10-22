@@ -161,15 +161,17 @@
 .clock-btn { width: 56px; padding: 0; display: grid; place-items: center; }
 .earlier { margin: 10px 0 4px; padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
 .earlier .hint { margin: 0 0 8px; }
-.stepper { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
-.stepper .btn { min-width: 56px; min-height: 48px; padding: 0 8px; font-size: calc(18px * var(--ts, 1)); }
+.stepper { display: flex; flex-direction: column; gap: 8px; margin: 0 0 10px; }
+.nudge { display: flex; gap: 8px; }
+.nudge .btn { flex: 1; min-height: 48px; }
 .live-steps .when.link { margin: 0; font-weight: 700; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
-.earlier .btn-row .btn { flex: 1; min-height: 48px; }
+.earlier .btn-row .btn { min-height: 48px; white-space: nowrap; }
+.earlier .btn-row .btn:first-child { flex: 0 0 auto; padding-inline: 20px; }
+.earlier .btn-row .btn:last-child { flex: 1; }
 
 /* A time of day that follows the Clock setting: hour, minute and (in 12-hour mode) am/pm. */
 .time-field { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; }
 .time-field select { font: inherit; font-size: calc(18px * var(--ts, 1)); min-height: 48px; padding: 4px 6px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
-.stepper .time-field { flex: 1; }
 
 /* A smaller button for a secondary action inside a card, such as stopping a timer. */
 .btn.small { min-height: 40px; padding: 4px 14px; font-size: calc(14px * var(--ts, 1)); }

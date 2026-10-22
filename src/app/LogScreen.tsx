@@ -34,7 +34,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
 
     return (
         <div class="log">
-            <h2>Your bakes</h2>
+            <h2>Log</h2>
             {entries.length === 0 && <p class="hint">No bakes yet. When you finish a bake you can log how it went here.</p>}
             <ol class="log-list">
                 {entries.map((e, i) => (

@@ -71,7 +71,7 @@ export const TIPS = {
     },
     bulk: {
         label: 'bulk fermentation',
-        text: 'The dough’s first long rise, in the bowl. It is ready when it has grown by the target amount and looks puffy, wobbly and bubbly.'
+        text: "The dough's first long rise, in the bowl. It is ready when it has grown by the target amount and looks puffy, wobbly and bubbly."
     },
     doughTemp: {
         label: 'dough temperature',

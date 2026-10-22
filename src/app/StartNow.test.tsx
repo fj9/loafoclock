@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/preact';
 import { afterEach, describe, expect, it } from 'vitest';
 import { StartNow } from './StartNow';
-import { lengthOf, dayLabel, clockOf, dayTime, dayInSentence, shortDate } from './format';
+import { lengthOf, dayLabel, clockOf, dayTime, dayInSentence, shortDate, signedMin } from './format';
 import { zonedToMs } from '../domain/plan';
 
 const LONDON = 'Europe/London';
@@ -58,6 +58,11 @@ describe('lever tips', () => {
 });
 
 describe('labels and durations', () => {
+    it('changes in minutes use a true minus sign, and a plus', () => {
+        expect(signedMin(-108)).toBe('−108 min');
+        expect(signedMin(10)).toBe('+10 min');
+        expect(signedMin(-5)).not.toContain('-'); // not a hyphen
+    });
     it('the timeline says "Bake and carve", with no ampersand', () => {
         render(<StartNow now={friday9} zone={LONDON} />);
         expect(screen.getByText('Bake and carve')).toBeTruthy();

@@ -9,7 +9,7 @@ import { EarlierPicker } from './EarlierPicker';
 import { Levers } from './Levers';
 import { StepDetail } from './StepDetail';
 import { Timeline } from './Timeline';
-import { clockOf, countdownText, dayTime, lengthOf } from './format';
+import { clockOf, countdownText, dayTime, lengthOf, signedMin } from './format';
 
 interface Props {
     record: LiveRecord;
@@ -162,7 +162,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                                 {s.actualAt !== undefined
                                     ? <button type="button" class="link when" aria-expanded={picker?.id === s.id} aria-label={`Change the time for ${s.label}`} onClick={() => openPicker(s.id, 'change')}>Done {clockOf(s.actualAt, zone)}</button>
                                     : <span class="when">{when(s.at)}</span>}{' '}{s.label}
-                                {s.status !== 'done' && s.shiftMin !== 0 && <em class="shift"> ({s.shiftMin > 0 ? '+' : ''}{s.shiftMin} min)</em>}
+                                {s.status !== 'done' && s.shiftMin !== 0 && <em class="shift"> ({signedMin(s.shiftMin)})</em>}
                                 {!isNext && (
                                     <button type="button" class="link" aria-expanded={open} onClick={() => setHow({ ...how, [s.id]: !open })} aria-label={`${open ? 'Hide' : 'Show'} how-to: ${s.label}`}>
                                         {open ? 'Hide how-to' : 'Show how-to'}

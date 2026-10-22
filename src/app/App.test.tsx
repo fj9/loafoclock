@@ -346,3 +346,13 @@ describe('button pairs: the safe action first, the primary or destructive one af
         expect(order[1]).toMatch(/^Save /);
     });
 });
+
+describe('page titles match their tabs', () => {
+    it('the Log tab has a Log heading, and the Plan tab has no page heading', () => {
+        render(<App />);
+        expect(screen.queryByRole('heading', { level: 2, name: 'Plan' })).toBeNull();
+        tab('Log');
+        expect(screen.getByRole('heading', { level: 2, name: 'Log' })).toBeTruthy();
+        expect(screen.queryByRole('heading', { name: 'Your bakes' })).toBeNull();
+    });
+});

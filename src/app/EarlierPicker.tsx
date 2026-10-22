@@ -33,9 +33,11 @@ export function EarlierPicker({ now, zone, start, label, onSave, onCancel }: Pro
         <div class="earlier" role="group" aria-label={label} onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}>
             <p class="hint">When did you do this?</p>
             <div class="stepper">
-                <button type="button" class="btn outline" aria-label="5 minutes earlier" onClick={() => setMs(ms - STEP)}>−5</button>
                 <TimeField label="Time" minutes={p.hour * 60 + p.minute} onChange={picked} />
-                <button type="button" class="btn outline" aria-label="5 minutes later" disabled={ms + STEP > now} onClick={() => setMs(ms + STEP)}>+5</button>
+                <div class="nudge">
+                    <button type="button" class="btn outline" aria-label="5 minutes earlier" onClick={() => setMs(ms - STEP)}>−5 min</button>
+                    <button type="button" class="btn outline" aria-label="5 minutes later" disabled={ms + STEP > now} onClick={() => setMs(ms + STEP)}>+5 min</button>
+                </div>
             </div>
             <div class="btn-row">
                 <button type="button" class="btn outline" onClick={onCancel}>Cancel</button>
