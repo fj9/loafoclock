@@ -81,3 +81,8 @@ export function shortDate(ms: number, now: number, zone?: Zone): string {
     const base = `${weekdayOf(ms, zone)} ${p.day} ${MONTHS[p.month - 1]}`;
     return p.year === partsOf(now, zone).year ? base : `${base} ${p.year}`;
 }
+
+/** A change in minutes with a true minus sign: "+10 min", "−108 min". */
+export function signedMin(n: number): string {
+    return `${n < 0 ? '−' : '+'}${Math.abs(n)} min`;
+}

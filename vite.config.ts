@@ -33,6 +33,7 @@ export default defineConfig({
     ],
     test: {
         include: ['src/**/*.test.{ts,tsx}'],
-        environment: 'node' // component tests opt in with `// @vitest-environment jsdom`
+        environment: 'node', // component tests opt in with `// @vitest-environment jsdom`
+        testTimeout: 30_000 // the planner searches take about 2 seconds alone, and longer on a busy machine
     }
 });

@@ -226,6 +226,22 @@ describe('steps in the live view', () => {
 });
 
 describe('the done-earlier picker', () => {
+    it('has − and + buttons that say how much: −5 min and +5 min', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        render(<Harness start={rec} at={plan.byId.autolyse} />);
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        expect(screen.getByRole('button', { name: '5 minutes earlier' }).textContent).toBe('−5 min');
+        expect(screen.getByRole('button', { name: '5 minutes later' }).textContent).toBe('+5 min');
+    });
+
+    it('shows how far each step has moved with the same minus sign', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt - 20 * MINUTE } };
+        render(<Harness start={rec} at={feedAt} />);
+        const shifts = [...document.querySelectorAll('.shift')].map((e) => e.textContent!);
+        expect(shifts.length).toBeGreaterThan(0);
+        for (const t of shifts) { expect(t).toMatch(/^ \([−+]\d+ min\)$/); expect(t).not.toContain('-'); }
+    });
+
     it('closes on Escape, and ticks nothing', () => {
         const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse} />);
