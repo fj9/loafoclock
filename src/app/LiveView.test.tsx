@@ -83,6 +83,19 @@ describe('live view', () => {
         expect(screen.queryByText('Keep my bake time')).toBeNull();
     });
 
+    it('says ahead, and offers a longer fridge, when you are early', () => {
+        const actuals = {
+            feed: feedAt, autolyse: plan.byId.autolyse, starterIn: plan.byId.starterIn, salt: plan.byId.salt,
+            fold1: plan.byId.fold1, fold2: plan.byId.fold2, fold3: plan.byId.fold3, fold4: plan.byId.fold4,
+            preShape: plan.byId.preShape, finalShape: plan.byId.finalShape, fridge: plan.byId.fridge - 90 * MINUTE
+        };
+        render(<Harness start={{ ...lockPlan(levers, feedAt), actuals }} at={plan.byId.fridge - 80 * MINUTE} />);
+        const note = screen.getByRole('status').textContent!;
+        expect(note).toMatch(/1 h 30 m ahead/);
+        expect(note).toMatch(/extend the fridge to 13 h 30 m/);
+        expect(note).not.toMatch(/behind/);
+    });
+
     it('says the bake moves when the fridge cannot give the time back', () => {
         const actuals = {
             feed: feedAt, autolyse: plan.byId.autolyse, starterIn: plan.byId.starterIn, salt: plan.byId.salt,
@@ -114,22 +127,13 @@ describe('live view', () => {
 });
 
 describe('steps in the live view', () => {
-    it('shows the how-to inside the Next up card, and starts a timer that is saved', () => {
+    it('shows the how-to inside the Next up card, without a timer button', () => {
         const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
-        let saved: LiveRecord = rec;
-        function Keep() {
-            const [r, setR] = useState(rec);
-            saved = r;
-            return <LiveView record={r} onChange={setR} onFinish={() => {}} clock={() => plan.byId.autolyse} zone={LONDON} />;
-        }
-        render(<Keep />);
+        render(<Harness start={rec} at={plan.byId.autolyse} />);
         // The step is due, so its how-to starts open, inside the one card
         expect(within(nextUp()).getByText('450g flour')).toBeTruthy();
-        fireEvent.click(screen.getByText('Start a 60 minute timer now'));
-        expect(saved.timers?.autolyse).toBe(plan.byId.autolyse + 60 * MINUTE);
-        expect(screen.getByRole('timer', { name: /Timer for/ }).textContent).toContain('1:00:00');
-        fireEvent.click(screen.getByText('Stop the timer'));
-        expect(saved.timers?.autolyse).toBeUndefined();
+        // Timers start themselves when you tick the step, and show above: there is no button for it here
+        expect(screen.queryByText(/minute timer now/)).toBeNull();
     });
 
     it('opens a step in its row in the list, and shows its tip', () => {

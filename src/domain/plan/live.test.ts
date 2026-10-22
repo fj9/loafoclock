@@ -77,6 +77,18 @@ describe('keep my bake time', () => {
         expect(withKeptBakeTime(levers, k).fridge).toEqual({ kind: 'hours', hours: 8 });
     });
 
+    it('when you are ahead, offers a longer fridge time to keep the bake time, up to 72 hours', () => {
+        const early = tick({}, 'fridge', original.byId.fridge - 90 * MINUTE);
+        const v = reconcile(original, levers, early, original.byId.fridge - 80 * MINUTE);
+        expect(v.keepBakeTime).toEqual({ fridgeHours: 13.5, possible: true });
+        const kept = reconcile(original, withKeptBakeTime(levers, v.keepBakeTime!), early, original.byId.fridge - 80 * MINUTE);
+        expect(kept.plan.byId.bake).toBe(original.byId.bake);
+        const farEarly = tick({}, 'fridge', original.byId.fridge - 70 * HOUR);
+        const k = reconcile(original, levers, farEarly, original.byId.fridge - 70 * HOUR).keepBakeTime!;
+        expect(k.possible).toBe(false);
+        expect(withKeptBakeTime(levers, k).fridge).toEqual({ kind: 'hours', hours: 72 });
+    });
+
     it('offers nothing when nothing has slipped, or without a fridge', () => {
         expect(keepBakeTime(original, original)).toBeNull();
         const none = buildPlan({ ...levers, fridge: { kind: 'none' } });

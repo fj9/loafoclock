@@ -92,13 +92,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     const kept = view.keepBakeTime;
     const text = (ms: number) => clockOf(ms, zone);
     const howOpen = (s: LiveStep, isNext: boolean) => how[s.id] ?? (isNext && s.status !== 'upcoming');
-    const detail = (s: LiveStep, showTip: boolean) => (
-        <StepDetail
-            id={s.id} plan={view.plan} zone={zone} clock={clock} timerEnd={record.timers?.[s.id]} showTip={showTip}
-            onStartTimer={(end) => onChange({ ...record, timers: { ...record.timers, [s.id]: end } })}
-            onStopTimer={() => clearTimer(s.id)}
-        />
-    );
+    const detail = (s: LiveStep, showTip: boolean) => <StepDetail id={s.id} plan={view.plan} zone={zone} showTip={showTip} />;
 
     return (
         <div class="live">
@@ -151,19 +145,22 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                 </section>
             )}
 
-            {kept && (
-                <p class="problems keep" role="status">
-                    You are {lengthOf(Math.abs(view.plan.byId.bake - original.byId.bake))} behind.{' '}
-                    {kept.possible ? (
-                        <>
-                            To bake when you planned, cut the fridge to {lengthOf(kept.fridgeHours * 3_600_000)}.{' '}
-                            <button type="button" class="link" onClick={() => onChange({ ...record, levers: withKeptBakeTime(record.levers, kept) })}>Keep my bake time</button>
-                        </>
-                    ) : (
-                        <>The fridge can not go below 8 hours, so the bake moves to {when(view.plan.byId.bake)}.</>
-                    )}
-                </p>
-            )}
+            {kept && (() => {
+                const late = view.plan.byId.bake > original.byId.bake;
+                return (
+                    <p class="problems keep" role="status">
+                        You are {lengthOf(Math.abs(view.plan.byId.bake - original.byId.bake))} {late ? 'behind' : 'ahead'}.{' '}
+                        {kept.possible ? (
+                            <>
+                                To bake when you planned, {late ? 'cut' : 'extend'} the fridge to {lengthOf(kept.fridgeHours * 3_600_000)}.{' '}
+                                <button type="button" class="link" onClick={() => onChange({ ...record, levers: withKeptBakeTime(record.levers, kept) })}>Keep my bake time</button>
+                            </>
+                        ) : (
+                            <>The fridge can not go {late ? 'below 8' : 'above 72'} hours, so the bake moves to {when(view.plan.byId.bake)}.</>
+                        )}
+                    </p>
+                );
+            })()}
 
             <section class="panel steps live-steps">
                 <h2>The steps</h2>
