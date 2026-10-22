@@ -95,7 +95,7 @@ describe('the log', () => {
         const q = (date: number) => ({ date, loaves: 1, size: 'regular', ratioN: 2, notes: '' });
         localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [q(3), q(2), q(1)] }));
         render(<App />);
-        fireEvent.input(screen.getByLabelText(/^Feed and starter timing/), { target: { value: '5' } });
+        fireEvent.input(screen.getByLabelText(/^Starter feeding time/), { target: { value: '5' } });
         expect(screen.getByText(/last 3 bakes all used quick feeds/)).toBeTruthy();
     });
 });
@@ -106,7 +106,7 @@ describe('already fed', () => {
         fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
         expect(screen.getByText('When did you feed your starter?')).toBeTruthy();
         // the feed ratio cannot change: it has already happened, so the slider only covers that ratio's window
-        const wait = screen.getByLabelText(/^Feed and starter timing/) as HTMLInputElement;
+        const wait = screen.getByLabelText(/^Starter feeding time/) as HTMLInputElement;
         expect(Number(wait.max)).toBe(11);
         expect(Number(wait.min)).toBeGreaterThanOrEqual(9);
         fireEvent.click(screen.getByText('Start this plan'));

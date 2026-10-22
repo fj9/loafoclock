@@ -38,7 +38,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
         <section class="levers" aria-label={part === 'timing' ? 'Timing levers' : part === 'other' ? 'Cooling and loaf' : 'Levers'}>
             {part !== 'other' && (<>
             <div class="lever">
-                <div class="lever-head"><label for="lv-feed">Feed and starter timing</label> <Tip name="ratio" /></div>
+                <div class="lever-head"><label for="lv-feed">Starter feeding time</label> <Tip name="ratio" /></div>
                 <input id="lv-feed" type="range" step={0.25} aria-valuetext={`${hoursText(wait)} after feeding, a ${ratio.ratio} feed`}
                     min={locked.feedRatio ? ratio.minHours + minDelayMin / 60 : WAIT_MIN_HOURS} max={locked.feedRatio ? ratio.maxHours : WAIT_MAX_HOURS} value={wait}
                     onInput={(e) => {
