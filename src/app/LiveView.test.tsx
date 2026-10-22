@@ -228,6 +228,19 @@ describe('done buttons, the how-to and timers', () => {
         expect(screen.queryByRole('timer')).toBeNull();
     });
 
+    it('clears the timers of earlier steps when you tick a later one, so they do not pile up', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        render(<Harness start={rec} at={plan.byId.autolyse} />);
+        fireEvent.click(screen.getByText('I have started the autolyse'));
+        fireEvent.click(screen.getByText('Just now'));
+        expect(screen.getAllByRole('timer')).toHaveLength(1);
+        fireEvent.click(screen.getByText('The starter is in'));
+        fireEvent.click(screen.getByText('Just now'));
+        const timers = screen.getAllByRole('timer');
+        expect(timers).toHaveLength(1);
+        expect(timers[0]!.getAttribute('aria-label')).toBe('Timer for Add the starter');
+    });
+
     it('shows time is up and lets you clear it', () => {
         const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt, autolyse: feedAt }, timers: { autolyse: feedAt + 10 * MINUTE } };
         render(<Harness start={rec} at={feedAt + 20 * MINUTE} />);

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { LiveRecord } from '../domain/liveStore';
 import {
-    FOLD_IDS, MINUTE, buildPlan, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type StepId, type Zone
+    FOLD_IDS, MINUTE, STEP_ORDER, buildPlan, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type StepId, type Zone
 } from '../domain/plan';
 import { guideFor } from '../domain/stepGuide';
 import { ConfirmSheet } from './ConfirmSheet';
@@ -79,8 +79,10 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
         setAsking(null);
         const minutes = guideFor(id, view.plan, (ms) => clockOf(ms, zone)).timerMinutes;
         const end = minutes === undefined ? undefined : at + minutes * MINUTE;
-        const timers = end !== undefined && end > clock() ? { ...record.timers, [id]: end } : record.timers;
-        onChange({ ...record, actuals: tick(record.actuals, id, at), ...(timers ? { timers } : {}) });
+        // Doing a step means the waits before it are over, so their timers go. Then this step's own wait starts.
+        const kept = Object.fromEntries(Object.entries(record.timers ?? {}).filter(([k]) => STEP_ORDER.indexOf(k as StepId) >= STEP_ORDER.indexOf(id)));
+        const timers = end !== undefined && end > clock() ? { ...kept, [id]: end } : kept;
+        onChange({ ...record, actuals: tick(record.actuals, id, at), timers });
     };
     const clearTimer = (id: StepId) => { const { [id]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, timers: rest }); };
     const undo = (id: StepId) => { const { [id]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, actuals: untick(record.actuals, id), timers: rest }); };
