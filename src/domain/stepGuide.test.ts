@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { guideFor, recipeOf } from './stepGuide';
+import { TIPS } from './tips';
 import { buildPlan, leversAt, STEP_ORDER } from './plan';
 
 const clock = (ms: number) => `t${ms}`;
@@ -49,5 +50,26 @@ describe('step guide', () => {
         const none = buildPlan(leversAt(0, { fridge: { kind: 'none' } }));
         expect(guideFor('fridge', none, clock).title).toBe('Proof on the counter');
         expect(guideFor('bake', plan({ size: 'large' }), clock).instructions.join(' ')).toContain('25 minutes (lid on)');
+    });
+});
+
+describe('what a step is', () => {
+    const words = (t: string) => t.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).filter((w) => w.length > 3);
+
+    it('is only shown where the instructions do not already say it', () => {
+        const p = plan();
+        for (const id of STEP_ORDER) {
+            const g = guideFor(id, p, clock);
+            if (!g.tip) continue;
+            const said = new Set(words(`${g.instructions.join(' ')} ${g.note ?? ''}`));
+            const tip = words(TIPS[g.tip].text);
+            expect(tip.filter((w) => said.has(w)).length / tip.length, id).toBeLessThan(0.6);
+        }
+    });
+
+    it('is left out of the folds, the feed and the final shape', () => {
+        const p = plan();
+        for (const id of ['feed', 'fold1', 'fold2', 'fold3', 'fold4', 'finalShape'] as const) expect(guideFor(id, p, clock).tip, id).toBeUndefined();
+        expect(guideFor('salt', p, clock).tip).toBe('enrichments');
     });
 });

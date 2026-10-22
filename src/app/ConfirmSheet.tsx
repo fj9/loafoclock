@@ -4,6 +4,8 @@ interface Props {
     title: string;
     body?: string;
     confirmLabel: string;
+    /** The action throws something away: the confirm button is red. */
+    danger?: boolean;
     onConfirm: () => void;
     onCancel: () => void;
 }
@@ -12,7 +14,7 @@ interface Props {
  * An in-app "are you sure?". The browser's own confirm popup is blocked in some browsers and web
  * views, which would leave the button doing nothing. Focus starts on Cancel, Escape cancels.
  */
-export function ConfirmSheet({ title, body, confirmLabel, onConfirm, onCancel }: Props) {
+export function ConfirmSheet({ title, body, confirmLabel, danger, onConfirm, onCancel }: Props) {
     const sheet = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const before = document.activeElement as HTMLElement | null;
@@ -28,7 +30,7 @@ export function ConfirmSheet({ title, body, confirmLabel, onConfirm, onCancel }:
                 {body && <p>{body}</p>}
                 <div class="btn-row">
                     <button type="button" class="btn outline" data-cancel onClick={onCancel}>Cancel</button>
-                    <button type="button" class="btn" onClick={onConfirm}>{confirmLabel}</button>
+                    <button type="button" class={`btn${danger ? ' danger-fill' : ''}`} onClick={onConfirm}>{confirmLabel}</button>
                 </div>
             </div>
         </div>

@@ -40,8 +40,6 @@
 .lever label, .lever .label { font-weight: 700; }
 .lever-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
 .lever-head.spaced { margin-top: 8px; }
-.lever-head .tip-wrap { display: contents; }
-.lever-head .tip { flex-basis: 100%; margin-top: 2px; }
 .lever select, .lever input[type="range"] { width: 100%; font: inherit; accent-color: var(--accent); }
 .lever select { padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
 .lever output { color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
@@ -86,23 +84,18 @@
 .live-steps .link { margin-left: 8px; font-size: calc(13px * var(--ts, 1)); }
 .sheet .chips { margin: 12px 0; }
 
-.info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1.5px solid var(--info); background: none; color: var(--muted); cursor: pointer; padding: 0; vertical-align: middle; }
-.info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
-.tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
-.guide .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
-.guide .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
-.guide .timer { margin: 8px 0; font-size: calc(20px * var(--ts, 1)); }
+.step-detail .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
+.step-detail .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
+.step-detail .timer { margin: 8px 0; font-size: calc(20px * var(--ts, 1)); }
 
 .tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--wash); }
 .tabs button { flex: 1; font: inherit; font-weight: 600; padding: 12px 4px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); cursor: pointer; }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
 .log-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
-.log-list h3 { font-size: calc(18px * var(--ts, 1)); }
 .log-list p { margin: 4px 0; }
 .lever textarea { width: 100%; font: inherit; padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
 .faq { border-bottom: 1px solid var(--line); padding: 8px 0; }
 .faq summary { font-weight: 700; cursor: pointer; }
-.about .panel h2, .help h2 { font-size: calc(20px * var(--ts, 1)); }
 .lever .sub { font-weight: 600; margin-top: 6px; }
 
 .timers { border-color: var(--accent); }
@@ -111,7 +104,7 @@
 .timer-name { font-weight: 700; }
 .timer-time { font-family: var(--font-display); font-size: calc(26px * var(--ts, 1)); font-variant-numeric: tabular-nums; }
 .timer-row.up { color: var(--accent); }
-.guide .big-btn { margin: 8px 0; }
+.step-detail .btn { margin: 4px 0 8px; }
 
 /* Each slider takes the colour of the bar on the timeline it controls. */
 .lever #lv-feed { accent-color: var(--good); }
@@ -119,7 +112,45 @@
 .lever #lv-fridge { accent-color: var(--cold-edge); }
 
 /* Footer: name on the left, the tip link in the middle, About on the right, all on one line. */
-.app-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
+.app-footer { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); white-space: nowrap; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .app-footer > :first-child { justify-self: start; }
 .app-footer > :last-child { justify-self: end; }
 .app-footer a, .app-footer .link { font: inherit; font-weight: 600; line-height: 1.4; padding: 4px 2px; }
+
+/* Tabs, the menu at the top right, and the in-progress dot on Bake. */
+.app-header { position: relative; }
+.menu-btn { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; color: var(--header-ink); cursor: pointer; }
+.menu-btn:hover, .menu-btn[aria-expanded="true"] { background: rgba(255, 255, 255, .14); }
+.menu-scrim { position: fixed; inset: 0; z-index: 30; }
+.menu { position: absolute; top: 58px; right: 10px; z-index: 31; list-style: none; margin: 0; padding: 6px; min-width: 160px; background: var(--card); color: var(--ink); border: 1px solid var(--info); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); text-align: left; }
+.menu button { display: block; width: 100%; text-align: left; font: inherit; font-weight: 600; padding: 10px 12px; border: 0; border-radius: 8px; background: none; color: inherit; cursor: pointer; }
+.menu button:hover, .menu button.on { background: var(--wash); }
+.tabs .dot { display: inline-block; width: 8px; height: 8px; margin: 0 0 8px 6px; border-radius: 50%; background: var(--good); }
+.bake-banner { margin: 0 0 16px; }
+.empty-bake .btn { margin-top: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.reminders { margin: 8px 0 16px; }
+
+/* One card for the step that is next: the how-to opens inside it. */
+.how-toggle { display: flex; align-items: center; gap: 6px; font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 8px 0; min-height: 40px; cursor: pointer; }
+.how-toggle svg { transition: transform var(--dur-fast, .15s); }
+.how-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.next-up .step-detail { border-top: 1px solid var(--line); margin: 0 0 12px; padding-top: 10px; }
+.step-detail .about { margin: 0 0 10px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-size: calc(14px * var(--ts, 1)); }
+.row-detail { margin: 8px 0; padding: 10px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); }
+.next-up .big-btn { margin-top: 4px; }
+
+/* Two matching actions side by side. Stop is the warning red, and so is its confirm button. */
+.actions-row { display: flex; gap: 12px; margin: 0 0 16px; }
+.actions-row .btn { flex: 1; }
+.btn.danger { color: var(--danger); border-color: var(--danger); }
+.btn.danger-fill { background: var(--danger); border-color: var(--danger); color: var(--card); }
+
+/* The (i) tips beside each lever label. */
+.lever-head .tip-wrap { display: contents; }
+.lever-head .tip { flex-basis: 100%; margin-top: 2px; }
+.info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1.5px solid var(--info); background: none; color: var(--muted); cursor: pointer; padding: 0; vertical-align: middle; }
+.info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
+.reminders .btn { width: 100%; }
+.keep .btn { margin-top: 8px; }

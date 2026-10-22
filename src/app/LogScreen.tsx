@@ -2,6 +2,7 @@ import { useRef, useState } from 'preact/hooks';
 import { exportLog, parseBackup, type LogEntry } from '../domain/bakeLog';
 import { ConfirmSheet } from './ConfirmSheet';
 import { downloadText } from './download';
+import { shortDate } from './format';
 import { LOAF_SIZES, type LoafSize } from '../domain/recipe';
 
 interface Props {
@@ -38,7 +39,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
             <ol class="log-list">
                 {entries.map((e, i) => (
                     <li class="panel">
-                        <h3>{new Date(e.date).toLocaleDateString()}{e.outcome ? ` · ${e.outcome}` : ''}</h3>
+                        <h3>{shortDate(e.date, Date.now())}{e.outcome ? ` · ${e.outcome}` : ''}</h3>
                         <p>{e.loaves} × {sizeLabel(e.size)}{e.hydration ? `, ${e.hydration}% hydration` : ''}</p>
                         <p class="hint">
                             {e.ratioN ? `Feed 1:${e.ratioN}:${e.ratioN}` : 'Feed not recorded'}
@@ -46,8 +47,10 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
                             {e.fridgeHours ? ` · fridge ${Math.round(e.fridgeHours * 10) / 10} h` : ''}
                         </p>
                         {e.notes && <p>{e.notes}</p>}
-                        <button type="button" class="btn outline" onClick={() => onRepeat(e)}>Repeat this bake</button>{' '}
-                        <button type="button" class="link" onClick={() => setRemoving(i)}>Remove</button>
+                        <div class="actions-row">
+                            <button type="button" class="btn outline" onClick={() => onRepeat(e)}>Repeat this bake</button>
+                            <button type="button" class="btn outline danger" onClick={() => setRemoving(i)}>Remove</button>
+                        </div>
                     </li>
                 ))}
             </ol>
@@ -55,7 +58,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
             {oldCount > 0 && (
                 <p class="panel">
                     The first Loaf O'Clock on this device has {oldCount} logged {oldCount === 1 ? 'bake' : 'bakes'}.{' '}
-                    <button type="button" class="link" onClick={onImportOld}>Add them to this log</button>
+                    <button type="button" class="btn outline" onClick={onImportOld}>Add them to this log</button>
                 </p>
             )}
 
@@ -70,7 +73,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
             {removing !== null && (
                 <ConfirmSheet
                     title="Remove this bake?" body="It will be taken out of your log."
-                    confirmLabel="Remove" onCancel={() => setRemoving(null)} onConfirm={() => { onRemove(removing); setRemoving(null); }}
+                    confirmLabel="Remove" danger onCancel={() => setRemoving(null)} onConfirm={() => { onRemove(removing); setRemoving(null); }}
                 />
             )}
         </div>

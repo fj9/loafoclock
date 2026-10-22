@@ -1,9 +1,11 @@
 import type { ComponentChildren } from 'preact';
 import { useMemo } from 'preact/hooks';
 import { buildPlan, violations, type Levers as LeverSet, type Plan, type Violation, type Zone } from '../domain/plan';
+import { planToIcs } from '../domain/ics';
+import { downloadText } from './download';
 import { Levers } from './Levers';
 import { Timeline } from './Timeline';
-import { clockOf, dayLabel } from './format';
+import { clockOf, dayTime } from './format';
 
 interface Props {
     levers: LeverSet;
@@ -49,17 +51,25 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quic
             {summary}
             <Levers part="loaf" levers={levers} zone={zone} onChange={onChange} />
             <section class="panel steps">
-                <h2>The steps</h2>
+                <h2>Planned steps</h2>
                 <ol>
                     {plan.steps.map((s) => (
                         <li class={problems.some((v) => v.kind === 'asleep' && v.stepId === s.id) ? 'asleep' : ''}>
-                            <span class="when">{dayLabel(s.at, now, zone)}, {clockOf(s.at, zone)}</span> {s.label}
+                            <span class="when">{dayTime(s.at, now, zone)}</span> {s.label}
                         </li>
                     ))}
                 </ol>
             </section>
             {onStart && (
-                <button type="button" class="btn big-btn" onClick={() => onStart(levers)}>Start this plan</button>
+                <>
+                    <button type="button" class="btn big-btn" onClick={() => onStart(levers)}>Start this plan</button>
+                    <div class="reminders">
+                        <button type="button" class="btn outline" onClick={() => downloadText('loaf-oclock-plan.ics', planToIcs(plan, { now: Date.now(), after: Date.now() }), 'text/calendar')}>
+                            Add reminders to my calendar
+                        </button>
+                        <p class="hint">A calendar file with an alert 10 minutes before each step. It shows the plan as it stands now, so save it again if you change the plan.</p>
+                    </div>
+                </>
             )}
         </>
     );

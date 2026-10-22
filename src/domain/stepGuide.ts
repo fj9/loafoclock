@@ -43,7 +43,6 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
                     `Cover and leave it somewhere warm to ferment until it is active, bubbly and at its peak, about ${clock(plan.starterReadyAt)} to ${clock(plan.starterStaleAt)}`
                 ],
                 note: `Makes ${f.total}g at 1:${l.ratioN}:${l.ratioN}: ${r.starter}g for the dough and ${f.total - r.starter}g to keep as your next starter.`,
-                tip: 'starter'
             };
         }
         case 'autolyse':
@@ -70,7 +69,7 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
                 title: `Stretch and fold ${n} of 4`, ingredients: [],
                 instructions: [...FOLD_INSTRUCTIONS, ...(n === 4 ? ['If you are adding bulky inclusions (cheese, fruit, chocolate), add them during this fold'] : [])],
                 note: n < 4 ? `The next fold is ${STEP_MINUTES.foldGap} minutes after this one.` : 'After this fold, leave the dough to finish rising.',
-                timerMinutes: STEP_MINUTES.foldGap, tip: 'folds'
+                timerMinutes: STEP_MINUTES.foldGap
             };
         }
         case 'preShape':
@@ -87,7 +86,6 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
             return {
                 title: 'Final shape', ingredients: [],
                 instructions: ['Shape the dough into a tight oval', 'Place it seam side up in a floured banneton', l.fridge.kind === 'none' ? 'Leave it on the counter to proof' : 'Cover it, ready for the fridge'],
-                tip: 'finalShape'
             };
         case 'fridge':
             return l.fridge.kind === 'none'

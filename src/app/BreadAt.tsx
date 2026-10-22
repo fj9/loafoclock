@@ -2,7 +2,7 @@ import { useMemo, useState } from 'preact/hooks';
 import { planBackward, atLocalTime, addLocalDays, startOfLocalDay, type Candidate, type Category, type Levers as LeverSet, type Zone } from '../domain/plan';
 import { CarvePicker } from './CarvePicker';
 import { PlanDetail } from './PlanDetail';
-import { clockOf, dayLabel, lengthOf } from './format';
+import { clockOf, dayInSentence, lengthOf } from './format';
 
 const TITLES: Record<Category, string> = {
     fresh: 'Baked fresh',
@@ -20,12 +20,12 @@ interface Props {
 
 function blurb(c: Candidate, now: number, zone: Zone): string {
     const p = c.plan;
-    const out = `out of the oven ${dayLabel(p.byId.out, now, zone)} at ${clockOf(p.byId.out, zone)}`;
+    const out = `out of the oven ${dayInSentence(p.byId.out, now, zone)} at ${clockOf(p.byId.out, zone)}`;
     switch (c.category) {
-        case 'fresh': return `Feed ${dayLabel(p.byId.feed, now, zone)} at ${clockOf(p.byId.feed, zone)}. Carve straight after it cools.`;
-        case 'moreFlavour': return `${lengthOf(p.fridgeHours * 3_600_000)} in the fridge for a tangier loaf, feed ${dayLabel(p.byId.feed, now, zone)} at ${clockOf(p.byId.feed, zone)}.`;
-        case 'bedtime': return `Loaf ${out}, carved in the morning. Feed ${dayLabel(p.byId.feed, now, zone)} at ${clockOf(p.byId.feed, zone)}.`;
-        case 'noFridge': return `Skips the fridge, so less sourdough. Feed ${dayLabel(p.byId.feed, now, zone)} at ${clockOf(p.byId.feed, zone)}.`;
+        case 'fresh': return `Feed ${dayInSentence(p.byId.feed, now, zone)} at ${clockOf(p.byId.feed, zone)}. Carve straight after it cools.`;
+        case 'moreFlavour': return `${lengthOf(p.fridgeHours * 3_600_000)} in the fridge for a tangier loaf, feed ${dayInSentence(p.byId.feed, now, zone)} at ${clockOf(p.byId.feed, zone)}.`;
+        case 'bedtime': return `Loaf ${out}, carved in the morning. Feed ${dayInSentence(p.byId.feed, now, zone)} at ${clockOf(p.byId.feed, zone)}.`;
+        case 'noFridge': return `Skips the fridge, so less sourdough. Feed ${dayInSentence(p.byId.feed, now, zone)} at ${clockOf(p.byId.feed, zone)}.`;
     }
 }
 

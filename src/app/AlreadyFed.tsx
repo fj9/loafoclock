@@ -5,7 +5,7 @@ import {
     type Actuals, type Levers as LeverSet, type Zone
 } from '../domain/plan';
 import { PlanDetail } from './PlanDetail';
-import { clockOf, dayLabel } from './format';
+import { clockOf, dayInSentence, dayTime } from './format';
 
 interface Props {
     now: number;
@@ -78,16 +78,16 @@ export function AlreadyFed({ now, zone, onStart, quickStreak }: Props) {
                     <section class="panel result" aria-live="polite">
                         <p class="eyebrow">Your starter</p>
                         <p class="big">
-                            {state === 'rising' && `Ready ${dayLabel(plan.starterReadyAt, now, zone)} at ${clockOf(plan.starterReadyAt, zone)}`}
+                            {state === 'rising' && `Ready ${dayInSentence(plan.starterReadyAt, now, zone)} at ${clockOf(plan.starterReadyAt, zone)}`}
                             {state === 'ready' && 'Ready now'}
                             {state === 'past' && 'Past its best'}
                         </p>
                         <p class="hint">
                             {state === 'past'
-                                ? `It was at its best until ${dayLabel(plan.starterStaleAt, now, zone)} at ${clockOf(plan.starterStaleAt, zone)}. It will still raise a loaf but more slowly, or you could feed it again.`
-                                : `Best used by ${dayLabel(plan.starterStaleAt, now, zone)} at ${clockOf(plan.starterStaleAt, zone)}.`}
+                                ? `It was at its best until ${dayInSentence(plan.starterStaleAt, now, zone)} at ${clockOf(plan.starterStaleAt, zone)}. It will still raise a loaf but more slowly, or you could feed it again.`
+                                : `Best used by ${dayInSentence(plan.starterStaleAt, now, zone)} at ${clockOf(plan.starterStaleAt, zone)}.`}
                         </p>
-                        <p class="hint">Ready to carve {dayLabel(plan.readyToCarve, now, zone)} at {clockOf(plan.readyToCarve, zone)}.</p>
+                        <p class="hint">Ready to carve {dayTime(plan.readyToCarve, now, zone)}.</p>
                     </section>
                     <PlanDetail
                         levers={levers} onChange={setLevers} now={now} zone={zone} quickStreak={quickStreak}

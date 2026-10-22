@@ -1,5 +1,5 @@
 // The live view: a locked plan, what has been ticked, and where you are in it now.
-import { FRIDGE_MIN_HOURS, type Levers } from './levers';
+import { FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, type Levers } from './levers';
 import { buildPlan, type Actuals, type Plan, type Step, type StepId } from './steps';
 import { HOUR, MINUTE } from './time';
 
@@ -20,7 +20,7 @@ export interface LiveStep extends Step {
 export interface KeepBakeTime {
     /** The fridge time that would keep the loaf coming out when first planned. */
     fridgeHours: number;
-    /** False if that would be less than the 8 hour minimum. */
+    /** False if that would be outside the 8 to 72 hour range. */
     possible: boolean;
 }
 
@@ -95,12 +95,12 @@ export function keepBakeTime(original: Plan, current: Plan): KeepBakeTime | null
     if (current.levers.fridge.kind !== 'hours') return null;
     if (Math.abs(current.byId.bake - original.byId.bake) < 1 * MINUTE) return null;
     const fridgeHours = (original.byId.bake - current.byId.fridge) / HOUR;
-    return { fridgeHours, possible: fridgeHours >= FRIDGE_MIN_HOURS - 1e-9 };
+    return { fridgeHours, possible: fridgeHours >= FRIDGE_MIN_HOURS - 1e-9 && fridgeHours <= FRIDGE_MAX_HOURS + 1e-9 };
 }
 
-/** The levers with the fridge changed so the bake stays at the planned time (kept above the minimum). */
+/** The levers with the fridge changed so the bake stays at the planned time (kept within 8 to 72 hours). */
 export function withKeptBakeTime(levers: Levers, k: KeepBakeTime): Levers {
-    return { ...levers, fridge: { kind: 'hours', hours: Math.max(k.fridgeHours, FRIDGE_MIN_HOURS) } };
+    return { ...levers, fridge: { kind: 'hours', hours: Math.min(Math.max(k.fridgeHours, FRIDGE_MIN_HOURS), FRIDGE_MAX_HOURS) } };
 }
 
 /** Ticks a step done at a moment you give (usually now, or "10 minutes ago"). */
