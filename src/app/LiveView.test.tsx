@@ -53,6 +53,8 @@ describe('live view', () => {
         const picker = within(nextUp()).getByRole('group', { name: 'Done earlier' });
         expect(screen.queryByRole('dialog')).toBeNull();
         expect((within(picker).getByLabelText('Time') as HTMLInputElement).value).toBe(hhmm(plan.byId.autolyse + 30 * MINUTE));
+        // Cancel is a button, like the Cancel on the confirmation sheets
+        expect(within(picker).getByRole('button', { name: 'Cancel' }).className).toContain('outline');
         fireEvent.click(within(picker).getByText('Cancel'));
         expect(within(nextUp()).queryByRole('group', { name: 'Done earlier' })).toBeNull();
         expect(nextUp().textContent).toContain('Start the autolyse'); // nothing was ticked

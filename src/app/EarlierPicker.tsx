@@ -40,7 +40,7 @@ export function EarlierPicker({ now, zone, start, label, onSave, onCancel }: Pro
                 <button type="button" class="btn outline" aria-label="5 minutes later" disabled={ms + STEP > now} onClick={() => setMs(ms + STEP)}>+5</button>
             </div>
             <div class="btn-row">
-                <button type="button" class="link" onClick={onCancel}>Cancel</button>
+                <button type="button" class="btn outline" onClick={onCancel}>Cancel</button>
                 <button type="button" class="btn" onClick={() => onSave(ms)}>Save {clockOf(ms, zone)}</button>
             </div>
         </div>
