@@ -35,29 +35,6 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
     return (
         <section class="levers" aria-label="Levers">
             <div class="lever">
-                <div class="lever-head"><span class="label" id="lv-loaf">Your loaf</span> <Tip name="loaf" /></div>
-                <div class="seg-choice" role="group" aria-labelledby="lv-loaf">
-                    {([1, 2] as const).map((n) => (
-                        <button type="button" class={(levers.loaves ?? 1) === n ? 'on' : ''} aria-pressed={(levers.loaves ?? 1) === n} onClick={() => set({ loaves: n })}>
-                            {n} {n === 1 ? 'loaf' : 'loaves'}
-                        </button>
-                    ))}
-                </div>
-                <div class="seg-choice" role="group" aria-label="Loaf size">
-                    {(Object.keys(LOAF_SIZES) as LoafSize[]).map((k) => (
-                        <button type="button" class={levers.size === k ? 'on' : ''} aria-pressed={levers.size === k} onClick={() => set({ size: k })}>
-                            {LOAF_SIZES[k].label}
-                        </button>
-                    ))}
-                </div>
-                <p class="hint">{LOAF_SIZES[levers.size].note}.</p>
-                <div class="lever-head spaced"><label for="lv-hydration" class="sub">Hydration</label> <Tip name="hydration" /></div>
-                <select id="lv-hydration" value={levers.hydration ?? DEFAULT_HYDRATION} onChange={(e) => set({ hydration: Number((e.target as HTMLSelectElement).value) })}>
-                    {HYDRATIONS.map((h) => <option value={h}>{h}%</option>)}
-                </select>
-            </div>
-
-            <div class="lever">
                 <div class="lever-head"><label for="lv-feed">Feed and starter timing</label> <Tip name="ratio" /></div>
                 <input id="lv-feed" type="range" step={0.25} aria-valuetext={`${hoursText(wait)} after feeding, a ${ratio.ratio} feed`}
                     min={locked.feedRatio ? ratio.minHours + minDelayMin / 60 : WAIT_MIN_HOURS} max={locked.feedRatio ? ratio.maxHours : WAIT_MAX_HOURS} value={wait}
@@ -117,6 +94,29 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
                         <button type="button" class={levers.cooling === c ? 'on' : ''} aria-pressed={levers.cooling === c} onClick={() => set({ cooling: c })}>{c} min</button>
                     ))}
                 </div>
+            </div>
+
+            <div class="lever">
+                <div class="lever-head"><span class="label" id="lv-loaf">Your loaf</span> <Tip name="loaf" /></div>
+                <div class="seg-choice" role="group" aria-labelledby="lv-loaf">
+                    {([1, 2] as const).map((n) => (
+                        <button type="button" class={(levers.loaves ?? 1) === n ? 'on' : ''} aria-pressed={(levers.loaves ?? 1) === n} onClick={() => set({ loaves: n })}>
+                            {n} {n === 1 ? 'loaf' : 'loaves'}
+                        </button>
+                    ))}
+                </div>
+                <div class="seg-choice" role="group" aria-label="Loaf size">
+                    {(Object.keys(LOAF_SIZES) as LoafSize[]).map((k) => (
+                        <button type="button" class={levers.size === k ? 'on' : ''} aria-pressed={levers.size === k} onClick={() => set({ size: k })}>
+                            {LOAF_SIZES[k].label}
+                        </button>
+                    ))}
+                </div>
+                <p class="hint">{LOAF_SIZES[levers.size].note}.</p>
+                <div class="lever-head spaced"><label for="lv-hydration" class="sub">Hydration</label> <Tip name="hydration" /></div>
+                <select id="lv-hydration" value={levers.hydration ?? DEFAULT_HYDRATION} onChange={(e) => set({ hydration: Number((e.target as HTMLSelectElement).value) })}>
+                    {HYDRATIONS.map((h) => <option value={h}>{h}%</option>)}
+                </select>
             </div>
         </section>
     );
