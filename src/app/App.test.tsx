@@ -99,3 +99,18 @@ describe('the log', () => {
         expect(screen.getByText(/last 3 bakes all used quick feeds/)).toBeTruthy();
     });
 });
+
+describe('already fed', () => {
+    it('plans from a feed in the past and starts with the feed ticked', () => {
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        expect(screen.getByText('When did you feed your starter?')).toBeTruthy();
+        // the feed ratio cannot change: it has already happened
+        expect((screen.getAllByLabelText('Feed').find((e) => e.id === 'lv-ratio') as HTMLSelectElement).disabled).toBe(true);
+        fireEvent.click(screen.getByText('Start this plan'));
+        const rec = JSON.parse(localStorage.getItem(LIVE_KEY)!).rec;
+        expect(rec.actuals.feed).toBe(rec.levers.feedAt);
+        expect(rec.levers.feedAt).toBeLessThan(Date.now());
+        expect(rec.levers.ratioN).toBe(6);
+    });
+});

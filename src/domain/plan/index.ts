@@ -5,3 +5,4 @@ export * from './rules';
 export * from './backward';
 export * from './hints';
 export * from './live';
+export * from './fed';

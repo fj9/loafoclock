@@ -16,12 +16,14 @@ interface Props {
     quickStreak?: number;
     /** Levers that have already happened cannot change. */
     locked?: { feedRatio?: boolean; doughTemp?: boolean; fridge?: boolean };
+    /** The shortest wait before adding the starter (minutes after it is ready), for a starter already fed. */
+    minDelayMin?: number;
 }
 
 const hoursText = (h: number) => lengthOf(h * 3_600_000);
 
 /** The things you can change, and what each does to your day. */
-export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }: Props) {
+export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, minDelayMin = 0 }: Props) {
     const set = (over: Partial<LeverSet>) => onChange({ ...levers, ...over });
     const ratio = ratioFor(levers.ratioN);
     const bulk = bulkFor(levers.doughTemp);
@@ -69,7 +71,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {} }:
                 )}
             </div>
 
-            {widthMin > 0 && (
+            {widthMin > minDelayMin && (
                 <div class="lever">
                     <label for="lv-wait">Extend starter fermentation time</label> <Tip name="extendStarter" />
                     <input id="lv-wait" type="range" min={0} max={widthMin} step={15} value={levers.starterDelayMin}

@@ -22,6 +22,7 @@ export function dayLabel(ms: number, now: number, zone?: Zone): string {
     const diff = localDayNumber(ms, zone) - localDayNumber(now, zone);
     if (diff === 0) return 'Today';
     if (diff === 1) return 'Tomorrow';
+    if (diff === -1) return 'Yesterday';
     const p = partsOf(ms, zone);
     return `${weekdayOf(ms, zone)} ${p.day} ${MONTHS[p.month - 1]}`;
 }
