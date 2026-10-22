@@ -284,3 +284,22 @@ describe('actions and links', () => {
         expect(screen.getByText('Why I made it')).toBeTruthy();
     });
 });
+
+describe('time fields follow the Clock setting', () => {
+    it('no screen uses the phone\'s own time box', () => {
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        expect(document.querySelector('input[type="time"]')).toBeNull();
+        expect(screen.getByLabelText('Hour')).toBeTruthy();
+    });
+
+    it('the already-fed time shows am/pm with the 12-hour setting, and not with the 24-hour one', () => {
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        expect(screen.getByLabelText('am or pm')).toBeTruthy(); // 12-hour is the default
+        menu('Settings');
+        fireEvent.click(screen.getByText('19:30'));
+        tab('Plan');
+        expect(screen.queryByLabelText('am or pm')).toBeNull();
+    });
+});

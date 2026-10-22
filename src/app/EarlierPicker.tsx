@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { MINUTE, addLocalDays, atLocalTime, partsOf, type Zone } from '../domain/plan';
+import { TimeField } from './TimeField';
 import { clockOf } from './format';
 
 interface Props {
@@ -21,13 +22,10 @@ const floorMinute = (ms: number) => Math.floor(ms / MINUTE) * MINUTE;
 export function EarlierPicker({ now, zone, start, label, onSave, onCancel }: Props) {
     const [ms, setMs] = useState(Math.min(floorMinute(start), floorMinute(now)));
     const p = partsOf(ms, zone);
-    const value = `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
 
-    /** A typed clock time on the same day, or the day before if that would be in the future. */
-    const typed = (v: string) => {
-        const [h, m] = v.split(':').map(Number);
-        if (!Number.isFinite(h) || !Number.isFinite(m)) return;
-        const t = atLocalTime(ms, h! * 60 + m!, zone);
+    /** A time picked on the same day, or the day before if that would be in the future (just after midnight). */
+    const picked = (minutes: number) => {
+        const t = atLocalTime(ms, minutes, zone);
         setMs(t > now + MINUTE ? addLocalDays(t, -1, zone) : t);
     };
 
@@ -36,7 +34,7 @@ export function EarlierPicker({ now, zone, start, label, onSave, onCancel }: Pro
             <p class="hint">When did you do this?</p>
             <div class="stepper">
                 <button type="button" class="btn outline" aria-label="5 minutes earlier" onClick={() => setMs(ms - STEP)}>−5</button>
-                <input type="time" aria-label="Time" required value={value} onInput={(e) => typed((e.target as HTMLInputElement).value)} />
+                <TimeField label="Time" minutes={p.hour * 60 + p.minute} onChange={picked} />
                 <button type="button" class="btn outline" aria-label="5 minutes later" disabled={ms + STEP > now} onClick={() => setMs(ms + STEP)}>+5</button>
             </div>
             <div class="btn-row">

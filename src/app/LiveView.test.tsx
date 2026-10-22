@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/pre
 import { useState } from 'preact/hooks';
 import { afterEach, describe, expect, it } from 'vitest';
 import { LiveView } from './LiveView';
+import { setClock12 } from '../domain/clock';
 import { lockPlan, type LiveRecord } from '../domain/liveStore';
 import { HOUR, MINUTE, STEP_ORDER, buildPlan, leversAt, partsOf, zonedToMs } from '../domain/plan';
 import { clockOf } from './format';
@@ -12,7 +13,7 @@ const feedAt = zonedToMs({ year: 2026, month: 10, day: 23, hour: 9 }, LONDON);
 const levers = leversAt(feedAt, { ratioN: 6, fridge: { kind: 'hours', hours: 12 } });
 const plan = buildPlan(levers);
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); setClock12(false); });
 
 /** Keeps the record in state, as the app does, with the clock held at a fixed moment. */
 function Harness({ start, at, onFinish = () => {} }: { start: LiveRecord; at: number; onFinish?: () => void }) {
@@ -21,6 +22,18 @@ function Harness({ start, at, onFinish = () => {} }: { start: LiveRecord; at: nu
 }
 /** "HH:MM" on the local clock. */
 const hhmm = (ms: number) => { const p = partsOf(ms, LONDON); return `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`; };
+/** The time shown in a picker's hour and minute selects (24-hour mode), as "HH:MM". */
+const shownTime = (scope: HTMLElement | Document = document) => {
+    const h = (within(scope as HTMLElement).getByLabelText('Hour') as HTMLSelectElement).value;
+    const m = (within(scope as HTMLElement).getByLabelText('Minute') as HTMLSelectElement).value;
+    return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
+};
+/** Sets the hour and minute selects to an "HH:MM" time. */
+const typeTime = (hhmmValue: string) => {
+    const [h, m] = hhmmValue.split(':').map(Number);
+    fireEvent.change(screen.getByLabelText('Hour'), { target: { value: String(h) } });
+    fireEvent.change(screen.getByLabelText('Minute'), { target: { value: String(m) } });
+};
 const nextUp = () => screen.getByRole('region', { name: 'Next up' });
 /** The Done button in the Next up card. */
 const done = () => within(nextUp()).getByRole('button', { name: 'Done' });
@@ -52,7 +65,7 @@ describe('live view', () => {
         fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
         const picker = within(nextUp()).getByRole('group', { name: 'Done earlier' });
         expect(screen.queryByRole('dialog')).toBeNull();
-        expect((within(picker).getByLabelText('Time') as HTMLInputElement).value).toBe(hhmm(plan.byId.autolyse + 30 * MINUTE));
+        expect(shownTime(picker)).toBe(hhmm(plan.byId.autolyse + 30 * MINUTE));
         // Cancel is a button, like the Cancel on the confirmation sheets
         expect(within(picker).getByRole('button', { name: 'Cancel' }).className).toContain('outline');
         fireEvent.click(within(picker).getByText('Cancel'));
@@ -71,7 +84,7 @@ describe('live view', () => {
         expect(later.disabled).toBe(true); // already at the current time
         fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
         fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
-        expect((screen.getByLabelText('Time') as HTMLInputElement).value).toBe(hhmm(t - 10 * MINUTE));
+        expect(shownTime()).toBe(hhmm(t - 10 * MINUTE));
         expect(later.disabled).toBe(false);
         expect(screen.getByText(`Save ${clockOf(t - 10 * MINUTE, LONDON)}`)).toBeTruthy();
     });
@@ -80,7 +93,7 @@ describe('live view', () => {
         const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse + 30 * MINUTE} />);
         fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
-        fireEvent.input(screen.getByLabelText('Time'), { target: { value: hhmm(plan.byId.autolyse) } });
+        typeTime(hhmm(plan.byId.autolyse));
         fireEvent.click(screen.getByText(`Save ${clockOf(plan.byId.autolyse, LONDON)}`));
         expect(nextUp().textContent).toContain('Add the starter');
         expect(screen.getByText(new RegExp(`^Done ${clockOf(plan.byId.autolyse, LONDON)}`))).toBeTruthy();
@@ -91,7 +104,7 @@ describe('live view', () => {
         const justAfterMidnight = zonedToMs({ year: 2026, month: 10, day: 24, hour: 0, minute: 10 }, LONDON);
         render(<Harness start={lockPlan(eve, 0)} at={justAfterMidnight} />);
         fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
-        fireEvent.input(screen.getByLabelText('Time'), { target: { value: '23:50' } });
+        typeTime('23:50');
         const yesterday = zonedToMs({ year: 2026, month: 10, day: 23, hour: 23, minute: 50 }, LONDON);
         fireEvent.click(screen.getByText(`Save ${clockOf(yesterday, LONDON)}`));
         expect(screen.getByText(new RegExp(`^Done ${clockOf(yesterday, LONDON)}`))).toBeTruthy();
@@ -102,7 +115,7 @@ describe('live view', () => {
         render(<Harness start={rec} at={feedAt + 40 * MINUTE} />);
         fireEvent.click(screen.getByRole('button', { name: 'Change the time for Feed your starter' }));
         const picker = screen.getByRole('group', { name: 'Change the time for Feed your starter' });
-        expect((within(picker).getByLabelText('Time') as HTMLInputElement).value).toBe(hhmm(feedAt + 20 * MINUTE));
+        expect(shownTime(picker)).toBe(hhmm(feedAt + 20 * MINUTE));
         fireEvent.click(within(picker).getByRole('button', { name: '5 minutes earlier' }));
         fireEvent.click(within(picker).getByText(`Save ${clockOf(feedAt + 15 * MINUTE, LONDON)}`));
         expect(screen.getByText(new RegExp(`^Done ${clockOf(feedAt + 15 * MINUTE, LONDON)}`))).toBeTruthy();
@@ -358,5 +371,35 @@ describe('the keep-bake-time action is a button', () => {
         };
         render(<Harness start={{ ...lockPlan(levers, feedAt), actuals }} at={plan.byId.fridge + 100 * MINUTE} />);
         expect(screen.getByRole('button', { name: 'Keep my bake time' }).className).toContain('outline');
+    });
+});
+
+describe('the picker follows the Clock setting', () => {
+    it('shows hour, minute and am/pm in 12-hour mode, and records the time you pick', () => {
+        setClock12(true);
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        const t = plan.byId.autolyse + 30 * MINUTE; // 7:35 am on the local clock
+        render(<Harness start={rec} at={t} />);
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        const picker = within(nextUp()).getByRole('group', { name: 'Done earlier' });
+        expect((within(picker).getByLabelText('am or pm') as HTMLSelectElement).value).toBe('pm');
+        // The hours go 1 to 12, not 0 to 23
+        const hours = [...(within(picker).getByLabelText('Hour') as HTMLSelectElement).options].map((o) => o.value);
+        expect(hours).toEqual(Array.from({ length: 12 }, (_, i) => String(i + 1)));
+        // Pick 6:10 am
+        fireEvent.change(within(picker).getByLabelText('Hour'), { target: { value: '6' } });
+        fireEvent.change(within(picker).getByLabelText('am or pm'), { target: { value: 'am' } });
+        fireEvent.change(within(picker).getByLabelText('Minute'), { target: { value: '10' } });
+        expect(within(picker).getByText(/^Save 6:10 am$/)).toBeTruthy();
+    });
+
+    it('shows only hour and minute in 24-hour mode', () => {
+        setClock12(false);
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        render(<Harness start={rec} at={plan.byId.autolyse} />);
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        expect(screen.queryByLabelText('am or pm')).toBeNull();
+        const hours = [...(screen.getByLabelText('Hour') as HTMLSelectElement).options].map((o) => o.value);
+        expect(hours).toHaveLength(24);
     });
 });

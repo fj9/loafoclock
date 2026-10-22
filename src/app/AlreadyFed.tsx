@@ -5,6 +5,7 @@ import {
     type Actuals, type Levers as LeverSet, type Zone
 } from '../domain/plan';
 import { PlanDetail } from './PlanDetail';
+import { TimeField } from './TimeField';
 import { clockOf, dayInSentence, dayTime } from './format';
 
 interface Props {
@@ -17,7 +18,6 @@ interface Props {
 interface Fed { dayBack: 0 | 1; min: number; ratioN: number }
 
 const DEFAULT_FED: Fed = { dayBack: 1, min: 20 * 60, ratioN: 6 };
-const pad = (n: number) => String(n).padStart(2, '0');
 
 const fedAtOf = (f: Fed, now: number, zone?: Zone) => atLocalTime(addLocalDays(startOfLocalDay(now, zone), -f.dayBack, zone), f.min, zone);
 
@@ -41,7 +41,6 @@ export function AlreadyFed({ now, zone, onStart, quickStreak }: Props) {
         setFed(next);
         setLevers(startingLevers(next, now, zone));
     };
-    const timeValue = `${pad(Math.floor(fed.min / 60))}:${pad(fed.min % 60)}`;
 
     return (
         <div class="already-fed">
@@ -53,12 +52,8 @@ export function AlreadyFed({ now, zone, onStart, quickStreak }: Props) {
                     ))}
                 </div>
                 <div class="lever">
-                    <label for="fed-time">Time</label>
-                    <input id="fed-time" type="time" value={timeValue}
-                        onChange={(e) => {
-                            const [h, m] = (e.target as HTMLInputElement).value.split(':').map(Number);
-                            if (Number.isFinite(h) && Number.isFinite(m)) change({ min: h! * 60 + m! });
-                        }} />
+                    <span class="label" id="fed-time">Time</span>
+                    <TimeField label="Time" minutes={fed.min} onChange={(min) => change({ min })} />
                 </div>
                 <div class="lever">
                     <label for="fed-ratio">Feed</label>

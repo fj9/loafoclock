@@ -163,6 +163,10 @@
 .earlier .hint { margin: 0 0 8px; }
 .stepper { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
 .stepper .btn { min-width: 56px; min-height: 48px; padding: 0 8px; font-size: calc(18px * var(--ts, 1)); }
-.stepper input { flex: 1; min-width: 0; min-height: 48px; font: inherit; font-size: calc(20px * var(--ts, 1)); text-align: center; padding: 6px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
 .live-steps .when.link { margin: 0; font-weight: 700; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
 .earlier .btn-row .btn { flex: 1; min-height: 48px; }
+
+/* A time of day that follows the Clock setting: hour, minute and (in 12-hour mode) am/pm. */
+.time-field { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; }
+.time-field select { font: inherit; font-size: calc(18px * var(--ts, 1)); min-height: 48px; padding: 4px 6px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.stepper .time-field { flex: 1; }
