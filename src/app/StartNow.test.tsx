@@ -12,7 +12,7 @@ afterEach(cleanup);
 
 describe('format', () => {
     it('writes lengths and days', () => {
-        expect(lengthOf(19.75 * 3_600_000)).toBe('19 h 45 m');
+        expect(lengthOf(19.75 * 3_600_000)).toBe('19 h 45 min');
         expect(lengthOf(8 * 3_600_000)).toBe('8 h');
         expect(dayLabel(friday9, friday9, LONDON)).toBe('Today');
         expect(dayLabel(friday9 + 30 * 3_600_000, friday9, LONDON)).toBe('Tomorrow');
@@ -54,6 +54,19 @@ describe('lever tips', () => {
         expect(tips.length).toBe(6);
         fireEvent.click(screen.getByLabelText('What is dough temperature?'));
         expect(screen.getByRole('note').textContent).toContain('Warmer dough rises faster');
+    });
+});
+
+describe('labels and durations', () => {
+    it('the timeline says "Bake and carve", with no ampersand', () => {
+        render(<StartNow now={friday9} zone={LONDON} />);
+        expect(screen.getByText('Bake and carve')).toBeTruthy();
+        expect(screen.queryByText(/&/)).toBeNull();
+    });
+    it('durations are written with h and min', () => {
+        expect(lengthOf(90 * 60_000)).toBe('1 h 30 min');
+        expect(lengthOf(40 * 60_000)).toBe('40 min');
+        expect(lengthOf(8 * 3_600_000)).toBe('8 h');
     });
 });
 

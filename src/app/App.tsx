@@ -167,7 +167,7 @@ export function App() {
                     />
                 )}
                 {tab === 'settings' && <SettingsScreen settings={settings} onChange={change} />}
-                {tab === 'help' && <><Help /><p><button type="button" class="link" onClick={() => setTab('about')}>About Loaf O'Clock</button></p></>}
+                {tab === 'help' && <Help />}
                 {tab === 'about' && <About />}
             </main>
             <footer class="app-footer">

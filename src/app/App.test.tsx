@@ -28,7 +28,7 @@ describe('App shell', () => {
         expect(screen.getByText('No bake running')).toBeTruthy();
         menu('Help');
         expect(screen.getByText('Keeping a healthy starter')).toBeTruthy();
-        fireEvent.click(screen.getByText("About Loaf O'Clock"));
+        menu('About');
         expect(screen.getByText('Why I made it')).toBeTruthy();
         tab('Plan');
         expect(screen.getByText('Start a loaf now')).toBeTruthy();
@@ -258,5 +258,29 @@ describe('tabs, the menu and the bake', () => {
         expect(screen.queryByText('Add reminders to my calendar')).toBeNull();
         tab('Plan');
         expect(screen.getByText('Add reminders to my calendar')).toBeTruthy();
+    });
+});
+
+describe('actions and links', () => {
+    it('Add reminders to my calendar is an outline button under Start this plan', () => {
+        render(<App />);
+        const b = screen.getByRole('button', { name: 'Add reminders to my calendar' });
+        expect(b.className).toContain('outline');
+        expect(b.closest('.reminders')?.previousElementSibling?.textContent).toBe('Start this plan');
+    });
+
+    it('adding the first app\'s bakes is an outline button', () => {
+        localStorage.setItem('sourdoughLogs', JSON.stringify([{ date: '2026-05-01T10:00:00.000Z', loaves: 1, size: 'regular', notes: '' }]));
+        render(<App />);
+        tab('Log');
+        expect(screen.getByRole('button', { name: 'Add them to this log' }).className).toContain('outline');
+    });
+
+    it('About is in the menu and the footer, not also on the Help page', () => {
+        render(<App />);
+        menu('Help');
+        expect(screen.queryByText("About Loaf O'Clock")).toBeNull();
+        menu('About');
+        expect(screen.getByText('Why I made it')).toBeTruthy();
     });
 });

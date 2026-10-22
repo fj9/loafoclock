@@ -32,13 +32,13 @@ export function whenOf(ms: number, zone?: Zone): string {
     return `${weekdayOf(ms, zone)} ${clockOf(ms, zone)}`;
 }
 
-/** "19 h 45 m", "8 h", "40 m" */
+/** "19 h 45 min", "8 h", "40 min" */
 export function lengthOf(ms: number): string {
     const total = Math.round(ms / 60_000);
     const h = Math.floor(total / 60);
     const m = total % 60;
-    if (!h) return `${m} m`;
-    return m ? `${h} h ${m} m` : `${h} h`;
+    if (!h) return `${m} min`;
+    return m ? `${h} h ${m} min` : `${h} h`;
 }
 
 /** For a day chip: "Today", "Tomorrow", or "Sat 24" */

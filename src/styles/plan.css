@@ -152,3 +152,5 @@
 .info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1.5px solid var(--info); background: none; color: var(--muted); cursor: pointer; padding: 0; vertical-align: middle; }
 .info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
 .tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
+.reminders .btn { width: 100%; }
+.keep .btn { margin-top: 8px; }

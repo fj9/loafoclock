@@ -58,7 +58,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
             {oldCount > 0 && (
                 <p class="panel">
                     The first Loaf O'Clock on this device has {oldCount} logged {oldCount === 1 ? 'bake' : 'bakes'}.{' '}
-                    <button type="button" class="link" onClick={onImportOld}>Add them to this log</button>
+                    <button type="button" class="btn outline" onClick={onImportOld}>Add them to this log</button>
                 </p>
             )}
 

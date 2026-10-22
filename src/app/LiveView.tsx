@@ -25,16 +25,18 @@ interface Props {
 const ASK_WHEN: readonly StepId[] = ['autolyse', 'starterIn'];
 const AGO = [
     { label: 'Just now', min: 0 }, { label: '10 min ago', min: 10 }, { label: '20 min ago', min: 20 },
-    { label: '30 min ago', min: 30 }, { label: '1 hour ago', min: 60 }
+    { label: '30 min ago', min: 30 }, { label: '1 h ago', min: 60 }
 ] as const;
 
-/** What the button says for each step. */
+/** What the button says for each step: always "I've …", in the past tense. */
 const DONE_LABEL: Partial<Record<StepId, string>> = {
-    feed: 'I have fed the starter', autolyse: 'I have started the autolyse', starterIn: 'The starter is in',
-    salt: 'The salt is in', preShape: 'Pre-shaped', finalShape: 'Shaped', fridge: 'In the fridge',
-    ovenOn: 'The oven is on', bake: 'In the oven', out: 'The loaf is out'
+    feed: "I've fed the starter", autolyse: "I've started the autolyse", starterIn: "I've added the starter",
+    salt: "I've added the salt", preShape: "I've pre-shaped", finalShape: "I've shaped the loaf",
+    fridge: "I've put it in the fridge", ovenOn: "I've turned the oven on", bake: "I've put it in the oven",
+    out: "I've taken the loaf out"
 };
-const doneLabel = (s: LiveStep) => (s.id.startsWith('fold') ? `Fold ${s.id.slice(4)} done` : DONE_LABEL[s.id] ?? 'Done');
+const doneLabel = (s: LiveStep, noFridge = false) =>
+    s.id.startsWith('fold') ? `I've done fold ${s.id.slice(4)}` : s.id === 'fridge' && noFridge ? "I've left it to proof" : DONE_LABEL[s.id] ?? "I've done this";
 
 /** The locked plan: where you are, what is next and how long you are free. */
 export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock = Date.now, zone }: Props) {
@@ -133,7 +135,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                         {howOpen(next, true) ? 'Hide how-to' : 'Show how-to'}
                     </button>
                     {howOpen(next, true) && <div id="next-how">{detail(next)}</div>}
-                    <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next)}</button>
+                    <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next, record.levers.fridge.kind === 'none')}</button>
                     {view.freeMs! > 0 && next.status === 'upcoming' && <p class="hint free">You are free for {lengthOf(view.freeMs!)}.</p>}
                 </section>
             ) : (
@@ -153,7 +155,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                         {kept.possible ? (
                             <>
                                 To bake when you planned, {late ? 'cut' : 'extend'} the fridge to {lengthOf(kept.fridgeHours * 3_600_000)}.{' '}
-                                <button type="button" class="link" onClick={() => onChange({ ...record, levers: withKeptBakeTime(record.levers, kept) })}>Keep my bake time</button>
+                                <button type="button" class="btn outline" onClick={() => onChange({ ...record, levers: withKeptBakeTime(record.levers, kept) })}>Keep my bake time</button>
                             </>
                         ) : (
                             <>The fridge can not go {late ? 'below 8' : 'above 72'} hours, so the bake moves to {when(view.plan.byId.bake)}.</>
