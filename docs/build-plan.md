@@ -19,7 +19,7 @@ Out for now: reminders, accounts and syncing, other recipes, and two loaves with
   1. **Start a loaf now.** Shows the range of possible carve times, starts on levers that fit your waking hours, and lets you tweak them. "Fastest" is genuinely the fastest (see below).
   2. **I want bread at...** Pick a day and a time and the app works backwards.
 - **Carve-time picker.** Day chips (Today, Tomorrow, then the next weekdays), meal chips, and a slider.
-  - Meals: Breakfast 8:00 am, Late breakfast 10:30 am, Lunch 12:30 pm, Tea 4:00 pm, Dinner 6:30 pm, Supper 8:30 pm.
+  - Meals: Breakfast 8:00 am, Late breakfast 10:30 am, Lunch 12:30 pm, Tea 4:00 pm, Supper 8:30 pm.
   - Slider: 6:00 am to 11:30 pm in 15 minute steps. A chip lights up when the slider sits on it.
 - **The fastest bake:** shortest feed (1:1:1), warmest dough (26 to 27°C), the 8 hour minimum in the fridge, and the shortest cooling. About 19 h 45 m from first feed to ready to carve (with 45 minute cooling).
 - **The secret unlock: no fridge.** Skip the cold retard and bake about 2 to 3 hours after shaping. It saves a lot of time (about 13 h 45 m in total) but is less sourdough, and the app says so. Shown as a quiet unlock under the fridge lever.

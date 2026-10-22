@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/preact';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/preact';
 import { useState } from 'preact/hooks';
 import { afterEach, describe, expect, it } from 'vitest';
 import { BreadAt } from './BreadAt';
@@ -62,5 +62,13 @@ describe('Bread at', () => {
         render(<BreadAt now={wed} zone={LONDON} />);
         fireEvent.click(screen.getByText('Today'));
         expect(screen.getByRole('status').textContent).toMatch(/no way to fit/i);
+    });
+});
+
+describe('meal chips', () => {
+    it('are Breakfast, Late breakfast, Lunch, Tea and Supper, with no Dinner', () => {
+        render(<BreadAt now={wed} zone={LONDON} />);
+        const meals = within(screen.getByRole('group', { name: 'Meal' })).getAllByRole('button').map((b) => b.textContent);
+        expect(meals).toEqual(['Breakfast', 'Late breakfast', 'Lunch', 'Tea', 'Supper']);
     });
 });
