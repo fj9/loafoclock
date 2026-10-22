@@ -1,11 +1,10 @@
-import { FEEDING_RATIOS } from '../domain/feeding';
 import { DEFAULT_HYDRATION, HYDRATIONS, LOAF_SIZES, type LoafSize } from '../domain/recipe';
 import {
-    COOLING_CHOICES, COOLEST_TEMP, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, bulkFor, isQuickFeed, ratioFor,
-    nudgeFridge, type Levers as LeverSet, type Zone
+    COOLING_CHOICES, COOLEST_TEMP, WAIT_MAX_HOURS, WAIT_MIN_HOURS, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, bulkFor, isQuickFeed, ratioFor,
+    buildPlan, feedForWait, nudgeFridge, waitHoursOf, type Levers as LeverSet, type Zone
 } from '../domain/plan';
 import { QUICK_FEED_NUDGE_AT } from '../domain/bakeLog';
-import { lengthOf } from './format';
+import { lengthOf, whenOf } from './format';
 import { Tip } from './Tip';
 
 interface Props {
@@ -27,7 +26,8 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
     const set = (over: Partial<LeverSet>) => onChange({ ...levers, ...over });
     const ratio = ratioFor(levers.ratioN);
     const bulk = bulkFor(levers.doughTemp);
-    const widthMin = (ratio.maxHours - ratio.minHours) * 60;
+    const wait = waitHoursOf(levers);
+    const plan = buildPlan(levers);
     const fridgeHours = levers.fridge.kind === 'hours' ? levers.fridge.hours : null;
     const nudge = nudgeFridge(levers, zone);
     const nudgeNeeded = nudge !== null && fridgeHours !== null && Math.abs(nudge - fridgeHours) > 1e-6;
@@ -58,27 +58,21 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
             </div>
 
             <div class="lever">
-                <div class="lever-head"><label for="lv-ratio">Feed</label> <Tip name="ratio" /></div>
-                <select id="lv-ratio" value={levers.ratioN} disabled={locked.feedRatio}
-                    onChange={(e) => set({ ratioN: Number((e.target as HTMLSelectElement).value), starterDelayMin: 0 })}>
-                    {FEEDING_RATIOS.map((r) => {
-                        const n = Number(r.ratio.split(':')[1]);
-                        return <option value={n}>{r.ratio}, ready in {r.minHours} to {r.maxHours} h{isQuickFeed(n) ? ' (quick)' : ''}</option>;
-                    })}
-                </select>
+                <div class="lever-head"><label for="lv-feed">Feed and starter timing</label> <Tip name="ratio" /></div>
+                <input id="lv-feed" type="range" step={0.25} aria-valuetext={`${hoursText(wait)} after feeding, a ${ratio.ratio} feed`}
+                    min={locked.feedRatio ? ratio.minHours + minDelayMin / 60 : WAIT_MIN_HOURS} max={locked.feedRatio ? ratio.maxHours : WAIT_MAX_HOURS} value={wait}
+                    onInput={(e) => {
+                        const h = Number((e.target as HTMLInputElement).value);
+                        set(locked.feedRatio ? { starterDelayMin: Math.round((h - ratio.minHours) * 60) } : feedForWait(h));
+                    }} />
+                <output>{ratio.ratio} feed, starter added {hoursText(wait)} after feeding</output>
+                <p class="hint">
+                    Starter ready from {whenOf(plan.starterReadyAt, zone)}. Autolyse at {whenOf(plan.byId.autolyse, zone)}, add the starter at {whenOf(plan.byId.starterIn, zone)}.
+                </p>
                 {isQuickFeed(levers.ratioN) && (
                     <p class="hint warn">Quick feeds are fine now and then to hurry a bake. For a starter you keep in the fridge, a steadier 1:6:6 is gentler.{quickStreak >= QUICK_FEED_NUDGE_AT && ` Your last ${quickStreak} bakes all used quick feeds, so this might be a good time for a steady one.`}</p>
                 )}
             </div>
-
-            {widthMin > minDelayMin && (
-                <div class="lever">
-                    <div class="lever-head"><label for="lv-wait">Extend starter fermentation time</label> <Tip name="extendStarter" /></div>
-                    <input id="lv-wait" type="range" min={0} max={widthMin} step={15} value={levers.starterDelayMin}
-                        onInput={(e) => set({ starterDelayMin: Number((e.target as HTMLInputElement).value) })} />
-                    <output>{levers.starterDelayMin ? `${lengthOf(levers.starterDelayMin * 60_000)} after it is ready` : 'As soon as it is ready'}</output>
-                </div>
-            )}
 
             <div class="lever">
                 <div class="lever-head"><label for="lv-temp">Dough temperature</label> <Tip name="doughTemp" /></div>

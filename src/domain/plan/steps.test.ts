@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bulkFor, leversAt } from './levers';
+import { WAIT_MAX_HOURS, WAIT_MIN_HOURS, bulkFor, feedForWait, leversAt, ratioFor, waitHoursOf } from './levers';
 import { fitsWakingHours, violations } from './rules';
 import { buildPlan, totalHours } from './steps';
 import { HOUR, MINUTE, zonedToMs } from './time';
@@ -134,5 +134,32 @@ describe('rules', () => {
         const p = buildPlan(leversAt(0));
         expect(violations(p, { zone: 'UTC', carveAt: p.byId.out + 16 * HOUR }).some((v) => v.kind === 'restTooLong')).toBe(false);
         expect(violations(p, { zone: 'UTC', carveAt: p.byId.out + 17 * HOUR }).some((v) => v.kind === 'restTooLong')).toBe(true);
+    });
+});
+
+describe('one slider for the feed', () => {
+    it('drifts up through the ratios as the wait grows', () => {
+        expect(feedForWait(4).ratioN).toBe(1);
+        expect(feedForWait(10)).toEqual({ ratioN: 6, starterDelayMin: 60 });
+        expect(feedForWait(16).ratioN).toBe(10);
+        let last = 0;
+        for (let h = WAIT_MIN_HOURS; h <= WAIT_MAX_HOURS; h += 0.25) {
+            const f = feedForWait(h);
+            expect(f.ratioN).toBeGreaterThanOrEqual(last);
+            last = f.ratioN;
+        }
+    });
+    it('always lands inside the ready window and round-trips', () => {
+        for (let h = WAIT_MIN_HOURS; h <= WAIT_MAX_HOURS + 1e-9; h += 0.25) {
+            const f = feedForWait(h);
+            const r = ratioFor(f.ratioN);
+            expect(r.minHours + f.starterDelayMin / 60).toBeGreaterThanOrEqual(r.minHours - 1e-9);
+            expect(r.minHours + f.starterDelayMin / 60).toBeLessThanOrEqual(r.maxHours + 1e-9);
+            expect(waitHoursOf(f)).toBeCloseTo(h, 6);
+        }
+    });
+    it('clamps outside the range', () => {
+        expect(feedForWait(1).ratioN).toBe(1);
+        expect(waitHoursOf(feedForWait(99))).toBe(16);
     });
 });

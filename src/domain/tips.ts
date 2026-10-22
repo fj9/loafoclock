@@ -11,7 +11,7 @@ export const TIPS = {
     },
     ratio: {
         label: 'a feeding ratio',
-        text: 'Parts of starter : flour : water, by weight. 1:6:6 means 1g of starter for every 6g of flour and 6g of water. More flour and water takes longer to rise but needs less starter.'
+        text: 'Parts of starter : flour : water, by weight. 1:6:6 means 1g of starter for every 6g of flour and 6g of water. More flour and water takes longer to rise but needs less starter. The slider picks the ratio for you: slide right for a longer wait.'
     },
     loaf: {
         label: 'your loaf',

@@ -97,7 +97,9 @@ describe('live view', () => {
         const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={feedAt + MINUTE} />);
         fireEvent.click(screen.getByText('Change the plan'));
-        expect((screen.getByLabelText('Feed') as HTMLSelectElement).disabled).toBe(true);
+        // the ratio is fixed, so the feed slider only moves within that ratio's ready window (1:6:6 is 9 to 11 hours)
+        const wait = screen.getByLabelText(/^Feed and starter timing/) as HTMLInputElement;
+        expect([Number(wait.min), Number(wait.max)]).toEqual([9, 11]);
         expect((screen.getByLabelText('Time in the fridge') as HTMLInputElement).disabled).toBe(false);
     });
 

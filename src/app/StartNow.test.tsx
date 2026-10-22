@@ -49,7 +49,7 @@ describe('Start now', () => {
 
     it('warns about quick feeds', () => {
         render(<StartNow now={friday9} zone={LONDON} />);
-        fireEvent.change(screen.getByLabelText('Feed'), { target: { value: '2' } });
+        fireEvent.input(screen.getByLabelText(/^Feed and starter timing/), { target: { value: '5' } });
         expect(screen.getByText(/Quick feeds are fine/)).toBeTruthy();
     });
 
