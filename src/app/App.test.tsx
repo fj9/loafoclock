@@ -153,3 +153,17 @@ describe('stopping and removing, without the browser popup', () => {
         expect(loadLog()).toHaveLength(0);
     });
 });
+
+describe('footer', () => {
+    it('has the Ko-fi link on every page', () => {
+        render(<App />);
+        for (const name of ['Plan', 'Log', 'Settings', 'Help']) {
+            tab(name);
+            const link = screen.getByRole('link', { name: 'Tip me on Ko-fi' }) as HTMLAnchorElement;
+            expect(link.href).toBe('https://ko-fi.com/fjnine');
+            expect(link.rel).toContain('noopener');
+        }
+        fireEvent.click(screen.getByText("About Loaf O'Clock", { selector: 'button' }));
+        expect(screen.getAllByRole('link', { name: 'Tip me on Ko-fi' }).length).toBeGreaterThan(0);
+    });
+});
