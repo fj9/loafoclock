@@ -45,8 +45,9 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quic
                 </ul>
             )}
             <Timeline plan={plan} zone={zone} now={now} />
-            <Levers part="other" levers={levers} zone={zone} onChange={onChange} locked={fed ? { feedRatio: true } : undefined} />
+            <Levers part="cooling" levers={levers} zone={zone} onChange={onChange} />
             {summary}
+            <Levers part="loaf" levers={levers} zone={zone} onChange={onChange} />
             <section class="panel steps">
                 <h2>The steps</h2>
                 <ol>

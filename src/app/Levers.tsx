@@ -17,8 +17,8 @@ interface Props {
     locked?: { feedRatio?: boolean; doughTemp?: boolean; fridge?: boolean };
     /** The shortest wait before adding the starter (minutes after it is ready), for a starter already fed. */
     minDelayMin?: number;
-    /** Show only the levers that move the timeline, or only the rest (cooling and your loaf). Both if not set. */
-    part?: 'timing' | 'other';
+    /** Show only one group of levers: those that move the timeline, the cooling, or your loaf. All of them if not set. */
+    part?: 'timing' | 'cooling' | 'loaf';
 }
 
 const hoursText = (h: number) => lengthOf(h * 3_600_000);
@@ -35,8 +35,8 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
     const nudgeNeeded = nudge !== null && fridgeHours !== null && Math.abs(nudge - fridgeHours) > 1e-6;
 
     return (
-        <section class="levers" aria-label={part === 'timing' ? 'Timing levers' : part === 'other' ? 'Cooling and loaf' : 'Levers'}>
-            {part !== 'other' && (<>
+        <section class="levers" aria-label={part === 'timing' ? 'Timing levers' : part === 'cooling' ? 'Cooling' : part === 'loaf' ? 'Your loaf' : 'Levers'}>
+            {(!part || part === 'timing') && (<>
             <div class="lever">
                 <div class="lever-head"><label for="lv-feed">Starter feeding time</label> <Tip name="ratio" /></div>
                 <input id="lv-feed" type="range" step={0.25} aria-valuetext={`${hoursText(wait)} after feeding, a ${ratio.ratio} feed`}
@@ -91,7 +91,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
             </div>
 
             </>)}
-            {part !== 'timing' && (<>
+            {(!part || part === 'cooling') && (<>
             <div class="lever">
                 <div class="lever-head"><span class="label" id="lv-cool">Cooling before carving</span> <Tip name="cooling" /></div>
                 <div class="seg-choice" role="group" aria-labelledby="lv-cool">
@@ -101,6 +101,8 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
                 </div>
             </div>
 
+            </>)}
+            {(!part || part === 'loaf') && (<>
             <div class="lever">
                 <div class="lever-head"><span class="label" id="lv-loaf">Your loaf</span> <Tip name="loaf" /></div>
                 <div class="seg-choice" role="group" aria-labelledby="lv-loaf">
