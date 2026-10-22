@@ -82,7 +82,7 @@
 .live-steps li.overdue { color: var(--danger); }
 .live-steps .shift { color: var(--muted); font-style: normal; }
 .live-steps .link { margin-left: 8px; font-size: calc(13px * var(--ts, 1)); }
-.sheet .chips { margin: 12px 0; }
+
 
 .step-detail .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
 .step-detail .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
@@ -154,3 +154,10 @@
 .tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: calc(14px * var(--ts, 1)); font-weight: 400; }
 .reminders .btn { width: 100%; }
 .keep .btn { margin-top: 8px; }
+
+/* The "when did you do this?" sheet: one big button, then a time. */
+.sheet .big-btn { margin: 4px 0 12px; }
+.at-time { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; }
+.at-time label { font-weight: 700; }
+.at-time input { flex: 1; font: inherit; padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); min-height: 44px; }
+.at-time .btn { min-height: 44px; }

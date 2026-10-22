@@ -4,7 +4,8 @@ import { useState } from 'preact/hooks';
 import { afterEach, describe, expect, it } from 'vitest';
 import { LiveView } from './LiveView';
 import { lockPlan, type LiveRecord } from '../domain/liveStore';
-import { HOUR, MINUTE, STEP_ORDER, buildPlan, leversAt, zonedToMs } from '../domain/plan';
+import { HOUR, MINUTE, STEP_ORDER, buildPlan, leversAt, partsOf, zonedToMs } from '../domain/plan';
+import { clockOf } from './format';
 
 const LONDON = 'Europe/London';
 const feedAt = zonedToMs({ year: 2026, month: 10, day: 23, hour: 9 }, LONDON);
@@ -18,6 +19,8 @@ function Harness({ start, at, onFinish = () => {} }: { start: LiveRecord; at: nu
     const [rec, setRec] = useState(start);
     return <LiveView record={rec} onChange={setRec} onFinish={onFinish} clock={() => at} zone={LONDON} />;
 }
+/** "HH:MM" on the local clock. */
+const hhmm = (ms: number) => { const p = partsOf(ms, LONDON); return `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`; };
 const nextUp = () => screen.getByRole('region', { name: 'Next up' });
 /** The Done button in the Next up card. */
 const done = () => within(nextUp()).getByRole('button', { name: 'Done' });
@@ -39,21 +42,44 @@ describe('live view', () => {
     it('tapping done moves to the next step', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + 5 * MINUTE} />);
         fireEvent.click(done());
+        fireEvent.click(screen.getByText('Just now'));
         expect(nextUp().textContent).toContain('Start the autolyse');
     });
 
-    it('asks when you did the autolyse, and a late one moves the plan', () => {
+    it('asks when you did a step, with just two choices: just now, or a time', () => {
         const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse + 30 * MINUTE} />);
         fireEvent.click(done());
-        expect(screen.getByRole('dialog', { name: 'When did you do this?' })).toBeTruthy();
-        fireEvent.click(screen.getByText('30 min ago'));
+        const dialog = screen.getByRole('dialog', { name: 'When did you do this?' });
+        expect(within(dialog).getByText('Start the autolyse')).toBeTruthy();
+        expect(within(dialog).getByText('Just now')).toBeTruthy();
+        expect(within(dialog).getByLabelText('Or at')).toBeTruthy();
+        expect(within(dialog).queryByText(/min ago/)).toBeNull();
+        fireEvent.click(within(dialog).getByText('Cancel'));
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect(nextUp().textContent).toContain('Start the autolyse'); // nothing was ticked
+    });
+
+    it('a typed time is recorded as that time, not the moment you tapped, and moves the plan', () => {
+        const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        render(<Harness start={rec} at={plan.byId.autolyse + 30 * MINUTE} />);
+        fireEvent.click(done());
+        const [h, m] = hhmm(plan.byId.autolyse).split(':');
+        fireEvent.input(screen.getByLabelText('Or at'), { target: { value: `${h}:${m}` } });
+        fireEvent.click(screen.getByText('Save'));
         expect(screen.queryByRole('dialog')).toBeNull();
         expect(nextUp().textContent).toContain('Add the starter');
-        // It is recorded at the time you said, not at the moment you tapped
-        const doneTime = new Date((plan.byId.autolyse + 30 * MINUTE) - 30 * MINUTE);
-        expect(doneTime.getTime()).toBe(plan.byId.autolyse);
-        expect(screen.getAllByText(/^Done /).length).toBe(2);
+        expect(screen.getByText(new RegExp(`^Done ${clockOf(plan.byId.autolyse, LONDON)}`))).toBeTruthy();
+    });
+
+    it('a time that would be in the future means yesterday, just after midnight', () => {
+        const eve = leversAt(zonedToMs({ year: 2026, month: 10, day: 23, hour: 23, minute: 30 }, LONDON));
+        const justAfterMidnight = zonedToMs({ year: 2026, month: 10, day: 24, hour: 0, minute: 10 }, LONDON);
+        render(<Harness start={lockPlan(eve, 0)} at={justAfterMidnight} />);
+        fireEvent.click(done());
+        fireEvent.input(screen.getByLabelText('Or at'), { target: { value: '23:50' } });
+        fireEvent.click(screen.getByText('Save'));
+        expect(screen.getByText(new RegExp(`^Done ${clockOf(zonedToMs({ year: 2026, month: 10, day: 23, hour: 23, minute: 50 }, LONDON), LONDON)}`))).toBeTruthy();
     });
 
     it('shows four fold dots and ticks each fold on its own', () => {
@@ -61,6 +87,7 @@ describe('live view', () => {
         render(<Harness start={{ ...lockPlan(levers, feedAt), actuals }} at={plan.byId.fold1} />);
         expect(screen.getAllByRole('listitem', { name: /^Fold \d/ })).toHaveLength(4);
         fireEvent.click(screen.getByText("Done fold 1"));
+        fireEvent.click(screen.getByText('Just now'));
         expect(nextUp().textContent).toContain('Fold 2');
         expect(screen.getByLabelText('Fold 1 done')).toBeTruthy();
         expect(screen.getByLabelText('Fold 2 to do')).toBeTruthy();
@@ -178,6 +205,8 @@ describe('done buttons, the how-to and timers', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
         // Not the next step: no need to open anything first
         fireEvent.click(screen.getByLabelText('Mark Add salt, honey and oil done'));
+        expect(screen.getByRole('dialog', { name: 'When did you do this?' }).textContent).toContain('Add salt, honey and oil');
+        fireEvent.click(screen.getByText('Just now'));
         expect(screen.getByText(/Done /)).toBeTruthy();
     });
 
@@ -212,6 +241,7 @@ describe('done buttons, the how-to and timers', () => {
     it('ticking moves on to the next step, which shows its own how-to', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
         fireEvent.click(done());
+        fireEvent.click(screen.getByText('Just now'));
         expect(nextUp().textContent).toContain('Start the autolyse');
         expect(screen.queryByText('84g water')).toBeNull();
     });

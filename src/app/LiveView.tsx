@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { LiveRecord } from '../domain/liveStore';
 import {
-    FOLD_IDS, MINUTE, STEP_ORDER, buildPlan, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type StepId, type Zone
+    FOLD_IDS, MINUTE, STEP_ORDER, addLocalDays, atLocalTime, buildPlan, partsOf, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type StepId, type Zone
 } from '../domain/plan';
 import { guideFor } from '../domain/stepGuide';
 import { ConfirmSheet } from './ConfirmSheet';
@@ -20,13 +20,6 @@ interface Props {
     clock?: () => number;
     zone?: Zone;
 }
-
-/** Steps where the time you did it sets the timing of everything after, so you are asked when. */
-const ASK_WHEN: readonly StepId[] = ['autolyse', 'starterIn'];
-const AGO = [
-    { label: 'Just now', min: 0 }, { label: '10 min ago', min: 10 }, { label: '20 min ago', min: 20 },
-    { label: '30 min ago', min: 30 }, { label: '1 h ago', min: 60 }
-] as const;
 
 /** What the button says: "Done", except a fold, where the number matters. */
 const doneLabel = (s: LiveStep) => (s.id.startsWith('fold') ? `Done fold ${s.id.slice(4)}` : 'Done');
@@ -50,6 +43,8 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     }, [running, clock]);
 
     const [asking, setAsking] = useState<StepId | null>(null);
+    // The time typed in the "when did you do this?" sheet, as "HH:MM".
+    const [at, setAt] = useState('');
     const [editing, setEditing] = useState(false);
     // Which steps have their how-to open. The step that is due starts open; the rest start closed.
     const [how, setHow] = useState<Partial<Record<StepId, boolean>>>({});
@@ -81,7 +76,16 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     };
     const clearTimer = (id: StepId) => { const { [id]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, timers: rest }); };
     const undo = (id: StepId) => { const { [id]: _gone, ...rest } = record.timers ?? {}; onChange({ ...record, actuals: untick(record.actuals, id), timers: rest }); };
-    const press = (s: LiveStep) => (ASK_WHEN.includes(s.id) ? setAsking(s.id) : doTick(s.id, clock()));
+    const hhmm = (ms: number) => { const p = partsOf(ms, zone); return `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`; };
+    // Every step asks when you did it, so a step you forgot to tick can be recorded at the right time.
+    const press = (s: LiveStep) => { setAt(hhmm(clock())); setAsking(s.id); };
+    /** A typed clock time today, or yesterday if that would be in the future (just after midnight). */
+    const timeToday = (value: string): number | null => {
+        const [h, m] = value.split(':').map(Number);
+        if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+        const ms = atLocalTime(clock(), h! * 60 + m!, zone);
+        return ms > clock() + MINUTE ? addLocalDays(ms, -1, zone) : ms;
+    };
     const when = (ms: number) => dayTime(ms, now, zone);
 
     const countdown = (ms: number) => (ms >= 0 ? `in ${lengthOf(ms)}` : `${lengthOf(-ms)} late`);
@@ -204,12 +208,14 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                 <div class="overlay" role="dialog" aria-modal="true" aria-label="When did you do this?">
                     <div class="sheet" ref={sheet}>
                         <h2>When did you do this?</h2>
-                        <div class="chips">
-                            {AGO.map((a) => (
-                                <button type="button" class="chip" onClick={() => doTick(asking, clock() - a.min * MINUTE)}>{a.label}</button>
-                            ))}
-                        </div>
-                        <div class="btn-row"><button type="button" class="btn outline" onClick={() => setAsking(null)}>Cancel</button></div>
+                        <p class="hint">{view.steps.find((x) => x.id === asking)?.label}</p>
+                        <button type="button" class="btn big-btn" onClick={() => doTick(asking, clock())}>Just now</button>
+                        <form class="at-time" onSubmit={(e) => { e.preventDefault(); const ms = timeToday(at); if (ms !== null) doTick(asking, ms); }}>
+                            <label for="did-at">Or at</label>
+                            <input id="did-at" type="time" required value={at} onInput={(e) => setAt((e.target as HTMLInputElement).value)} />
+                            <button type="submit" class="btn outline">Save</button>
+                        </form>
+                        <button type="button" class="link" onClick={() => setAsking(null)}>Cancel</button>
                     </div>
                 </div>
             )}
