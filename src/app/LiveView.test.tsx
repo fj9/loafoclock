@@ -132,16 +132,18 @@ describe('steps in the live view', () => {
         render(<Harness start={rec} at={plan.byId.autolyse} />);
         // The step is due, so its how-to starts open, inside the one card
         expect(within(nextUp()).getByText('450g flour')).toBeTruthy();
+        expect(within(nextUp()).getByText(/Mixing only the flour and water/)).toBeTruthy();
         // Timers start themselves when you tick the step, and show above: there is no button for it here
         expect(screen.queryByText(/minute timer now/)).toBeNull();
     });
 
-    it('opens a step in its row in the list, and shows its tip', () => {
+    it('opens a step in its row in the list, with what it is', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
         fireEvent.click(screen.getByLabelText('Show how-to: Add salt, honey and oil'));
         expect(screen.getByText('10g salt')).toBeTruthy();
-        fireEvent.click(screen.getByLabelText('What is salt and enrichments?'));
-        expect(screen.getByRole('note').textContent).toContain('Salt adds flavour');
+        // What the step is comes with it, in the same place: no separate (i) to tap
+        expect(screen.getByText(/Salt adds flavour/)).toBeTruthy();
+        expect(screen.queryByLabelText(/^What is /)).toBeNull();
         fireEvent.click(screen.getByLabelText('Hide how-to: Add salt, honey and oil'));
         expect(screen.queryByText('10g salt')).toBeNull();
     });

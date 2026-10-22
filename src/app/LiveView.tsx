@@ -7,7 +7,6 @@ import { guideFor } from '../domain/stepGuide';
 import { ConfirmSheet } from './ConfirmSheet';
 import { Levers } from './Levers';
 import { StepDetail } from './StepDetail';
-import { Tip } from './Tip';
 import { Timeline } from './Timeline';
 import { clockOf, countdownText, dayLabel, lengthOf } from './format';
 
@@ -90,9 +89,8 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
 
     const countdown = (ms: number) => (ms >= 0 ? `in ${lengthOf(ms)}` : `${lengthOf(-ms)} late`);
     const kept = view.keepBakeTime;
-    const text = (ms: number) => clockOf(ms, zone);
     const howOpen = (s: LiveStep, isNext: boolean) => how[s.id] ?? (isNext && s.status !== 'upcoming');
-    const detail = (s: LiveStep, showTip: boolean) => <StepDetail id={s.id} plan={view.plan} zone={zone} showTip={showTip} />;
+    const detail = (s: LiveStep) => <StepDetail id={s.id} plan={view.plan} zone={zone} />;
 
     return (
         <div class="live">
@@ -119,7 +117,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
             {next ? (
                 <section class={`panel next-up ${next.status}`} aria-label="Next up">
                     <p class="eyebrow">Next up</p>
-                    <p class="big">{next.label} {guideFor(next.id, view.plan, text).tip && <Tip name={guideFor(next.id, view.plan, text).tip!} />}</p>
+                    <p class="big">{next.label}</p>
                     <p class="hint">{when(next.at)} · <strong>{countdown(view.untilNext!)}</strong></p>
                     {FOLD_IDS.includes(next.id) && (
                         <ol class="folds" aria-label="Folds">
@@ -132,7 +130,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                         <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                         {howOpen(next, true) ? 'Hide the how-to' : 'Show the how-to'}
                     </button>
-                    {howOpen(next, true) && <div id="next-how">{detail(next, false)}</div>}
+                    {howOpen(next, true) && <div id="next-how">{detail(next)}</div>}
                     <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next)}</button>
                     {view.freeMs! > 0 && next.status === 'upcoming' && <p class="hint free">You are free for {lengthOf(view.freeMs!)}.</p>}
                 </section>
@@ -180,7 +178,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                                 {s.status === 'done'
                                     ? <button type="button" class="link" onClick={() => undo(s.id)} aria-label={`Undo ${s.label}`}>Undo</button>
                                     : <button type="button" class="link" onClick={() => press(s)} aria-label={`Mark ${s.label} done`}>Done</button>}
-                                {open && <div class="row-detail">{detail(s, true)}</div>}
+                                {open && <div class="row-detail">{detail(s)}</div>}
                             </li>
                         );
                     })}
