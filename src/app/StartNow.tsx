@@ -31,9 +31,6 @@ export function StartNow({ now, zone, onStart, quickStreak, base = {} }: Props) 
                         </p>
                     </section>
             )} />
-            <button type="button" class="btn outline" onClick={() => setLevers(startNowLevers(now, base, zone) ?? leversAt(now, base))}>
-                Suggest levers again
-            </button>
         </div>
     );
 }
