@@ -53,3 +53,27 @@ describe('timeline layout', () => {
         expect(l.x(mid)).toBeCloseTo((brk.x0 + brk.x1) / 2, 6);
     });
 });
+
+describe('timeline layout with times in any order', () => {
+    it('keeps every step inside the bar when a later step was recorded before the feed', () => {
+        const levers = leversAt(0, { fridge: { kind: 'hours', hours: 15.5 } });
+        const p = buildPlan(levers, { feed: 20 * HOUR, fridge: 15 * HOUR });
+        for (const width of [240, 287, 340, 600]) {
+            const l = layoutTimeline(p, width);
+            for (const s of p.steps) {
+                expect(l.x(s.at), s.id).toBeGreaterThanOrEqual(-1e-6);
+                expect(l.x(s.at), s.id).toBeLessThanOrEqual(width + 1e-6);
+            }
+            for (const piece of l.pieces) expect(piece.x1).toBeGreaterThanOrEqual(piece.x0);
+            expect(Number.isFinite(l.pxPerHour)).toBe(true);
+        }
+    });
+
+    it('keeps every step inside the bar when many steps were ticked in a short time', () => {
+        const levers = leversAt(0, { fridge: { kind: 'hours', hours: 15.5 } });
+        const actuals = Object.fromEntries(['feed', 'autolyse', 'starterIn', 'salt', 'fold1', 'fold2', 'fold3', 'fold4', 'preShape', 'finalShape', 'fridge'].map((id, i) => [id, 17 * HOUR + i * 6 * 60_000]));
+        const p = buildPlan(levers, actuals as never);
+        const l = layoutTimeline(p, 287);
+        for (const s of p.steps) { expect(l.x(s.at)).toBeGreaterThanOrEqual(0); expect(l.x(s.at)).toBeLessThanOrEqual(287 + 1e-6); }
+    });
+});

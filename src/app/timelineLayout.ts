@@ -27,15 +27,17 @@ export interface Layout {
 }
 
 export function layoutTimeline(plan: Plan, width: number): Layout {
-    const start = plan.byId.feed - HOUR;
-    const end = plan.readyToCarve + HOUR;
+    // Cover every step, whatever order the times are in, so nothing can land outside the bar.
+    const times = plan.steps.map((st) => st.at);
+    const start = Math.min(...times) - HOUR;
+    const end = Math.max(...times) + HOUR;
     const from = plan.byId.fridge;
     const to = plan.byId.ovenOn;
     const fold = plan.levers.fridge.kind === 'hours' && (to - from) / HOUR >= MIN_BREAK_HOURS;
 
     const total = (end - start) / HOUR;
     const linear = fold ? total - (to - from) / HOUR : total;
-    const pxPerHour = (width - (fold ? BREAK_PX : 0)) / linear;
+    const pxPerHour = (width - (fold ? BREAK_PX : 0)) / Math.max(linear, 1);
 
     const pieces: Piece[] = [];
     let x = 0;

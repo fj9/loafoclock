@@ -123,6 +123,7 @@ Review points with the owner after milestones 2, 3 and 4.
 - **Destructive actions** (Stop this bake, Remove, Replace) are red, and so is their confirm button. They always ask first, with an in-app sheet, because the browser's own popup is blocked in some browsers.
 - **Links** are for small in-line actions only. Anything that does something important is an outline or filled button.
 - **Lists of things you tap** (the progress list) use whole-row buttons, at least 56px tall, that open in place, instead of rows of small links.
+- **Times in a bake always run in order.** A step cannot be recorded earlier than the step before it, or later than the one after it. The picker stops at those limits and says why, and the timeline copes with any order anyway, so a saved bake can never push the bar out of its box.
 - **Empty states** are one pattern: a short heading, one sentence, and a button only if there is something to press (`EmptyState`).
 - **Text sizes** are six named sizes (12, 14, 16, 18, 22 and 28 px, all scaled by the Settings text size) and **corner radii** are four named sizes and a pill. They are defined in `tokens.css`, and a test fails if a stylesheet uses a bare number.
 - **Times** follow the Clock setting everywhere, including the time fields.

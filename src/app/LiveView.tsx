@@ -60,7 +60,20 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     const { next } = view;
 
     // Ticking a step closes its panel and, if the step ends in a wait (a rest, a preheat, cooling), starts that timer.
-    const doTick = (id: StepId, at: number) => {
+    /**
+     * The earliest and latest a step can be recorded: not before the steps ahead of it, and not after
+     * the steps behind it, so the times always run in order.
+     */
+    const bounds = (id: StepId) => {
+        const idx = STEP_ORDER.indexOf(id);
+        const times = (ids: readonly StepId[]) => ids.map((k) => record.actuals[k]).filter((v): v is number => v !== undefined);
+        const earlier = times(STEP_ORDER.slice(0, idx));
+        const later = times(STEP_ORDER.slice(idx + 1));
+        return { lo: earlier.length ? Math.max(...earlier) : -Infinity, hi: later.length ? Math.min(...later) : Infinity };
+    };
+    const doTick = (id: StepId, asked: number) => {
+        const { lo, hi } = bounds(id);
+        const at = Math.min(Math.max(asked, lo), hi);
         setPicker(null);
         setHow((h) => { const { [id]: _closed, ...rest } = h; return rest; });
         const minutes = guideFor(id, view.plan, (ms) => clockOf(ms, zone)).timerMinutes;
@@ -128,7 +141,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                         </button>
                     </div>
                     {picker?.id === next.id && (
-                        <EarlierPicker now={clock()} zone={zone} start={clock()} label="Done earlier" onCancel={() => setPicker(null)} onSave={(ms) => doTick(next.id, ms)} />
+                        <EarlierPicker now={Math.min(clock(), bounds(next.id).hi)} notBefore={bounds(next.id).lo} zone={zone} start={clock()} label="Done earlier" onCancel={() => setPicker(null)} onSave={(ms) => doTick(next.id, ms)} />
                     )}
                     {view.freeMs! > 0 && next.status === 'upcoming' && <p class="hint free">You are free for {lengthOf(view.freeMs!)}.</p>}
                 </section>
@@ -184,7 +197,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                                     <div class="expand" id={`row-${s.id}`}>
                                         {done ? (
                                             picker?.id === s.id
-                                                ? <EarlierPicker now={clock()} zone={zone} start={s.actualAt!} label={`Change the time for ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
+                                                ? <EarlierPicker now={Math.min(clock(), bounds(s.id).hi)} notBefore={bounds(s.id).lo} zone={zone} start={s.actualAt!} label={`Change the time for ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
                                                 : (
                                                     <div class="btn-row">
                                                         <button type="button" class="btn outline" onClick={() => openPicker(s.id, 'change')}>Change time</button>
@@ -201,7 +214,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                                                     </button>
                                                 </div>
                                                 {picker?.id === s.id && (
-                                                    <EarlierPicker now={clock()} zone={zone} start={clock()} label={`Done earlier: ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
+                                                    <EarlierPicker now={Math.min(clock(), bounds(s.id).hi)} notBefore={bounds(s.id).lo} zone={zone} start={clock()} label={`Done earlier: ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
                                                 )}
                                             </>
                                         )}
