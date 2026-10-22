@@ -102,12 +102,24 @@ describe('Start now', () => {
         expect(screen.getByText(/Quick feeds are fine/)).toBeTruthy();
     });
 
-    it('skips the fridge and brings it back', () => {
+    it('skips the fridge with a tick box, the slider stays in place, and unticking brings the time back', () => {
         render(<StartNow now={friday9} zone={LONDON} />);
-        fireEvent.click(screen.getByText('Skip the fridge'));
+        const slider = screen.getByLabelText('Time in the fridge') as HTMLInputElement;
+        fireEvent.input(slider, { target: { value: '20' } });
+        const tick = screen.getByLabelText('Skip the fridge') as HTMLInputElement;
+        expect(tick.type).toBe('checkbox');
+        expect(tick.checked).toBe(false);
+        fireEvent.click(tick);
+        // Nothing jumps: the same slider is still there, greyed out, and says it is skipped
+        const after = screen.getByLabelText('Time in the fridge') as HTMLInputElement;
+        expect(after.disabled).toBe(true);
+        expect(screen.getByText('Skipped')).toBeTruthy();
         expect(screen.getByText(/less sourdough loaf/)).toBeTruthy();
-        fireEvent.click(screen.getByText('Use the fridge again'));
-        expect(screen.getByLabelText('Time in the fridge')).toBeTruthy();
+        fireEvent.click(screen.getByLabelText('Skip the fridge'));
+        const back = screen.getByLabelText('Time in the fridge') as HTMLInputElement;
+        expect(back.disabled).toBe(false);
+        expect(back.value).toBe('20'); // the time you had is restored
+        expect(screen.queryByText('Skipped')).toBeNull();
     });
 });
 

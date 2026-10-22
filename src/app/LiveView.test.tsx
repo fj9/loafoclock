@@ -416,3 +416,13 @@ describe('the timer controls are buttons', () => {
         expect(screen.getByRole('button', { name: 'Clear' }).className).toContain('outline');
     });
 });
+
+describe('skipping the fridge in a running bake', () => {
+    it('has no tick box once the fridge time can no longer change', () => {
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt, ovenOn: plan.byId.ovenOn } };
+        render(<Harness start={rec} at={plan.byId.ovenOn + MINUTE} />);
+        fireEvent.click(screen.getByText('Change the plan'));
+        expect((screen.getByLabelText('Time in the fridge') as HTMLInputElement).disabled).toBe(true);
+        expect(screen.queryByLabelText('Skip the fridge')).toBeNull();
+    });
+});

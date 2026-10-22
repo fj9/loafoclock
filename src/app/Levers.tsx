@@ -3,6 +3,7 @@ import {
     COOLING_CHOICES, COOLEST_TEMP, WAIT_MAX_HOURS, WAIT_MIN_HOURS, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, bulkFor, isQuickFeed, ratioFor,
     buildPlan, feedForWait, nudgeFridge, waitHoursOf, type Levers as LeverSet, type Zone
 } from '../domain/plan';
+import { useRef } from 'preact/hooks';
 import { QUICK_FEED_NUDGE_AT } from '../domain/bakeLog';
 import { lengthOf, whenOf } from './format';
 import { Tip } from './Tip';
@@ -31,6 +32,11 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
     const wait = waitHoursOf(levers);
     const plan = buildPlan(levers);
     const fridgeHours = levers.fridge.kind === 'hours' ? levers.fridge.hours : null;
+    // The fridge time is remembered while it is skipped, so unticking brings it back.
+    const lastHours = useRef(FRIDGE_MIN_HOURS);
+    if (fridgeHours !== null) lastHours.current = fridgeHours;
+    const skipped = fridgeHours === null;
+    const shownHours = fridgeHours ?? lastHours.current;
     const nudge = nudgeFridge(levers, zone);
     const nudgeNeeded = nudge !== null && fridgeHours !== null && Math.abs(nudge - fridgeHours) > 1e-6;
 
@@ -63,31 +69,24 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
 
             <div class="lever">
                 <div class="lever-head"><label for="lv-fridge">Time in the fridge</label> <Tip name="retardation" /></div>
-                {fridgeHours !== null ? (
-                    <>
-                        <input id="lv-fridge" type="range" min={FRIDGE_MIN_HOURS} max={FRIDGE_MAX_HOURS} step={0.25} value={fridgeHours} disabled={locked.fridge}
-                            onInput={(e) => set({ fridge: { kind: 'hours', hours: Number((e.target as HTMLInputElement).value) } })} />
-                        <output>{hoursText(fridgeHours)}</output>
-                        {nudgeNeeded && (
-                            <p class="hint warn">
-                                That puts the oven or the bake in your sleeping hours.{' '}
-                                <button type="button" class="link" onClick={() => set({ fridge: { kind: 'hours', hours: nudge! } })}>
-                                    Use {hoursText(nudge!)} instead
-                                </button>
-                            </p>
-                        )}
-                        {!locked.fridge && (
-                            <p class="hint">
-                                <button type="button" class="link" onClick={() => set({ fridge: { kind: 'none' } })}>Skip the fridge</button>
-                            </p>
-                        )}
-                    </>
-                ) : (
-                    <>
-                        <p id="lv-fridge" class="hint">No fridge: shape, then bake after about 2 to 3 hours. It saves a lot of time but makes a less sourdough loaf.</p>
-                        <button type="button" class="link" onClick={() => set({ fridge: { kind: 'hours', hours: FRIDGE_MIN_HOURS } })}>Use the fridge again</button>
-                    </>
+                <input id="lv-fridge" type="range" min={FRIDGE_MIN_HOURS} max={FRIDGE_MAX_HOURS} step={0.25} value={shownHours} disabled={locked.fridge || skipped}
+                    onInput={(e) => set({ fridge: { kind: 'hours', hours: Number((e.target as HTMLInputElement).value) } })} />
+                <output>{skipped ? 'Skipped' : hoursText(shownHours)}</output>
+                {nudgeNeeded && (
+                    <p class="hint warn">
+                        That puts the oven or the bake in your sleeping hours.{' '}
+                        <button type="button" class="link" onClick={() => set({ fridge: { kind: 'hours', hours: nudge! } })}>
+                            Use {hoursText(nudge!)} instead
+                        </button>
+                    </p>
                 )}
+                {!locked.fridge && (
+                    <label class="check">
+                        <input type="checkbox" checked={skipped} onChange={() => set({ fridge: skipped ? { kind: 'hours', hours: lastHours.current } : { kind: 'none' } })} />
+                        Skip the fridge
+                    </label>
+                )}
+                {skipped && <p class="hint">No fridge: shape, then bake after about 2 to 3 hours. It saves a lot of time but makes a less sourdough loaf.</p>}
             </div>
 
             </>)}
