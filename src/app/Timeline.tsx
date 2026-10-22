@@ -1,4 +1,4 @@
-import { isAwake, atLocalTime, addLocalDays, startOfLocalDay, partsOf, HOUR, type Plan, type StepId, type Zone } from '../domain/plan';
+import { getWaking, isAwake, atLocalTime, addLocalDays, startOfLocalDay, partsOf, HOUR, type Plan, type StepId, type Zone } from '../domain/plan';
 import { clockOf, weekdayOf } from './format';
 
 const PX_PER_HOUR = 14;
@@ -36,8 +36,8 @@ export function Timeline({ plan, zone, now }: Props) {
             <div class="tl-scroll" tabIndex={0} role="region" aria-label="Timeline of the whole bake, scrolls sideways. The steps are listed below.">
                 <div class="tl-track" role="img" aria-label="The bake from the first feed to ready to carve" style={{ width: `${width}px` }}>
                     {days.map((d) => {
-                        const night = atLocalTime(d, 23 * 60, zone);
-                        const morning = atLocalTime(d, 6 * 60, zone);
+                        const night = atLocalTime(d, getWaking().toMin, zone);
+                        const morning = atLocalTime(d, getWaking().fromMin, zone);
                         return (
                             <>
                                 <div class="tl-sleep" style={{ left: `${x(d)}px`, width: `${x(morning) - x(d)}px` }} />

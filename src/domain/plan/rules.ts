@@ -1,7 +1,7 @@
 // The rules a plan has to follow.
 import { FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, isQuickFeed } from './levers';
 import type { Plan, StepId } from './steps';
-import { HOUR, isAwake, type Waking, DEFAULT_WAKING, type Zone } from './time';
+import { HOUR, getWaking, isAwake, type Waking, type Zone } from './time';
 
 /** The longest the loaf may rest between coming out of the oven and being carved. */
 export const MAX_REST_BEFORE_CARVING_HOURS = 16;
@@ -21,7 +21,7 @@ export interface Rules {
 /** Everything about the plan that breaks a rule. Empty means it is fine. */
 export function violations(plan: Plan, rules: Rules = {}): Violation[] {
     const out: Violation[] = [];
-    const waking = rules.waking ?? DEFAULT_WAKING;
+    const waking = rules.waking ?? getWaking();
     for (const s of plan.steps) {
         if (s.needsYou && !isAwake(s.at, rules.zone, waking)) out.push({ kind: 'asleep', stepId: s.id, at: s.at });
     }

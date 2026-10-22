@@ -113,10 +113,22 @@ export interface Waking {
     toMin: number;   // inclusive
 }
 
-/** Every moment that needs you must fall between 6:00 am and 11:00 pm. */
+/** Every moment that needs you must fall between 6:00 am and 11:00 pm, unless the Settings say otherwise. */
 export const DEFAULT_WAKING: Waking = { fromMin: 6 * 60, toMin: 23 * 60 };
 
-export function isAwake(ms: number, zone: Zone = undefined, waking: Waking = DEFAULT_WAKING): boolean {
+let current: Waking = DEFAULT_WAKING;
+
+/** Sets the waking hours the whole app plans around (the app does this from Settings). */
+export function setWaking(w: Waking = DEFAULT_WAKING): void {
+    current = w;
+}
+export const getWaking = (): Waking => current;
+
+/** Whether a setting is usable: up by 5 to 10 am, in bed between 8 pm and midnight. */
+export const isValidWaking = (w: Waking): boolean =>
+    Number.isInteger(w.fromMin) && Number.isInteger(w.toMin) && w.fromMin >= 5 * 60 && w.fromMin <= 10 * 60 && w.toMin >= 20 * 60 && w.toMin <= 24 * 60 - 1;
+
+export function isAwake(ms: number, zone: Zone = undefined, waking: Waking = current): boolean {
     const m = minutesOfDay(ms, zone);
     return m >= waking.fromMin && m <= waking.toMin;
 }

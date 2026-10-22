@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './App';
 import { LOG_KEY, loadLog } from '../domain/bakeLog';
 import { LIVE_KEY, lockPlan } from '../domain/liveStore';
-import { STEP_ORDER, buildPlan, leversAt } from '../domain/plan';
+import { STEP_ORDER, buildPlan, leversAt, setWaking } from '../domain/plan';
 
-beforeEach(() => { localStorage.clear(); document.documentElement.removeAttribute('data-theme'); });
+beforeEach(() => { setWaking(); localStorage.clear(); document.documentElement.removeAttribute('data-theme'); });
 afterEach(cleanup);
 
 const tab = (name: string) => fireEvent.click(screen.getByRole('button', { name }));
@@ -112,5 +112,17 @@ describe('already fed', () => {
         expect(rec.actuals.feed).toBe(rec.levers.feedAt);
         expect(rec.levers.feedAt).toBeLessThan(Date.now());
         expect(rec.levers.ratioN).toBe(6);
+    });
+});
+
+describe('waking hours setting', () => {
+    it('is chosen in Settings, remembered, and shown in the wording', () => {
+        render(<App />);
+        tab('Settings');
+        expect(screen.getByText(/between 6:00 am and 11:00 pm/)).toBeTruthy();
+        fireEvent.change(screen.getByLabelText(/Up from/), { target: { value: String(7 * 60) } });
+        fireEvent.change(screen.getByLabelText(/In bed by/), { target: { value: String(22 * 60) } });
+        expect(screen.getByText(/between 7:00 am and 10:00 pm/)).toBeTruthy();
+        expect(JSON.parse(localStorage.getItem('loafoclockSettings')!)).toMatchObject({ wakeFrom: 420, wakeTo: 1320 });
     });
 });

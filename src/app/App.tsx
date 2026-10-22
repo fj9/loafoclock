@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'preact/hooks';
 import { addToLog, importOldLog, loadLog, oldLogEntries, quickFeedStreak, removeFromLog, type LogEntry } from '../domain/bakeLog';
 import { setClock12 } from '../domain/clock';
+import { setWaking } from '../domain/plan';
 import { clearLive, loadLive, lockPlan, saveLive, type LiveRecord } from '../domain/liveStore';
 import { buildPlan, type Actuals, type Levers } from '../domain/plan';
-import { applyDisplaySettings, applyTheme, loadSettings, saveSettings, type Settings } from '../domain/settings';
+import { applyDisplaySettings, applyTheme, loadSettings, saveSettings, wakingFromSettings, type Settings } from '../domain/settings';
 import { About } from './About';
 import { AlreadyFed } from './AlreadyFed';
 import { BreadAt } from './BreadAt';
@@ -39,6 +40,9 @@ export function App() {
 
     // Display settings apply to the whole page; they are set again whenever they change.
     setClock12(settings.clock12 !== false);
+    const waking = wakingFromSettings(settings);
+    setWaking(waking);
+    const wakeKey = `${waking.fromMin}-${waking.toMin}`; // plans are worked out again when this changes
     useEffect(() => { applyTheme(settings); applyDisplaySettings(settings); }, [settings]);
     const change = (patch: Settings) => { saveSettings(patch); setSettings((s) => ({ ...s, ...patch })); };
 
@@ -85,10 +89,10 @@ export function App() {
                     </div>
                 )}
                 {mode === 'at'
-                    ? <BreadAt now={now} onStart={start} quickStreak={streak} />
+                    ? <BreadAt key={wakeKey} now={now} onStart={start} quickStreak={streak} />
                     : alreadyFed
-                        ? <AlreadyFed now={now} onStart={start} quickStreak={streak} />
-                        : <StartNow key={repeat?.key ?? 0} now={now} onStart={start} quickStreak={streak} base={repeat?.base} />}
+                        ? <AlreadyFed key={wakeKey} now={now} onStart={start} quickStreak={streak} />
+                        : <StartNow key={`${repeat?.key ?? 0}-${wakeKey}`} now={now} onStart={start} quickStreak={streak} base={repeat?.base} />}
             </>
         )
     );

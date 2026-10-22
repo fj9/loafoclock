@@ -6,7 +6,7 @@ import {
 } from './levers';
 import { fitsWakingHours } from './rules';
 import { buildPlan, type Plan } from './steps';
-import { HOUR, MINUTE, atLocalTime, ceilTo, isAwake, addLocalDays, type Zone } from './time';
+import { HOUR, MINUTE, atLocalTime, ceilTo, getWaking, isAwake, addLocalDays, type Zone } from './time';
 
 export type Category = 'fresh' | 'moreFlavour' | 'bedtime' | 'noFridge';
 
@@ -87,12 +87,12 @@ const allFridges = (): Fridge[] => {
     return list;
 };
 
-/** The latest evening times the loaf could come out, in quarter hours, that still leave a rest of at most 16 hours. */
+/** The latest evening times (the last three hours before bed) the loaf could come out, in quarter hours, that still leave a rest of at most 16 hours. */
 function bedtimeOuts(carveAt: number, cooling: number, zone: Zone): number[] {
     const outs: number[] = [];
     const evening = (dayMs: number, min: number) => atLocalTime(dayMs, min, zone);
     for (const dayMs of [carveAt, addLocalDays(carveAt, -1, zone)]) {
-        for (let m = 23 * 60; m >= 20 * 60; m -= 15) {
+        for (let m = getWaking().toMin; m >= getWaking().toMin - 3 * 60; m -= 15) {
             const out = evening(dayMs, m);
             const rest = (carveAt - out) / HOUR;
             // More than a night of rest, so it is a different plan from baking fresh

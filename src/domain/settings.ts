@@ -1,5 +1,6 @@
 // Things the app remembers between visits, kept in the browser's local storage.
 // Keys start with "loafoclock" so they never read another app's data on the same site.
+import { DEFAULT_WAKING, isValidWaking, type Waking } from './plan/time';
 const SETTINGS_KEY = 'loafoclockSettings';
 
 export const TEXT_SIZES = ['normal', 'large', 'larger'] as const;
@@ -15,6 +16,9 @@ export interface Settings {
     textSize?: TextSize;
     clock12?: boolean;
     theme?: Theme;
+    /** Waking hours, in minutes since midnight: up from, and in bed by. */
+    wakeFrom?: number;
+    wakeTo?: number;
     welcomeSeen?: boolean;
     [key: string]: unknown;
 }
@@ -47,4 +51,10 @@ export function applyTheme(settings: Settings, root: { setAttribute(k: string, v
     if (!root) return;
     if (settings.theme === 'light' || settings.theme === 'dark') root.setAttribute('data-theme', settings.theme);
     else root.removeAttribute('data-theme');
+}
+
+/** The waking hours from the settings, or the usual 6:00 am to 11:00 pm if none are set or they are not usable. */
+export function wakingFromSettings(settings: Settings): Waking {
+    const w = { fromMin: settings.wakeFrom ?? DEFAULT_WAKING.fromMin, toMin: settings.wakeTo ?? DEFAULT_WAKING.toMin };
+    return isValidWaking(w) ? w : DEFAULT_WAKING;
 }
