@@ -52,6 +52,8 @@ export function App() {
     useEffect(() => { applyTheme(settings); applyDisplaySettings(settings); }, [settings]);
     const change = (patch: Settings) => { saveSettings(patch); setSettings((s) => ({ ...s, ...patch })); };
 
+    // A new section starts at the top, not wherever the last one was scrolled to.
+    useEffect(() => { try { window.scrollTo({ top: 0 }); } catch { /* no scrolling here */ } }, [tab]);
     useEffect(() => {
         if (!menuOpen) return;
         const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };

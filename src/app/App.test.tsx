@@ -205,6 +205,18 @@ describe('tabs, the menu and the bake', () => {
         expect(localStorage.getItem(LIVE_KEY)).not.toBeNull();
     });
 
+    it('starts each section at the top of the page', () => {
+        const scrolled: number[] = [];
+        window.scrollTo = ((o: ScrollToOptions) => { scrolled.push(o.top ?? -1); }) as typeof window.scrollTo;
+        render(<App />);
+        scrolled.length = 0;
+        fireEvent.click(screen.getByText('Start this plan'));
+        expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
+        expect(scrolled).toEqual([0]);
+        tab('Log');
+        expect(scrolled).toEqual([0, 0]);
+    });
+
     it('asks before a new plan replaces the bake in progress', () => {
         plant();
         render(<App />);
