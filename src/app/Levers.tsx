@@ -68,7 +68,15 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
             </div>
 
             <div class="lever">
-                <div class="lever-head"><label for="lv-fridge">Time in the fridge</label> <Tip name="retardation" /></div>
+                <div class="lever-head">
+                    <label for="lv-fridge">Time in the fridge</label> <Tip name="retardation" />
+                    {!locked.fridge && (
+                        <label class="check">
+                            Skip the fridge
+                            <input type="checkbox" checked={skipped} onChange={() => set({ fridge: skipped ? { kind: 'hours', hours: lastHours.current } : { kind: 'none' } })} />
+                        </label>
+                    )}
+                </div>
                 <input id="lv-fridge" type="range" min={FRIDGE_MIN_HOURS} max={FRIDGE_MAX_HOURS} step={0.25} value={shownHours} disabled={locked.fridge || skipped}
                     onInput={(e) => set({ fridge: { kind: 'hours', hours: Number((e.target as HTMLInputElement).value) } })} />
                 <output>{skipped ? 'Skipped' : hoursText(shownHours)}</output>
@@ -79,12 +87,6 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
                             Use {hoursText(nudge!)} instead
                         </button>
                     </p>
-                )}
-                {!locked.fridge && (
-                    <label class="check">
-                        <input type="checkbox" checked={skipped} onChange={() => set({ fridge: skipped ? { kind: 'hours', hours: lastHours.current } : { kind: 'none' } })} />
-                        Skip the fridge
-                    </label>
                 )}
                 {skipped && <p class="hint">No fridge: shape, then bake after about 2 to 3 hours. It saves a lot of time but makes a less sourdough loaf.</p>}
             </div>
