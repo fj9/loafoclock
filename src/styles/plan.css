@@ -155,9 +155,13 @@
 .reminders .btn { width: 100%; }
 .keep .btn { margin-top: 8px; }
 
-/* The "when did you do this?" sheet: one big button, then a time. */
-.sheet .big-btn { margin: 4px 0 12px; }
-.at-time { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; }
-.at-time label { font-weight: 700; }
-.at-time input { flex: 1; font: inherit; padding: 8px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); min-height: 44px; }
-.at-time .btn { min-height: 44px; }
+/* Done, with a clock button beside it for a step you forgot to tick, and the picker inside the card. */
+.done-row { display: flex; gap: 8px; align-items: stretch; margin-top: 4px; }
+.done-row .big-btn { flex: 1; width: auto; margin: 0; }
+.clock-btn { width: 56px; padding: 0; display: grid; place-items: center; }
+.earlier { margin: 10px 0 4px; padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+.earlier .hint { margin: 0 0 8px; }
+.stepper { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+.stepper .btn { min-width: 56px; min-height: 48px; padding: 0 8px; font-size: calc(18px * var(--ts, 1)); }
+.stepper input { flex: 1; min-width: 0; min-height: 48px; font: inherit; font-size: calc(20px * var(--ts, 1)); text-align: center; padding: 6px; border-radius: 8px; border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.live-steps .when.link { margin: 0; font-weight: 700; padding: 0; text-decoration: underline; text-underline-offset: 2px; }

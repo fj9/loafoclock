@@ -42,32 +42,44 @@ describe('live view', () => {
     it('tapping done moves to the next step', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + 5 * MINUTE} />);
         fireEvent.click(done());
-        fireEvent.click(screen.getByText('Just now'));
         expect(nextUp().textContent).toContain('Start the autolyse');
     });
 
-    it('asks when you did a step, with just two choices: just now, or a time', () => {
+    it('Done ticks at once, with no pop-up, and the clock button opens a picker inside the card', () => {
         const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse + 30 * MINUTE} />);
-        fireEvent.click(done());
-        const dialog = screen.getByRole('dialog', { name: 'When did you do this?' });
-        expect(within(dialog).getByText('Start the autolyse')).toBeTruthy();
-        expect(within(dialog).getByText('Just now')).toBeTruthy();
-        expect(within(dialog).getByLabelText('Or at')).toBeTruthy();
-        expect(within(dialog).queryByText(/min ago/)).toBeNull();
-        fireEvent.click(within(dialog).getByText('Cancel'));
         expect(screen.queryByRole('dialog')).toBeNull();
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        const picker = within(nextUp()).getByRole('group', { name: 'Done earlier' });
+        expect(screen.queryByRole('dialog')).toBeNull();
+        expect((within(picker).getByLabelText('Time') as HTMLInputElement).value).toBe(hhmm(plan.byId.autolyse + 30 * MINUTE));
+        fireEvent.click(within(picker).getByText('Cancel'));
+        expect(within(nextUp()).queryByRole('group', { name: 'Done earlier' })).toBeNull();
         expect(nextUp().textContent).toContain('Start the autolyse'); // nothing was ticked
+        fireEvent.click(done());
+        expect(nextUp().textContent).toContain('Add the starter');
     });
 
-    it('a typed time is recorded as that time, not the moment you tapped, and moves the plan', () => {
+    it('the picker steps back in 5 minutes, and cannot go into the future', () => {
+        const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
+        const t = plan.byId.autolyse + 30 * MINUTE;
+        render(<Harness start={rec} at={t} />);
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        const later = screen.getByRole('button', { name: '5 minutes later' }) as HTMLButtonElement;
+        expect(later.disabled).toBe(true); // already at the current time
+        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
+        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
+        expect((screen.getByLabelText('Time') as HTMLInputElement).value).toBe(hhmm(t - 10 * MINUTE));
+        expect(later.disabled).toBe(false);
+        expect(screen.getByText(`Save ${clockOf(t - 10 * MINUTE, LONDON)}`)).toBeTruthy();
+    });
+
+    it('a time you save is recorded as that time, not the moment you tapped, and moves the plan', () => {
         const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse + 30 * MINUTE} />);
-        fireEvent.click(done());
-        const [h, m] = hhmm(plan.byId.autolyse).split(':');
-        fireEvent.input(screen.getByLabelText('Or at'), { target: { value: `${h}:${m}` } });
-        fireEvent.click(screen.getByText('Save'));
-        expect(screen.queryByRole('dialog')).toBeNull();
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        fireEvent.input(screen.getByLabelText('Time'), { target: { value: hhmm(plan.byId.autolyse) } });
+        fireEvent.click(screen.getByText(`Save ${clockOf(plan.byId.autolyse, LONDON)}`));
         expect(nextUp().textContent).toContain('Add the starter');
         expect(screen.getByText(new RegExp(`^Done ${clockOf(plan.byId.autolyse, LONDON)}`))).toBeTruthy();
     });
@@ -76,10 +88,23 @@ describe('live view', () => {
         const eve = leversAt(zonedToMs({ year: 2026, month: 10, day: 23, hour: 23, minute: 30 }, LONDON));
         const justAfterMidnight = zonedToMs({ year: 2026, month: 10, day: 24, hour: 0, minute: 10 }, LONDON);
         render(<Harness start={lockPlan(eve, 0)} at={justAfterMidnight} />);
-        fireEvent.click(done());
-        fireEvent.input(screen.getByLabelText('Or at'), { target: { value: '23:50' } });
-        fireEvent.click(screen.getByText('Save'));
-        expect(screen.getByText(new RegExp(`^Done ${clockOf(zonedToMs({ year: 2026, month: 10, day: 23, hour: 23, minute: 50 }, LONDON), LONDON)}`))).toBeTruthy();
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        fireEvent.input(screen.getByLabelText('Time'), { target: { value: '23:50' } });
+        const yesterday = zonedToMs({ year: 2026, month: 10, day: 23, hour: 23, minute: 50 }, LONDON);
+        fireEvent.click(screen.getByText(`Save ${clockOf(yesterday, LONDON)}`));
+        expect(screen.getByText(new RegExp(`^Done ${clockOf(yesterday, LONDON)}`))).toBeTruthy();
+    });
+
+    it('the time on a finished step can be changed afterwards', () => {
+        const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt + 20 * MINUTE } };
+        render(<Harness start={rec} at={feedAt + 40 * MINUTE} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Change the time for Feed your starter' }));
+        const picker = screen.getByRole('group', { name: 'Change the time for Feed your starter' });
+        expect((within(picker).getByLabelText('Time') as HTMLInputElement).value).toBe(hhmm(feedAt + 20 * MINUTE));
+        fireEvent.click(within(picker).getByRole('button', { name: '5 minutes earlier' }));
+        fireEvent.click(within(picker).getByText(`Save ${clockOf(feedAt + 15 * MINUTE, LONDON)}`));
+        expect(screen.getByText(new RegExp(`^Done ${clockOf(feedAt + 15 * MINUTE, LONDON)}`))).toBeTruthy();
+        expect(screen.queryByRole('group')).toBeNull();
     });
 
     it('shows four fold dots and ticks each fold on its own', () => {
@@ -87,7 +112,6 @@ describe('live view', () => {
         render(<Harness start={{ ...lockPlan(levers, feedAt), actuals }} at={plan.byId.fold1} />);
         expect(screen.getAllByRole('listitem', { name: /^Fold \d/ })).toHaveLength(4);
         fireEvent.click(screen.getByText("Done fold 1"));
-        fireEvent.click(screen.getByText('Just now'));
         expect(nextUp().textContent).toContain('Fold 2');
         expect(screen.getByLabelText('Fold 1 done')).toBeTruthy();
         expect(screen.getByLabelText('Fold 2 to do')).toBeTruthy();
@@ -186,17 +210,20 @@ describe('steps in the live view', () => {
     });
 });
 
-describe('the when-did-you-do-this sheet', () => {
-    it('takes focus, closes on Escape and gives focus back', () => {
+describe('the done-earlier picker', () => {
+    it('closes on Escape, and ticks nothing', () => {
         const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse} />);
-        const button = done();
-        button.focus();
-        fireEvent.click(button);
-        expect(document.activeElement?.textContent).toBe('Just now');
-        fireEvent.keyDown(document, { key: 'Escape' });
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        fireEvent.keyDown(screen.getByLabelText('Time'), { key: 'Escape' });
+        expect(screen.queryByRole('group', { name: 'Done earlier' })).toBeNull();
+        expect(nextUp().textContent).toContain('Start the autolyse');
+    });
+
+    it('has no pop-up sheet any more', () => {
+        render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
+        fireEvent.click(done());
         expect(screen.queryByRole('dialog')).toBeNull();
-        expect(document.activeElement).toBe(button);
     });
 });
 
@@ -205,8 +232,6 @@ describe('done buttons, the how-to and timers', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);
         // Not the next step: no need to open anything first
         fireEvent.click(screen.getByLabelText('Mark Add salt, honey and oil done'));
-        expect(screen.getByRole('dialog', { name: 'When did you do this?' }).textContent).toContain('Add salt, honey and oil');
-        fireEvent.click(screen.getByText('Just now'));
         expect(screen.getByText(/Done /)).toBeTruthy();
     });
 
@@ -241,7 +266,6 @@ describe('done buttons, the how-to and timers', () => {
     it('ticking moves on to the next step, which shows its own how-to', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt + MINUTE} />);
         fireEvent.click(done());
-        fireEvent.click(screen.getByText('Just now'));
         expect(nextUp().textContent).toContain('Start the autolyse');
         expect(screen.queryByText('84g water')).toBeNull();
     });
@@ -251,7 +275,6 @@ describe('done buttons, the how-to and timers', () => {
         const at = plan.byId.autolyse;
         render(<Harness start={rec} at={at} />);
         fireEvent.click(done());
-        fireEvent.click(screen.getByText('Just now'));
         const timer = screen.getByRole('timer', { name: 'Timer for Start the autolyse' });
         expect(timer.textContent).toContain('1:00:00');
         expect(timer.textContent).toContain('until');
@@ -264,10 +287,8 @@ describe('done buttons, the how-to and timers', () => {
         const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse} />);
         fireEvent.click(done());
-        fireEvent.click(screen.getByText('Just now'));
         expect(screen.getAllByRole('timer')).toHaveLength(1);
         fireEvent.click(done());
-        fireEvent.click(screen.getByText('Just now'));
         const timers = screen.getAllByRole('timer');
         expect(timers).toHaveLength(1);
         expect(timers[0]!.getAttribute('aria-label')).toBe('Timer for Add the starter');
