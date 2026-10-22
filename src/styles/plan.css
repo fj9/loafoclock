@@ -96,9 +96,6 @@
 .tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--wash); }
 .tabs button { flex: 1; font: inherit; font-weight: 600; padding: 12px 4px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); cursor: pointer; }
 .tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
-.footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; justify-content: flex-end; }
-.footer-links a { font-weight: 600; }
-.app-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; gap: 4px 16px; flex-wrap: wrap; border-top: 1px solid var(--line); color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
 .log-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
 .log-list h3 { font-size: calc(18px * var(--ts, 1)); }
 .log-list p { margin: 4px 0; }
@@ -120,3 +117,9 @@
 .lever #lv-feed { accent-color: var(--good); }
 .lever #lv-temp { accent-color: var(--fill-a); }
 .lever #lv-fridge { accent-color: var(--cold-edge); }
+
+/* Footer: name on the left, the tip link in the middle, About on the right, all on one line. */
+.app-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: calc(14px * var(--ts, 1)); }
+.app-footer > :first-child { justify-self: start; }
+.app-footer > :last-child { justify-self: end; }
+.app-footer a, .app-footer .link { font: inherit; font-weight: 600; line-height: 1.4; padding: 4px 2px; }
