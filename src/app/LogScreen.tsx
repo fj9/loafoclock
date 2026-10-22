@@ -70,7 +70,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
             {removing !== null && (
                 <ConfirmSheet
                     title="Remove this bake?" body="It will be taken out of your log."
-                    confirmLabel="Remove" onCancel={() => setRemoving(null)} onConfirm={() => { onRemove(removing); setRemoving(null); }}
+                    confirmLabel="Remove" danger onCancel={() => setRemoving(null)} onConfirm={() => { onRemove(removing); setRemoving(null); }}
                 />
             )}
         </div>

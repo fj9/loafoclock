@@ -187,19 +187,21 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                 </ol>
             </section>
 
-            <button type="button" class="btn outline" onClick={() => setEditing(!editing)} aria-expanded={editing}>
-                {editing ? 'Hide the levers' : 'Change the plan'}
-            </button>
+            <div class="actions-row">
+                <button type="button" class="btn outline" onClick={() => setEditing(!editing)} aria-expanded={editing}>
+                    {editing ? 'Hide the levers' : 'Change the plan'}
+                </button>
+                <button type="button" class="btn outline danger" onClick={() => setStopping(true)}>Stop this bake</button>
+            </div>
             {editing && (
                 <Levers levers={record.levers} zone={zone} locked={{ feedRatio: view.locked.feedRatio, doughTemp: view.locked.doughTemp, fridge: view.locked.fridge }}
                     onChange={(levers) => onChange({ ...record, levers })} />
             )}
-            <p><button type="button" class="link" onClick={() => setStopping(true)}>Stop this bake</button></p>
 
             {stopping && (
                 <ConfirmSheet
                     title="Stop this bake?" body="The plan and any timers will be thrown away. Nothing is added to your log."
-                    confirmLabel="Stop this bake" onCancel={() => setStopping(false)} onConfirm={() => { setStopping(false); onStop(); }}
+                    confirmLabel="Stop this bake" danger onCancel={() => setStopping(false)} onConfirm={() => { setStopping(false); onStop(); }}
                 />
             )}
 

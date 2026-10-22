@@ -146,3 +146,9 @@
 .step-detail .about { margin: 0 0 10px; padding: 8px 12px; border-radius: 8px; background: var(--info-bg); color: var(--info-ink); font-size: calc(14px * var(--ts, 1)); }
 .row-detail { margin: 8px 0; padding: 10px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); }
 .next-up .big-btn { margin-top: 4px; }
+
+/* Two matching actions side by side. Stop is the warning red, and so is its confirm button. */
+.actions-row { display: flex; gap: 12px; margin: 0 0 16px; }
+.actions-row .btn { flex: 1; }
+.btn.danger { color: var(--danger); border-color: var(--danger); }
+.btn.danger-fill { background: var(--danger); border-color: var(--danger); color: var(--card); }
