@@ -60,7 +60,7 @@ describe('live view', () => {
         const actuals = { feed: feedAt, autolyse: plan.byId.autolyse, starterIn: plan.byId.starterIn, salt: plan.byId.salt };
         render(<Harness start={{ ...lockPlan(levers, feedAt), actuals }} at={plan.byId.fold1} />);
         expect(screen.getAllByRole('listitem', { name: /^Fold \d/ })).toHaveLength(4);
-        fireEvent.click(screen.getByText("I've done fold 1"));
+        fireEvent.click(screen.getByText("Done fold 1"));
         expect(nextUp().textContent).toContain('Fold 2');
         expect(screen.getByLabelText('Fold 1 done')).toBeTruthy();
         expect(screen.getByLabelText('Fold 2 to do')).toBeTruthy();
@@ -289,7 +289,7 @@ describe('the Done button', () => {
             const before = Object.fromEntries(ids.slice(0, ids.indexOf(id)).map((p) => [p, plan.byId[p]]));
             const { unmount } = render(<Harness start={{ ...lockPlan(levers, feedAt), actuals: before }} at={plan.byId[id] + MINUTE} />);
             const label = within(nextUp()).getAllByRole('button').find((b) => b.className.includes('big-btn'))!.textContent!;
-            if (id.startsWith('fold')) expect(label, id).toBe(`I've done fold ${id.slice(4)}`);
+            if (id.startsWith('fold')) expect(label, id).toBe(`Done fold ${id.slice(4)}`);
             else expect(label, id).toBe('Done');
             unmount();
         }

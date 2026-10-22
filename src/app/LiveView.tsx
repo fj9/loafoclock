@@ -29,7 +29,7 @@ const AGO = [
 ] as const;
 
 /** What the button says: "Done", except a fold, where the number matters. */
-const doneLabel = (s: LiveStep) => (s.id.startsWith('fold') ? `I've done fold ${s.id.slice(4)}` : 'Done');
+const doneLabel = (s: LiveStep) => (s.id.startsWith('fold') ? `Done fold ${s.id.slice(4)}` : 'Done');
 
 /** The locked plan: where you are, what is next and how long you are free. */
 export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock = Date.now, zone }: Props) {
