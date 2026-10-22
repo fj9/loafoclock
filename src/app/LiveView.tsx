@@ -22,6 +22,12 @@ interface Props {
     zone?: Zone;
 }
 
+const Chevron = () => (
+    <svg class="chev" width="18" height="18" viewBox="0 0 14 14" aria-hidden="true">
+        <path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+);
+
 /** What the button says: "Done", except a fold, where the number matters. */
 const doneLabel = (s: LiveStep) => (s.id.startsWith('fold') ? `Done fold ${s.id.slice(4)}` : 'Done');
 
@@ -56,6 +62,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     // Ticking a step closes its panel and, if the step ends in a wait (a rest, a preheat, cooling), starts that timer.
     const doTick = (id: StepId, at: number) => {
         setPicker(null);
+        setHow((h) => { const { [id]: _closed, ...rest } = h; return rest; });
         const minutes = guideFor(id, view.plan, (ms) => clockOf(ms, zone)).timerMinutes;
         const end = minutes === undefined ? undefined : at + minutes * MINUTE;
         // Doing a step means the waits before it are over, so their timers go. Then this step's own wait starts.
@@ -153,32 +160,57 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
 
             <section class="panel steps live-steps">
                 <h2>Your progress</h2>
-                <ol>
+                <ul class="rows">
                     {view.steps.filter((s) => s.id !== 'carve').map((s) => {
                         const isNext = next?.id === s.id;
-                        const open = !isNext && howOpen(s, false);
+                        const done = s.status === 'done';
+                        const open = !isNext && (how[s.id] ?? false);
+                        const text = (
+                            <span class="rowtext">
+                                <span class="title">{s.label}{!done && s.shiftMin !== 0 && <span class="shift"> {signedMin(s.shiftMin)}</span>}</span>
+                                <span class="sub">{done ? `Done ${clockOf(s.actualAt!, zone)}` : when(s.at)}</span>
+                            </span>
+                        );
                         return (
-                            <li class={s.status}>
-                                {s.actualAt !== undefined
-                                    ? <button type="button" class="link when" aria-expanded={picker?.id === s.id} aria-label={`Change the time for ${s.label}`} onClick={() => openPicker(s.id, 'change')}>Done {clockOf(s.actualAt, zone)}</button>
-                                    : <span class="when">{when(s.at)}</span>}{' '}{s.label}
-                                {s.status !== 'done' && s.shiftMin !== 0 && <em class="shift"> ({signedMin(s.shiftMin)})</em>}
-                                {!isNext && (
-                                    <button type="button" class="link" aria-expanded={open} onClick={() => setHow({ ...how, [s.id]: !open })} aria-label={`${open ? 'Hide' : 'Show'} how-to: ${s.label}`}>
-                                        {open ? 'Hide how-to' : 'Show how-to'}
-                                    </button>
-                                )}
-                                {s.status === 'done'
-                                    ? <button type="button" class="link" onClick={() => undo(s.id)} aria-label={`Undo ${s.label}`}>Undo</button>
-                                    : <button type="button" class="link" onClick={() => press(s)} aria-label={`Mark ${s.label} done`}>Done</button>}
-                                {open && <div class="row-detail">{detail(s)}</div>}
-                                {picker?.id === s.id && s.actualAt !== undefined && (
-                                    <EarlierPicker now={clock()} zone={zone} start={s.actualAt} label={`Change the time for ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
+                            <li class={`${s.status}${isNext ? ' is-next' : ''}`}>
+                                {isNext
+                                    ? <div class="rowbtn static">{text}<span class="tag">Next up</span></div>
+                                    : (
+                                        <button type="button" class="rowbtn" aria-expanded={open} aria-controls={`row-${s.id}`} onClick={() => setHow({ ...how, [s.id]: !open })}>
+                                            {text}<Chevron />
+                                        </button>
+                                    )}
+                                {open && (
+                                    <div class="expand" id={`row-${s.id}`}>
+                                        {done ? (
+                                            picker?.id === s.id
+                                                ? <EarlierPicker now={clock()} zone={zone} start={s.actualAt!} label={`Change the time for ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
+                                                : (
+                                                    <div class="btn-row">
+                                                        <button type="button" class="btn outline" onClick={() => openPicker(s.id, 'change')}>Change time</button>
+                                                        <button type="button" class="btn outline" onClick={() => undo(s.id)}>Undo</button>
+                                                    </div>
+                                                )
+                                        ) : (
+                                            <>
+                                                {detail(s)}
+                                                <div class="done-row">
+                                                    <button type="button" class="btn big-btn" onClick={() => press(s)}>{doneLabel(s)}</button>
+                                                    <button type="button" class="btn outline clock-btn" aria-label="Done earlier" aria-expanded={picker?.id === s.id} onClick={() => openPicker(s.id, 'earlier')}>
+                                                        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="M11 6.5V11l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                                    </button>
+                                                </div>
+                                                {picker?.id === s.id && (
+                                                    <EarlierPicker now={clock()} zone={zone} start={clock()} label={`Done earlier: ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
                                 )}
                             </li>
                         );
                     })}
-                </ol>
+                </ul>
             </section>
 
             <div class="actions-row">

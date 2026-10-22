@@ -63,10 +63,10 @@ describe('labels and durations', () => {
         expect(signedMin(10)).toBe('+10 min');
         expect(signedMin(-5)).not.toContain('-'); // not a hyphen
     });
-    it('the timeline says "Bake and carve", with no ampersand', () => {
+    it('the timeline says "Bake" for the end of the bake', () => {
         render(<StartNow now={friday9} zone={LONDON} />);
-        expect(screen.getByText('Bake and carve')).toBeTruthy();
-        expect(screen.queryByText(/&/)).toBeNull();
+        expect(screen.getByText('Bake')).toBeTruthy();
+        expect(screen.queryByText(/Bake and carve/)).toBeNull();
     });
     it('durations are written with h and min', () => {
         expect(lengthOf(90 * 60_000)).toBe('1 h 30 min');

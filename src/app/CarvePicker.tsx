@@ -7,7 +7,6 @@ export const MEALS = [
     { label: 'Late breakfast', min: 10 * 60 + 30 },
     { label: 'Lunch', min: 12 * 60 + 30 },
     { label: 'Tea', min: 16 * 60 },
-    { label: 'Dinner', min: 18 * 60 + 30 },
     { label: 'Supper', min: 20 * 60 + 30 }
 ] as const;
 
