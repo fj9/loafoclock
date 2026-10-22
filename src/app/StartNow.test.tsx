@@ -61,3 +61,18 @@ describe('Start now', () => {
         expect(screen.getByLabelText('Time in the fridge')).toBeTruthy();
     });
 });
+
+describe('reminders on the plan page', () => {
+    it('downloads a calendar file for the plan under Start this plan', () => {
+        let saved = '';
+        const realBlob = globalThis.Blob;
+        globalThis.Blob = class extends realBlob { constructor(parts: BlobPart[], o?: BlobPropertyBag) { super(parts, o); saved = String(parts[0]); } } as typeof Blob;
+        URL.createObjectURL = () => 'blob:test';
+        URL.revokeObjectURL = () => {};
+        render(<StartNow now={friday9} zone={LONDON} onStart={() => {}} />);
+        fireEvent.click(screen.getByText('Add reminders to my calendar'));
+        globalThis.Blob = realBlob;
+        expect(saved).toContain('BEGIN:VCALENDAR');
+        expect(saved).toContain('TRIGGER:-PT10M');
+    });
+});

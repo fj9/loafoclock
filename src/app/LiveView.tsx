@@ -3,8 +3,6 @@ import type { LiveRecord } from '../domain/liveStore';
 import {
     FOLD_IDS, MINUTE, buildPlan, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type StepId, type Zone
 } from '../domain/plan';
-import { planToIcs } from '../domain/ics';
-import { downloadText } from './download';
 import { guideFor } from '../domain/stepGuide';
 import { ConfirmSheet } from './ConfirmSheet';
 import { Levers } from './Levers';
@@ -181,12 +179,6 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                 </ol>
             </section>
 
-            <p class="hint">
-                <button type="button" class="link" onClick={() => downloadText('loaf-oclock-plan.ics', planToIcs(view.plan, { now: clock(), done: Object.keys(record.actuals) as StepId[], after: clock() }), 'text/calendar')}>
-                    Add reminders to my calendar
-                </button>
-                {' '}A calendar file with an alert 10 minutes before each step. Save it again if you change the plan.
-            </p>
             <button type="button" class="btn outline" onClick={() => setEditing(!editing)} aria-expanded={editing}>
                 {editing ? 'Hide the levers' : 'Change the plan'}
             </button>

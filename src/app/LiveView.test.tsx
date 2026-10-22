@@ -164,24 +164,6 @@ describe('the when-did-you-do-this sheet', () => {
     });
 });
 
-describe('reminders', () => {
-    it('offers a calendar file for the steps still to come', () => {
-        let saved = '';
-        const realBlob = globalThis.Blob;
-        globalThis.Blob = class extends realBlob { constructor(parts: BlobPart[], o?: BlobPropertyBag) { super(parts, o); saved = String(parts[0]); } } as typeof Blob;
-        URL.createObjectURL = () => 'blob:test';
-        URL.revokeObjectURL = () => {};
-        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
-        render(<Harness start={rec} at={feedAt + 5 * MINUTE} />);
-        fireEvent.click(screen.getByText('Add reminders to my calendar'));
-        globalThis.Blob = realBlob;
-        expect(saved).toContain('BEGIN:VCALENDAR');
-        expect(saved).toContain('Start autolyse');
-        expect(saved).not.toContain('Feed your starter');
-    });
-});
-
-
 describe('done buttons, closing the panel and timers', () => {
     it('has a done button in the step panel and in the list for every step not yet done', () => {
         render(<Harness start={lockPlan(levers, feedAt)} at={feedAt} />);

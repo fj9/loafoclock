@@ -1,6 +1,8 @@
 import type { ComponentChildren } from 'preact';
 import { useMemo } from 'preact/hooks';
 import { buildPlan, violations, type Levers as LeverSet, type Plan, type Violation, type Zone } from '../domain/plan';
+import { planToIcs } from '../domain/ics';
+import { downloadText } from './download';
 import { Levers } from './Levers';
 import { Timeline } from './Timeline';
 import { clockOf, dayLabel } from './format';
@@ -59,7 +61,15 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quic
                 </ol>
             </section>
             {onStart && (
-                <button type="button" class="btn big-btn" onClick={() => onStart(levers)}>Start this plan</button>
+                <>
+                    <button type="button" class="btn big-btn" onClick={() => onStart(levers)}>Start this plan</button>
+                    <p class="hint reminders">
+                        <button type="button" class="link" onClick={() => downloadText('loaf-oclock-plan.ics', planToIcs(plan, { now: Date.now(), after: Date.now() }), 'text/calendar')}>
+                            Add reminders to my calendar
+                        </button>
+                        {' '}A calendar file with an alert 10 minutes before each step. It shows the plan as it stands now, so save it again if you change the plan.
+                    </p>
+                </>
             )}
         </>
     );

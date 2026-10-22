@@ -8,6 +8,7 @@ import { applyDisplaySettings, applyTheme, loadSettings, saveSettings, wakingFro
 import { About } from './About';
 import { AlreadyFed } from './AlreadyFed';
 import { BreadAt } from './BreadAt';
+import { ConfirmSheet } from './ConfirmSheet';
 import { FinishForm } from './FinishForm';
 import { Help } from './Help';
 import { LiveView } from './LiveView';
@@ -21,17 +22,22 @@ import { UpdatePrompt } from './UpdatePrompt';
 const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
 
 type Mode = 'now' | 'at';
-type Tab = 'plan' | 'log' | 'settings' | 'help' | 'about';
-const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['log', 'Log'], ['settings', 'Settings'], ['help', 'Help']];
+type Tab = 'plan' | 'bake' | 'log' | 'settings' | 'help' | 'about';
+const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['bake', 'Bake'], ['log', 'Log']];
+/** The rest live in the menu at the top right. */
+const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['help', 'Help'], ['about', 'About']];
 
 export function App() {
     const [now] = useState(startingPoint);
     const [mode, setMode] = useState<Mode>('now');
     // Under "Start a loaf now": feed the starter now, or say it was already fed.
     const [alreadyFed, setAlreadyFed] = useState(false);
-    const [tab, setTab] = useState<Tab>('plan');
+    // A saved plan means a bake is under way, so open on it.
+    const [tab, setTab] = useState<Tab>(() => (loadLive() ? 'bake' : 'plan'));
+    const [menuOpen, setMenuOpen] = useState(false);
+    // A plan waiting for you to confirm that it replaces the bake in progress.
+    const [replacing, setReplacing] = useState<{ levers: Levers; actuals: Actuals } | null>(null);
     const [settings, setSettings] = useState<Settings>(() => loadSettings());
-    // A saved plan means a bake is under way: go straight back to it.
     const [live, setLive] = useState<LiveRecord | null>(() => loadLive());
     const [finishing, setFinishing] = useState<LiveRecord | null>(null);
     const [log, setLog] = useState<LogEntry[]>(() => loadLog());
@@ -46,8 +52,17 @@ export function App() {
     useEffect(() => { applyTheme(settings); applyDisplaySettings(settings); }, [settings]);
     const change = (patch: Settings) => { saveSettings(patch); setSettings((s) => ({ ...s, ...patch })); };
 
+    useEffect(() => {
+        if (!menuOpen) return;
+        const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+        document.addEventListener('keydown', esc);
+        return () => document.removeEventListener('keydown', esc);
+    }, [menuOpen]);
+    const go = (t: Tab) => { setTab(t); setMenuOpen(false); };
+
     const update = (rec: LiveRecord) => { saveLive(rec); setLive(rec); };
-    const start = (levers: Levers, actuals: Actuals = {}) => update({ ...lockPlan(levers, Date.now()), actuals });
+    const begin = (levers: Levers, actuals: Actuals) => { update({ ...lockPlan(levers, Date.now()), actuals }); setTab('bake'); };
+    const start = (levers: Levers, actuals: Actuals = {}) => (live ? setReplacing({ levers, actuals }) : begin(levers, actuals));
     const discard = () => { clearLive(); setLive(null); setFinishing(null); };
     const saveEntry = (entry: LogEntry) => { setLog(addToLog(entry)); discard(); setTab('log'); };
 
@@ -60,46 +75,70 @@ export function App() {
     };
     const streak = quickFeedStreak(log);
 
+    const bake = finishing ? (
+        <FinishForm
+            entry={(() => {
+                const p = buildPlan(finishing.levers, finishing.actuals);
+                return {
+                    date: Date.now(), loaves: finishing.levers.loaves ?? 1, size: finishing.levers.size,
+                    ...(finishing.levers.hydration ? { hydration: finishing.levers.hydration } : {}),
+                    ratioN: finishing.levers.ratioN, doughTemp: finishing.levers.doughTemp,
+                    ...(p.fridgeHours ? { fridgeHours: Math.round(p.fridgeHours * 100) / 100 } : {})
+                };
+            })()}
+            onSave={saveEntry} onSkip={discard}
+        />
+    ) : live ? (
+        <LiveView record={live} onChange={update} onFinish={() => setFinishing(live)} onStop={discard} />
+    ) : (
+        <section class="panel empty-bake" aria-label="No bake running">
+            <h2>No bake running</h2>
+            <p>Plan a loaf and press Start this plan. It will show up here, with what to do next and how long you are free.</p>
+            <button type="button" class="btn" onClick={() => setTab('plan')}>Plan a loaf</button>
+        </section>
+    );
+
     const plan = (
-        finishing ? (
-            <FinishForm
-                entry={(() => {
-                    const p = buildPlan(finishing.levers, finishing.actuals);
-                    return {
-                        date: Date.now(), loaves: finishing.levers.loaves ?? 1, size: finishing.levers.size,
-                        ...(finishing.levers.hydration ? { hydration: finishing.levers.hydration } : {}),
-                        ratioN: finishing.levers.ratioN, doughTemp: finishing.levers.doughTemp,
-                        ...(p.fridgeHours ? { fridgeHours: Math.round(p.fridgeHours * 100) / 100 } : {})
-                    };
-                })()}
-                onSave={saveEntry} onSkip={discard}
-            />
-        ) : live ? (
-            <LiveView record={live} onChange={update} onFinish={() => setFinishing(live)} onStop={discard} />
-        ) : (
-            <>
-                <div class="seg-choice mode" role="group" aria-label="How do you want to plan?">
-                    <button type="button" class={mode === 'now' ? 'on' : ''} aria-pressed={mode === 'now'} onClick={() => setMode('now')}>Start a loaf now</button>
-                    <button type="button" class={mode === 'at' ? 'on' : ''} aria-pressed={mode === 'at'} onClick={() => setMode('at')}>I want bread at…</button>
+        <>
+            {live && (
+                <p class="panel bake-banner" role="status">
+                    You have a bake in progress. <button type="button" class="link" onClick={() => setTab('bake')}>Go to Bake</button>
+                </p>
+            )}
+            <div class="seg-choice mode" role="group" aria-label="How do you want to plan?">
+                <button type="button" class={mode === 'now' ? 'on' : ''} aria-pressed={mode === 'now'} onClick={() => setMode('now')}>Start a loaf now</button>
+                <button type="button" class={mode === 'at' ? 'on' : ''} aria-pressed={mode === 'at'} onClick={() => setMode('at')}>I want bread at…</button>
+            </div>
+            {mode === 'now' && (
+                <div class="seg-choice mode" role="group" aria-label="Your starter">
+                    <button type="button" class={!alreadyFed ? 'on' : ''} aria-pressed={!alreadyFed} onClick={() => setAlreadyFed(false)}>Feed it now</button>
+                    <button type="button" class={alreadyFed ? 'on' : ''} aria-pressed={alreadyFed} onClick={() => setAlreadyFed(true)}>I've already fed my starter</button>
                 </div>
-                {mode === 'now' && (
-                    <div class="seg-choice mode" role="group" aria-label="Your starter">
-                        <button type="button" class={!alreadyFed ? 'on' : ''} aria-pressed={!alreadyFed} onClick={() => setAlreadyFed(false)}>Feed it now</button>
-                        <button type="button" class={alreadyFed ? 'on' : ''} aria-pressed={alreadyFed} onClick={() => setAlreadyFed(true)}>I've already fed my starter</button>
-                    </div>
-                )}
-                {mode === 'at'
-                    ? <BreadAt key={wakeKey} now={now} onStart={start} quickStreak={streak} />
-                    : alreadyFed
-                        ? <AlreadyFed key={wakeKey} now={now} onStart={start} quickStreak={streak} />
-                        : <StartNow key={`${repeat?.key ?? 0}-${wakeKey}`} now={now} onStart={start} quickStreak={streak} base={repeat?.base} />}
-            </>
-        )
+            )}
+            {mode === 'at'
+                ? <BreadAt key={wakeKey} now={now} onStart={start} quickStreak={streak} />
+                : alreadyFed
+                    ? <AlreadyFed key={wakeKey} now={now} onStart={start} quickStreak={streak} />
+                    : <StartNow key={`${repeat?.key ?? 0}-${wakeKey}`} now={now} onStart={start} quickStreak={streak} base={repeat?.base} />}
+        </>
     );
 
     return (
         <div class="app">
             <header class="app-header">
+                <button type="button" class="menu-btn" aria-label="Menu" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>
+                    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none" /></svg>
+                </button>
+                {menuOpen && (
+                    <>
+                        <div class="menu-scrim" onClick={() => setMenuOpen(false)} />
+                        <ul class="menu" role="menu" aria-label="Menu">
+                            {MENU.map(([id, label]) => (
+                                <li role="none"><button type="button" role="menuitem" class={tab === id ? 'on' : ''} onClick={() => go(id)}>{label}</button></li>
+                            ))}
+                        </ul>
+                    </>
+                )}
                 <h1>
                     <Logo />
                     Loaf O'Clock
@@ -108,11 +147,15 @@ export function App() {
             </header>
             <nav class="tabs" aria-label="Sections">
                 {TABS.map(([id, label]) => (
-                    <button type="button" class={tab === id || (tab === 'about' && id === 'help') ? 'on' : ''} aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)}>{label}</button>
+                    <button type="button" class={tab === id ? 'on' : ''} aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)}>
+                        {label}
+                        {id === 'bake' && live && <><span class="dot" aria-hidden="true" />{' '}<span class="sr-only">(in progress)</span></>}
+                    </button>
                 ))}
             </nav>
             <main class="app-main">
                 {tab === 'plan' && plan}
+                {tab === 'bake' && bake}
                 {tab === 'log' && (
                     <LogScreen
                         entries={log} oldCount={oldCount} onRepeat={repeatBake}
@@ -130,6 +173,13 @@ export function App() {
                 <a href="https://ko-fi.com/fjnine" target="_blank" rel="noopener noreferrer">Tip me on Ko-fi</a>
                 <button type="button" class="link" onClick={() => setTab('about')}>About</button>
             </footer>
+            {replacing && (
+                <ConfirmSheet
+                    title="Replace your current bake?" body="You already have a bake in progress. Starting this plan throws that one away."
+                    confirmLabel="Start this plan" onCancel={() => setReplacing(null)}
+                    onConfirm={() => { begin(replacing.levers, replacing.actuals); setReplacing(null); }}
+                />
+            )}
             <UpdatePrompt />
         </div>
     );

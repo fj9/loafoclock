@@ -9,7 +9,9 @@ import { STEP_ORDER, buildPlan, leversAt, setWaking } from '../domain/plan';
 beforeEach(() => { setWaking(); localStorage.clear(); document.documentElement.removeAttribute('data-theme'); });
 afterEach(cleanup);
 
-const tab = (name: string) => fireEvent.click(screen.getByRole('button', { name }));
+const tab = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
+/** Settings, Help and About are in the menu at the top right. */
+const menu = (name: string) => { fireEvent.click(screen.getByRole('button', { name: 'Menu' })); fireEvent.click(screen.getByRole('menuitem', { name })); };
 
 describe('App shell', () => {
     it('shows the name and the tagline', () => {
@@ -22,7 +24,9 @@ describe('App shell', () => {
         render(<App />);
         tab('Log');
         expect(screen.getByText('No bakes yet. When you finish a bake you can log how it went here.')).toBeTruthy();
-        tab('Help');
+        tab('Bake');
+        expect(screen.getByText('No bake running')).toBeTruthy();
+        menu('Help');
         expect(screen.getByText('Keeping a healthy starter')).toBeTruthy();
         fireEvent.click(screen.getByText("About Loaf O'Clock"));
         expect(screen.getByText('Why I made it')).toBeTruthy();
@@ -32,7 +36,7 @@ describe('App shell', () => {
 
     it('settings change the theme and the clock, and are remembered', () => {
         render(<App />);
-        tab('Settings');
+        menu('Settings');
         fireEvent.click(screen.getByText('Dark'));
         expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
         fireEvent.click(screen.getByText('19:30'));
@@ -120,7 +124,7 @@ describe('already fed', () => {
 describe('waking hours setting', () => {
     it('is chosen in Settings, remembered, and shown in the wording', () => {
         render(<App />);
-        tab('Settings');
+        menu('Settings');
         expect(screen.getByText(/between 6:00 am and 11:00 pm/)).toBeTruthy();
         fireEvent.change(screen.getByLabelText(/Up from/), { target: { value: String(7 * 60) } });
         fireEvent.change(screen.getByLabelText(/In bed by/), { target: { value: String(22 * 60) } });
@@ -137,7 +141,7 @@ describe('stopping and removing, without the browser popup', () => {
         fireEvent.click(screen.getByText('Stop this bake'));
         fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Stop this bake'));
         expect(localStorage.getItem(LIVE_KEY)).toBeNull();
-        expect(screen.getByText('Start a loaf now')).toBeTruthy();
+        expect(screen.getByText('No bake running')).toBeTruthy();
     });
 
     it('removing a bake from the log asks first', () => {
@@ -157,13 +161,70 @@ describe('stopping and removing, without the browser popup', () => {
 describe('footer', () => {
     it('has the Ko-fi link on every page', () => {
         render(<App />);
-        for (const name of ['Plan', 'Log', 'Settings', 'Help']) {
-            tab(name);
+        for (const name of ['Plan', 'Bake', 'Log']) {
+            tab(new RegExp(`^${name}`));
             const link = screen.getByRole('link', { name: 'Tip me on Ko-fi' }) as HTMLAnchorElement;
             expect(link.href).toBe('https://ko-fi.com/fjnine');
             expect(link.rel).toContain('noopener');
         }
-        fireEvent.click(screen.getByText("About Loaf O'Clock", { selector: 'button' }));
-        expect(screen.getAllByRole('link', { name: 'Tip me on Ko-fi' }).length).toBeGreaterThan(0);
+        for (const name of ['Settings', 'Help', 'About']) {
+            menu(name);
+            expect(screen.getByRole('link', { name: 'Tip me on Ko-fi' })).toBeTruthy();
+        }
+    });
+});
+
+describe('tabs, the menu and the bake', () => {
+    const plant = () => localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
+
+    it('has Plan, Bake and Log as tabs, with Settings, Help and About in the menu', () => {
+        render(<App />);
+        expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanBakeLog$/);
+        expect(screen.queryByRole('button', { name: 'Settings' })).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+        expect(screen.getAllByRole('menuitem').map((e) => e.textContent)).toEqual(['Settings', 'Help', 'About']);
+        fireEvent.keyDown(document, { key: 'Escape' });
+        expect(screen.queryByRole('menu')).toBeNull();
+    });
+
+    it('opens on the bake when one is running, and marks the tab', () => {
+        plant();
+        render(<App />);
+        expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /^Bake \(in progress\)/ }).getAttribute('aria-current')).toBe('page');
+        tab('Plan');
+        expect(screen.getByText(/You have a bake in progress/)).toBeTruthy();
+        fireEvent.click(screen.getByText('Go to Bake'));
+        expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
+    });
+
+    it('starting a plan opens the Bake tab', () => {
+        render(<App />);
+        fireEvent.click(screen.getByText('Start this plan'));
+        expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
+        expect(localStorage.getItem(LIVE_KEY)).not.toBeNull();
+    });
+
+    it('asks before a new plan replaces the bake in progress', () => {
+        plant();
+        render(<App />);
+        tab('Plan');
+        const before = localStorage.getItem(LIVE_KEY);
+        fireEvent.click(screen.getByText('Start this plan'));
+        const dialog = screen.getByRole('alertdialog', { name: 'Replace your current bake?' });
+        fireEvent.click(within(dialog).getByText('Cancel'));
+        expect(localStorage.getItem(LIVE_KEY)).toBe(before);
+        fireEvent.click(screen.getByText('Start this plan'));
+        fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Start this plan'));
+        expect(localStorage.getItem(LIVE_KEY)).not.toBe(before);
+        expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
+    });
+
+    it('the bake tab has no reminders button; the plan page does', () => {
+        plant();
+        render(<App />);
+        expect(screen.queryByText('Add reminders to my calendar')).toBeNull();
+        tab('Plan');
+        expect(screen.getByText('Add reminders to my calendar')).toBeTruthy();
     });
 });
