@@ -1,7 +1,7 @@
-import { getWaking, isAwake, atLocalTime, addLocalDays, startOfLocalDay, partsOf, HOUR, type Plan, type StepId, type Zone } from '../domain/plan';
-import { clockOf, weekdayOf } from './format';
-
-const PX_PER_HOUR = 14;
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { getWaking, isAwake, atLocalTime, addLocalDays, startOfLocalDay, partsOf, HOUR, type Plan, type Zone } from '../domain/plan';
+import { clockOf, lengthOf, weekdayOf } from './format';
+import { layoutTimeline } from './timelineLayout';
 
 /** Roughly how wide a label is, in pixels, at the chosen text size. */
 const textScale = () => ({ large: 1.15, larger: 1.3 } as Record<string, number>)[globalThis.document?.documentElement.dataset.text ?? ''] ?? 1;
@@ -16,34 +16,57 @@ interface Props {
     now?: number;
 }
 
-/** The whole bake on one horizontal bar, from the first feed to ready to carve. */
+/**
+ * The whole bake on one bar, from the first feed to ready to carve. It always fits the width:
+ * a long stay in the fridge is folded into a labelled break, so the busy hours keep their detail.
+ */
 export function Timeline({ plan, zone, now }: Props) {
-    const start = plan.byId.feed - HOUR;
-    const end = plan.readyToCarve + HOUR;
-    const x = (ms: number) => ((ms - start) / HOUR) * PX_PER_HOUR;
-    const width = x(end);
+    const frame = useRef<HTMLDivElement>(null);
+    const [width, setWidth] = useState(340);
+    useEffect(() => {
+        const el = frame.current;
+        if (!el) return;
+        const measure = () => setWidth(Math.max(240, el.clientWidth || 340));
+        measure();
+        if (typeof ResizeObserver === 'undefined') return;
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
 
-    // Midnight to midnight for the day labels, and 11 pm to 6 am for the sleeping bands
+    const { start, end, pieces, x } = layoutTimeline(plan, width);
+    const b = plan.byId;
+    const noFridge = plan.levers.fridge.kind === 'none';
+    const brk = pieces.find((p) => p.collapsed);
+
+    // Midnight to midnight for the day labels and the sleeping bands
     const days: number[] = [];
     for (let d = startOfLocalDay(start, zone); d < end; d = addLocalDays(d, 1, zone)) days.push(d);
 
-    // A sleeping band is drawn only where it shows, and named if there is room.
-    const sleepBand = (from: number, to: number) => {
-        const a = Math.max(from, start);
-        const z = Math.min(to, end);
+    // A sleeping band is drawn only where it shows (not inside the break), and named if there is room.
+    const sleepBand = (from: number, to: number) => pieces.filter((p) => !p.collapsed).map((p) => {
+        const a = Math.max(from, p.from);
+        const z = Math.min(to, p.to);
         if (z <= a) return null;
-        return (
-            <div class="tl-sleep" style={{ left: `${x(a)}px`, width: `${x(z) - x(a)}px` }}>
-                {x(z) - x(a) >= 56 * textScale() && <span>Asleep</span>}
-            </div>
-        );
-    };
+        const w = x(z) - x(a);
+        return <div class="tl-sleep" style={{ left: `${x(a)}px`, width: `${w}px` }}>{w >= 56 * textScale() && <span>Asleep</span>}</div>;
+    });
+
+    // Where a day label goes: its first visible moment. A day that starts inside the break is named after it.
+    const dayLabels: Array<{ d: number; left: number }> = [];
+    for (const d of days) {
+        const next = addLocalDays(d, 1, zone);
+        const p = pieces.find((q) => next > q.from && d < q.to)!;
+        const left = p.collapsed ? (p.to < next && p.to < end ? p.x1 : null) : x(Math.max(d, start));
+        if (left === null) continue;
+        if (dayLabels.length && left < dayLabels[dayLabels.length - 1]!.left + 46) continue;
+        if (left + 46 > width) continue;
+        dayLabels.push({ d, left });
+    }
 
     const seg = (from: number, to: number, cls: string, label: string) => (
         <div class={`tl-seg ${cls}`} style={{ left: `${x(from)}px`, width: `${Math.max(0, x(to) - x(from))}px` }} title={label} />
     );
-    const b = plan.byId;
-    const noFridge = plan.levers.fridge.kind === 'none';
 
     // Labels go under the bars: the end first, then each bar's name at its start. A label that
     // would touch another goes on a second row; one that fits nowhere is left out.
@@ -69,27 +92,30 @@ export function Timeline({ plan, zone, now }: Props) {
     }
 
     return (
-        <div class="timeline">
-            <div class="tl-scroll" tabIndex={0} role="region" aria-label="Timeline of the whole bake, scrolls sideways. The steps are listed below.">
-                <div class="tl-track" role="img" aria-label="The bake from the first feed to ready to carve" style={{ width: `${width}px` }}>
-                    {days.map((d) => {
-                        const night = atLocalTime(d, getWaking().toMin, zone);
-                        const morning = atLocalTime(d, getWaking().fromMin, zone);
-                        return (
-                            <>
-                                {sleepBand(d, morning)}
-                                {sleepBand(night, addLocalDays(d, 1, zone))}
-                                {Math.min(end, addLocalDays(d, 1, zone)) - Math.max(start, d) >= 3 * HOUR && (
-                                    <div class="tl-day" style={{ left: `${Math.max(0, x(d))}px` }}>
-                                        {weekdayOf(d + 12 * HOUR, zone)} {partsOf(d + 12 * HOUR, zone).day}
-                                    </div>
-                                )}
-                            </>
-                        );
-                    })}
+        <div class="timeline" ref={frame}>
+            <div class="tl-scroll">
+                <div class="tl-track" role="img" aria-label="The bake from the first feed to ready to carve. The steps are listed below." style={{ width: `${width}px` }}>
+                    {days.map((d) => (
+                        <>
+                            {sleepBand(d, atLocalTime(d, getWaking().fromMin, zone))}
+                            {sleepBand(atLocalTime(d, getWaking().toMin, zone), addLocalDays(d, 1, zone))}
+                        </>
+                    ))}
+                    {dayLabels.map(({ d, left }) => (
+                        <div class="tl-day" style={{ left: `${left}px` }}>{weekdayOf(d + 12 * HOUR, zone)} {partsOf(d + 12 * HOUR, zone).day}</div>
+                    ))}
                     {seg(b.feed, b.starterIn, 'rising', 'Starter rising')}
                     {seg(b.starterIn, plan.bulkEnd, 'bulk', 'Bulk fermentation')}
-                    {seg(b.fridge, b.ovenOn, noFridge ? 'proof' : 'fridge', noFridge ? 'Proofing' : 'In the fridge')}
+                    {noFridge ? seg(b.fridge, b.ovenOn, 'proof', 'Proofing') : (
+                        <div class={`tl-seg fridge${brk ? ' folded' : ''}`} style={{ left: `${x(b.fridge)}px`, width: `${x(b.ovenOn) - x(b.fridge)}px` }} title="In the fridge">
+                            {brk && <span>{lengthOf(b.ovenOn - b.fridge)}</span>}
+                        </div>
+                    )}
+                    {brk && [brk.x0, brk.x1].map((px) => (
+                        <svg class="tl-zig" style={{ left: `${px - 6}px` }} width="12" height="30" viewBox="0 0 12 30" aria-hidden="true">
+                            <path d="M3 0 L9 8 L3 15 L9 22 L3 30" fill="none" stroke="currentColor" stroke-width="1.6" />
+                        </svg>
+                    ))}
                     {seg(b.bake, b.out, 'bake', 'Baking')}
                     {seg(b.out, b.carve, 'cool', 'Cooling')}
                     {plan.steps.map((s) => {
@@ -101,8 +127,7 @@ export function Timeline({ plan, zone, now }: Props) {
                                 class={`tl-mark${asleep ? ' asleep' : ''}${isFold ? ' small' : ''}${s.id === 'carve' ? ' carve' : ''}`}
                                 style={{ left: `${x(s.at)}px` }}
                                 title={`${s.label}, ${clockOf(s.at, zone)}`}
-                            >
-                            </div>
+                            />
                         );
                     })}
                     {placed.map((l) => (

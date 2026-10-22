@@ -6,14 +6,16 @@
 .problems { list-style: none; margin: 0 0 16px; display: grid; gap: 4px; }
 
 .timeline { margin: 0 0 16px; }
-.tl-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--wash); }
+.tl-scroll { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--wash); }
 .tl-track { position: relative; height: 150px; }
 .tl-sleep { position: absolute; top: 0; bottom: 0; background: var(--info-bg); opacity: .9; background-image: repeating-linear-gradient(45deg, transparent 0 6px, var(--line) 6px 7px); }
 .tl-day { position: absolute; top: 4px; padding-left: 6px; font-size: calc(12px * var(--ts, 1)); font-weight: 700; color: var(--muted); white-space: nowrap; }
 .tl-seg { position: absolute; top: 56px; height: 18px; border-radius: 4px; }
 .tl-seg.rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-seg.bulk { background: var(--fill-a); }
-.tl-seg.fridge { background: var(--info); }
+.tl-seg.fridge { background: var(--info-bg); border: 1.5px solid var(--info); }
+.tl-seg.fridge span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: calc(11px * var(--ts, 1)); font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tl-zig { position: absolute; top: 49px; color: var(--muted); }
 .tl-seg.proof { background: var(--warn); }
 .tl-seg.bake { background: var(--fill-b); }
 .tl-seg.cool { background: var(--good); opacity: .6; }
@@ -26,7 +28,7 @@
 .tl-lab .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
 .tl-lab .rising { background: var(--good-bg); border: 1px solid var(--good); }
 .tl-lab .bulk { background: var(--fill-a); }
-.tl-lab .fridge { background: var(--info); }
+.tl-lab .fridge { background: var(--info-bg); border: 1.5px solid var(--info); }
 .tl-lab .proof { background: var(--warn); }
 .tl-now { position: absolute; top: 24px; bottom: 0; width: 2px; background: var(--accent); }
 .tl-now span { position: absolute; top: -2px; left: 4px; font-size: calc(11px * var(--ts, 1)); font-weight: 700; color: var(--accent); }
