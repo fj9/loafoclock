@@ -50,11 +50,11 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
                         </button>
                     ))}
                 </div>
-                <div class="lever-head"><label for="lv-hydration" class="sub">Hydration</label> <Tip name="hydration" /></div>
+                <p class="hint">{LOAF_SIZES[levers.size].note}.</p>
+                <div class="lever-head spaced"><label for="lv-hydration" class="sub">Hydration</label> <Tip name="hydration" /></div>
                 <select id="lv-hydration" value={levers.hydration ?? DEFAULT_HYDRATION} onChange={(e) => set({ hydration: Number((e.target as HTMLSelectElement).value) })}>
                     {HYDRATIONS.map((h) => <option value={h}>{h}%</option>)}
                 </select>
-                <p class="hint">{LOAF_SIZES[levers.size].note}.</p>
             </div>
 
             <div class="lever">

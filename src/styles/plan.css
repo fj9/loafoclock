@@ -38,6 +38,7 @@
 .lever { display: grid; gap: 4px; }
 .lever label, .lever .label { font-weight: 700; }
 .lever-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.lever-head.spaced { margin-top: 8px; }
 .lever-head .tip-wrap { display: contents; }
 .lever-head .tip { flex-basis: 100%; margin-top: 2px; }
 .lever select, .lever input[type="range"] { width: 100%; font: inherit; accent-color: var(--accent); }
