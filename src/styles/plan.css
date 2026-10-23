@@ -8,7 +8,13 @@
 .timeline { margin: 0 0 16px; }
 .tl-scroll { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--wash); }
 .tl-track { position: relative; height: 150px; }
-.tl-sleep { position: absolute; top: 0; bottom: 0; background: var(--info-bg); opacity: .9; background-image: repeating-linear-gradient(45deg, transparent 0 6px, var(--line) 6px 7px); }
+/* The same night on the timeline across the top. */
+.tl-sleep { position: absolute; top: 2px; bottom: 2px; z-index: 0; background: var(--night-bg); border: 1px solid var(--night-edge); border-radius: var(--radius-md); }
+.tl-sleep.cut-left { border-left-color: transparent; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.tl-sleep.cut-right { border-right-color: transparent; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.tl-sleep span { position: absolute; bottom: 6px; display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; }
+.tl-sleep .bed { left: 8px; }
+.tl-sleep .wake { right: 8px; }
 .tl-day { position: absolute; top: 4px; padding-left: 6px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); white-space: nowrap; }
 .tl-seg { position: absolute; top: 56px; height: 18px; border-radius: var(--radius-xs); }
 .tl-seg.rising { background: var(--good-bg); border: 1px solid var(--good); }
@@ -25,7 +31,6 @@
 .tl-mark.small { top: 53px; height: 20px; }
 .tl-mark.carve { top: 43px; height: 40px; width: 4px; margin-left: -2px; background: var(--good); }
 .tl-mark.asleep { background: var(--danger); }
-.tl-sleep span { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: var(--fs-xs); color: var(--muted); }
 .tl-lab { position: absolute; display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: 600; color: var(--ink); white-space: nowrap; }
 .tl-lab .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
 .tl-lab .rising { background: var(--good-bg); border: 1px solid var(--good); }

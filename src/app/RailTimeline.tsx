@@ -1,5 +1,6 @@
-import { addLocalDays, atLocalTime, getWaking, isAwake, localDayNumber, startOfLocalDay, type Plan, type Zone } from '../domain/plan';
+import { isAwake, localDayNumber, startOfLocalDay, type Plan, type Zone } from '../domain/plan';
 import { clockOf, lengthOf, shortDate } from './format';
+import { asleepLabel, bedLabel, nightsIn, wakeLabel } from './night';
 
 interface Row {
     key: string;
@@ -55,33 +56,8 @@ function totalOf(plan: Plan, wait: Wait): number {
     }
 }
 
-interface Night {
-    /** The part of the night inside this stretch. */
-    from: number;
-    to: number;
-    /** Where the whole night runs from and to: bedtime and getting up. */
-    bed: number;
-    wake: number;
-}
-
-/** The sleeping hours that fall inside the stretch from `a` to `b`. */
-function nightsIn(a: number, b: number, zone: Zone): Night[] {
-    const { fromMin, toMin } = getWaking();
-    const found: Night[] = [];
-    for (let d = addLocalDays(startOfLocalDay(a, zone), -1, zone); d < b; d = addLocalDays(d, 1, zone)) {
-        const bed = atLocalTime(d, toMin, zone);
-        const wake = atLocalTime(addLocalDays(d, 1, zone), fromMin, zone);
-        if (bed < b && a < wake) found.push({ from: Math.max(a, bed), to: Math.min(b, wake), bed, wake });
-    }
-    return found;
-}
-
-const Moon = () => <svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M11 8.5A5 5 0 0 1 5.5 3a5 5 0 1 0 5.5 5.5z" fill="currentColor" /></svg>;
-const Sunrise = () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-        <path d="M2 11h10M4.5 11a2.5 2.5 0 0 1 5 0M7 3v2M3 5.5l1 1M11 5.5l-1 1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
-    </svg>
-);
+/** True if this moment is in sleeping hours. */
+const nightAt = (t: number, zone: Zone) => nightsIn(t, t + 1, zone).length > 0;
 
 /** A night band this tall has room for bedtime at the top and getting up at the bottom; a shorter one gets a single label; a very short one none. */
 const TWO_LABELS_PX = 44;
@@ -123,8 +99,8 @@ export function RailTimeline({ plan, zone, now }: Props) {
                 const nowAt = showNow && nextRow && now! >= r.from && now! < nextRow.at ? Math.round(((now! - r.from) / length) * height) : null;
                 return (
                     <li key={r.key} class={r.key === 'carve' ? 'rl-end' : ''}>
-                        {newDay && <p class="rl-day">{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
-                        <div class="rl-row">
+                        {newDay && <p class={`rl-day${nightAt(startOfLocalDay(r.at, zone), zone) ? ' in-night' : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
+                        <div class={`rl-row${(r.times ?? [r.at]).some((t) => nightAt(t, zone)) ? ' in-night' : ''}`}>
                             <span class="rl-time">{clockOf(r.at, zone)}</span>
                             <span class="rl-node"><i class={`rl-dot${asleep ? ' asleep' : ''}`} /></span>
                             <span class="rl-label">
@@ -150,9 +126,9 @@ export function RailTimeline({ plan, zone, now }: Props) {
                                     const showOne = whole && tall >= ONE_LABEL_PX && tall < TWO_LABELS_PX;
                                     return (
                                         <span class={`rl-night${n.from === n.bed ? '' : ' cut-top'}${n.to === n.wake ? '' : ' cut-bottom'}`} style={{ top: `${top}px`, height: `${tall}px` }} aria-hidden="true">
-                                            {showBed && <span class="bed"><Moon /> Bedtime {clockOf(n.bed, zone)}</span>}
-                                            {showWake && <span class="wake"><Sunrise /> Up {clockOf(n.wake, zone)}</span>}
-                                            {showOne && <span class="bed"><Moon /> Asleep {clockOf(n.bed, zone)} to {clockOf(n.wake, zone)}</span>}
+                                            {showBed && <span class="bed">{bedLabel(n, zone)}</span>}
+                                            {showWake && <span class="wake">{wakeLabel(n, zone)}</span>}
+                                            {showOne && <span class="bed">{asleepLabel(n, zone)}</span>}
                                         </span>
                                     );
                                 })}
