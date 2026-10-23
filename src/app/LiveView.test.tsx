@@ -106,8 +106,11 @@ describe('live view', () => {
         render(<Harness start={rec} at={t} />);
         fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
         const picker = within(nextUp()).getByRole('group', { name: 'Done earlier' });
-        expect(within(picker).getAllByRole('button').map((b) => b.textContent).slice(0, 5)).toEqual(['Just now', '5 min ago', '10 min ago', '30 min ago', '1 h ago']);
-        expect(within(picker).getByRole('button', { name: 'Just now' }).getAttribute('aria-pressed')).toBe('true');
+        // No "Just now": it opens at the current time, and Done and Save already mean that
+        expect(within(picker).getAllByRole('button').map((b) => b.textContent).slice(0, 4)).toEqual(['5 min ago', '10 min ago', '30 min ago', '1 h ago']);
+        expect(within(picker).queryByRole('button', { name: 'Just now' })).toBeNull();
+        expect(shownTime(picker)).toBe(hhmm(t));
+        expect(within(picker).queryAllByRole('button', { pressed: true })).toHaveLength(0);
         fireEvent.click(within(picker).getByRole('button', { name: '10 min ago' }));
         expect(shownTime(picker)).toBe(hhmm(t - 10 * MINUTE));
         expect(within(picker).getByRole('button', { name: '10 min ago' }).getAttribute('aria-pressed')).toBe('true');
