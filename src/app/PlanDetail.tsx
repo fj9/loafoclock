@@ -23,6 +23,8 @@ export interface PlanDetailProps {
     summary?: ComponentChildren;
     /** What the New plan layout shows under its pinned answer: the fastest and no-fridge times. The classic layout ignores it. */
     range?: ComponentChildren;
+    /** Why the levers start where they do, when that is not what you would expect. Shown under the answer. */
+    notice?: ComponentChildren;
 }
 
 export function describe(v: Violation, plan: Plan, zone: Zone): string {
@@ -35,7 +37,7 @@ export function describe(v: Violation, plan: Plan, zone: Zone): string {
 }
 
 /** The timeline, the levers and the step list for one plan. */
-export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed, summary }: PlanDetailProps) {
+export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed, summary, notice }: PlanDetailProps) {
     const plan = useMemo(() => buildPlan(levers), [levers]);
     // A feed that has already happened is not held to waking hours.
     const problems = violations(plan, { zone, carveAt }).filter((v) => !(fed && v.kind === 'asleep' && v.stepId === 'feed'));
@@ -50,6 +52,7 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quic
             )}
             <Timeline plan={plan} zone={zone} now={now} />
             <Levers part="cooling" levers={levers} zone={zone} onChange={onChange} />
+            {notice}
             {summary}
             <Levers part="loaf" levers={levers} zone={zone} onChange={onChange} />
             <section class="panel steps">

@@ -1,11 +1,11 @@
 // Helping you pick levers: the range of times, what fits your waking hours, and where to start.
 import { ASSUMED_RATIO_N } from '../feeding';
 import {
-    FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, isQuickFeed, leversAt, ratioFor, type Levers
+    BULK_TABLE, DEFAULT_LEVERS, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, isQuickFeed, leversAt, ratioFor, type Levers
 } from './levers';
 import { fitsWakingHours } from './rules';
 import { buildPlan, type Plan } from './steps';
-import { HOUR, isAwake, type Zone } from './time';
+import { HOUR, MINUTE, isAwake, type Zone } from './time';
 
 type Base = Partial<Pick<Levers, 'doughTemp' | 'cooling' | 'size' | 'autolyseMin' | 'fermentolyseMin'>>;
 
@@ -58,28 +58,53 @@ export function nudgeFridge(levers: Levers, zone?: Zone): number | null {
     return best;
 }
 
-/**
- * Where to start for "Start a loaf now": the earliest bake that keeps everything in waking hours,
- * leaning away from quick feeds (each step below a standard feed counts as three hours).
- */
-export function startNowLevers(startAt: number, base: Base = {}, zone?: Zone): Levers | null {
+/** How much a degree away from the usual dough temperature counts against a plan, so it only moves when it pays. */
+const TEMP_PENALTY_HOURS = 1;
+const FEED_SLIDE_LIMIT = 24 * HOUR;
+
+/** The best plan for feeding at exactly this moment, or null if nothing keeps you out of your sleeping hours. */
+function bestFeedingAt(feedAt: number, base: Base, zone?: Zone): Levers | null {
+    // A dough temperature given by the caller is the kitchen you have, so only the others are free to move.
+    const temps = base.doughTemp !== undefined
+        ? [base.doughTemp]
+        : BULK_TABLE.map((r) => r.temp).sort((a, b) => Math.abs(a - DEFAULT_LEVERS.doughTemp) - Math.abs(b - DEFAULT_LEVERS.doughTemp));
     let best: { levers: Levers; cost: number } | null = null;
-    for (let n = 1; n <= 10; n++) {
-        const width = (ratioFor(n).maxHours - ratioFor(n).minHours) * 60;
-        for (let delay = 0; delay <= width + 1e-9; delay += 15) {
-            const levers = leversAt(startAt, { ...base, ratioN: n, starterDelayMin: delay });
-            const early = buildPlan({ ...levers, fridge: { kind: 'hours', hours: FRIDGE_MIN_HOURS } });
-            const upToFridge = early.steps.filter((s) => !['ovenOn', 'bake', 'out', 'carve'].includes(s.id));
-            if (!upToFridge.every((s) => isAwake(s.at, zone))) continue;
-            const h = nudgeFridge(levers, zone);
-            if (h === null) continue;
-            const plan = buildPlan({ ...levers, fridge: { kind: 'hours', hours: h } });
-            if (!fitsWakingHours(plan, { zone })) continue;
-            const penalty = (isQuickFeed(n) ? (ASSUMED_RATIO_N - n) : Math.abs(ASSUMED_RATIO_N - n) / 2) * 3 * HOUR;
-            const cost = plan.readyToCarve + penalty;
-            if (!best || cost < best.cost) best = { levers: plan.levers, cost };
+    for (const doughTemp of temps) {
+        for (let n = 1; n <= 10; n++) {
+            const width = (ratioFor(n).maxHours - ratioFor(n).minHours) * 60;
+            for (let delay = 0; delay <= width + 1e-9; delay += 15) {
+                const levers = leversAt(feedAt, { ...base, doughTemp, ratioN: n, starterDelayMin: delay });
+                const early = buildPlan({ ...levers, fridge: { kind: 'hours', hours: FRIDGE_MIN_HOURS } });
+                const upToFridge = early.steps.filter((s) => !['ovenOn', 'bake', 'out', 'carve'].includes(s.id));
+                if (!upToFridge.every((s) => isAwake(s.at, zone))) continue;
+                const feedPenalty = (isQuickFeed(n) ? (ASSUMED_RATIO_N - n) : Math.abs(ASSUMED_RATIO_N - n) / 2) * 3 * HOUR;
+                const tempPenalty = base.doughTemp !== undefined ? 0 : Math.abs(DEFAULT_LEVERS.doughTemp - doughTemp) * TEMP_PENALTY_HOURS * HOUR;
+                // The shortest fridge time is the best this feed can do, so skip the slower search if it already loses.
+                if (best && early.readyToCarve + feedPenalty + tempPenalty >= best.cost) continue;
+                const h = nudgeFridge(levers, zone);
+                if (h === null) continue;
+                const plan = buildPlan({ ...levers, fridge: { kind: 'hours', hours: h } });
+                if (!fitsWakingHours(plan, { zone })) continue;
+                const cost = plan.readyToCarve + feedPenalty + tempPenalty;
+                if (!best || cost < best.cost) best = { levers: plan.levers, cost };
+            }
         }
     }
     return best ? best.levers : null;
 }
 
+/**
+ * Where to start for "Start a loaf now": the earliest bake that keeps everything you do in waking hours.
+ * It tries every feed, wait, fridge time and dough temperature (leaning away from quick feeds, where each
+ * step below a standard feed counts as three hours, and away from moving the dough temperature, which
+ * counts as an hour a degree). If feeding right now can not work, say in the small hours, the first feed
+ * slides to the next moment that can, so the answer is never a plan that breaks your sleep.
+ */
+export function startNowLevers(startAt: number, base: Base = {}, zone?: Zone): Levers | null {
+    for (let at = startAt; at <= startAt + FEED_SLIDE_LIMIT; at += 15 * MINUTE) {
+        if (!isAwake(at, zone)) continue;
+        const found = bestFeedingAt(at, base, zone);
+        if (found) return found;
+    }
+    return null;
+}

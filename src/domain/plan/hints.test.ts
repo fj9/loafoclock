@@ -56,4 +56,30 @@ describe('start now', () => {
         const l = startNowLevers(at(10, 23, 9), {}, LONDON)!;
         expect(l.ratioN).toBeGreaterThanOrEqual(3);
     });
+    it('feeds right now at midday by moving the dough temperature, where 24°C has no plan that fits', () => {
+        for (const start of [at(10, 23, 12), at(10, 23, 13, 30)]) {
+            const l = startNowLevers(start, {}, LONDON)!;
+            expect(l.feedAt).toBe(start);
+            expect(l.doughTemp).not.toBe(24);
+            expect(fitsWakingHours(buildPlan(l), { zone: LONDON })).toBe(true);
+        }
+    });
+    it('keeps a dough temperature it was given, even if that means a later bake', () => {
+        const l = startNowLevers(at(10, 23, 9), { doughTemp: 21 }, LONDON)!;
+        expect(l.doughTemp).toBe(21);
+        expect(fitsWakingHours(buildPlan(l), { zone: LONDON })).toBe(true);
+    });
+    it('slides the first feed to the next waking moment when feeding now would be in the night', () => {
+        for (const [start, first] of [[at(10, 24, 2), at(10, 24, 6)], [at(10, 23, 23, 30), at(10, 24, 6)]]) {
+            const l = startNowLevers(start!, {}, LONDON)!;
+            expect(l.feedAt).toBeGreaterThanOrEqual(start!);
+            expect(l.feedAt).toBeLessThanOrEqual(first! + 3_600_000 * 6);
+            expect(isAwake(l.feedAt, LONDON)).toBe(true);
+            expect(fitsWakingHours(buildPlan(l), { zone: LONDON })).toBe(true);
+        }
+    });
+    it('does not feed later than it has to', () => {
+        const l = startNowLevers(at(10, 24, 5, 30), {}, LONDON)!;
+        expect(l.feedAt).toBe(at(10, 24, 6));
+    });
 });
