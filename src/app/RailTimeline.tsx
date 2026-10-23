@@ -1,14 +1,12 @@
-import { addLocalDays, atLocalTime, getWaking, isAwake, localDayNumber, startOfLocalDay, type Plan, type Zone } from '../domain/plan';
+import type { ComponentChildren } from 'preact';
+import { isAwake, localDayNumber, type Plan, type StepId, type Step, type Zone } from '../domain/plan';
 import { clockOf, lengthOf, shortDate } from './format';
+import { asleepLabel, bedLabel, nightsIn, wakeLabel } from './night';
 
 interface Row {
-    key: string;
+    key: StepId;
     label: string;
     at: number;
-    /** When the row stands for several steps (the folds), the moment of each. */
-    times?: number[];
-    /** The moment the wait after this row starts. For the folds it is the last one. */
-    from: number;
     needsYou: boolean;
 }
 
@@ -16,19 +14,8 @@ type Wait = 'rising' | 'bulk' | 'fridge' | 'proof' | 'bake' | 'cool' | 'plain';
 
 const WAIT_NAMES: Partial<Record<Wait, string>> = { rising: 'Starter rising', bulk: 'Bulk', fridge: 'In the fridge', proof: 'Proofing', bake: 'Baking', cool: 'Cooling' };
 
-/** The steps in order, with the four folds folded into one row. */
-function rowsOf(plan: Plan): Row[] {
-    const rows: Row[] = [];
-    for (const s of plan.steps) {
-        if (s.id === 'fold1') {
-            const times = (['fold1', 'fold2', 'fold3', 'fold4'] as const).map((id) => plan.byId[id]);
-            rows.push({ key: 'folds', label: 'Four folds', at: s.at, times, from: times[3]!, needsYou: true });
-        } else if (!s.id.startsWith('fold')) {
-            rows.push({ key: s.id, label: s.label, at: s.at, from: s.at, needsYou: s.needsYou });
-        }
-    }
-    return rows;
-}
+/** Every step in order, each fold on its own row. */
+const rowsOf = (plan: Plan): Row[] => plan.steps.map((s) => ({ key: s.id, label: s.label, at: s.at, needsYou: s.needsYou }));
 
 /** Which stretch of the bake a wait belongs to, from where its middle falls. */
 function waitAt(plan: Plan, mid: number): Wait {
@@ -55,16 +42,17 @@ function totalOf(plan: Plan, wait: Wait): number {
     }
 }
 
-/** True if any of the stretch from `a` to `b` falls in sleeping hours. */
-function overlapsSleep(a: number, b: number, zone: Zone): boolean {
-    const { fromMin, toMin } = getWaking();
-    for (let d = addLocalDays(startOfLocalDay(a, zone), -1, zone); d < b; d = addLocalDays(d, 1, zone)) {
-        const from = atLocalTime(d, toMin, zone);
-        const to = atLocalTime(addLocalDays(d, 1, zone), fromMin, zone);
-        if (from < b && a < to) return true;
-    }
-    return false;
-}
+/** True if this moment is in sleeping hours. */
+const nightAt = (t: number, zone: Zone) => nightsIn(t, t + 1, zone).length > 0;
+
+/** A night band this tall has room for bedtime at the top and getting up at the bottom; a shorter one gets a single label; a very short one none. */
+const TWO_LABELS_PX = 44;
+const ONE_LABEL_PX = 26;
+/**
+ * A piece of the band shorter than this cannot hold a full rounded corner (the browser would squash it), so it is left
+ * out and the step beside it closes the band instead. It only ever drops a sliver at the very start or end of a night.
+ */
+const MIN_PIECE_PX = 24;
 
 /** A wait is drawn taller the longer it is, but not in proportion: a night in the fridge must not fill the screen. */
 const heightOf = (ms: number) => Math.round(18 + 22 * Math.log2(1 + ms / 3_600_000));
@@ -74,52 +62,95 @@ interface Props {
     zone?: Zone;
     /** Shows a Now line if it falls inside the bake. */
     now?: number;
+    /** For a bake under way: where each step stands, so done steps are ticked, the next one stands out and a late one is flagged. */
+    state?: (id: StepId) => StepState;
+    /** Replaces what is written beside a step, so the caller can make a row open in place. Return nothing to keep the usual name. */
+    renderLabel?: (step: Step) => ComponentChildren | undefined;
 }
+
+export type StepState = 'done' | 'next' | 'overdue' | 'upcoming';
 
 /**
  * The bake as a list down the page: the time on the left, a rail of coloured waits in the middle and what to do
- * on the right. Days are named where they start, and a moon marks a wait that runs into the night.
+ * on the right. Days are named where they start, and the night is a tinted band behind the waits that run into it.
  */
-export function RailTimeline({ plan, zone, now }: Props) {
+export function RailTimeline({ plan, zone, now, state, renderLabel }: Props) {
     const rows = rowsOf(plan);
     const first = rows[0]!.at;
     const showNow = now !== undefined && now > first && now < plan.readyToCarve;
 
+    // Which pieces of the night band are drawn where, so that each piece rounds its corners only where the band
+    // really begins or ends, and runs straight into its neighbour where the band carries on.
+    const newDayAt = (i: number) => i === 0 || localDayNumber(rows[i]!.at, zone) !== localDayNumber(rows[i - 1]!.at, zone);
+    const nightsOf = rows.map((r, i) => {
+        const next = rows[i + 1];
+        if (!next) return [];
+        const length = next.at - r.at;
+        const height = heightOf(length);
+        return nightsIn(r.at, next.at, zone).filter((n) => Math.round(((n.to - n.from) / length) * height) >= MIN_PIECE_PX);
+    });
+    const headerTint = rows.map((r, i) => newDayAt(i) && nightAt(r.at, zone));
+    const rowTint = rows.map((r) => nightAt(r.at, zone));
+    const gapTopTint = (i: number) => nightsOf[i]!.some((n) => n.from === rows[i]!.at);
+    const gapBottomTint = (i: number) => i < rows.length - 1 && nightsOf[i]!.some((n) => n.to === rows[i + 1]!.at);
+    const nextTint = (i: number) => (newDayAt(i + 1) ? headerTint[i + 1] : rowTint[i + 1]) ?? false;
+    const edges = (tintedAbove: boolean, tintedBelow: boolean) => `${tintedAbove ? '' : ' round-top'}${tintedBelow ? '' : ' round-bottom'}`;
+
     return (
-        <ol class="rail" aria-label="The bake, step by step">
+        <ol class={`rail${state ? ' live' : ''}`} aria-label="The bake, step by step">
             {rows.map((r, i) => {
                 const nextRow = rows[i + 1];
-                const newDay = i === 0 || localDayNumber(r.at, zone) !== localDayNumber(rows[i - 1]!.at, zone);
-                const asleep = r.needsYou && (r.times ?? [r.at]).some((t) => !isAwake(t, zone));
-                const wait = nextRow ? waitAt(plan, (r.from + nextRow.at) / 2) : 'plain';
-                const length = nextRow ? nextRow.at - r.from : 0;
+                const newDay = newDayAt(i);
+                const step = plan.steps[i]!;
+                const st = state?.(r.key);
+                const asleep = r.needsYou && !isAwake(r.at, zone) && st !== 'done';
+                const wait = nextRow ? waitAt(plan, (r.at + nextRow.at) / 2) : 'plain';
+                const length = nextRow ? nextRow.at - r.at : 0;
                 // A wait is named once, on its first stretch, with its whole length.
-                const prevWait = i > 0 ? waitAt(plan, (rows[i - 1]!.from + r.at) / 2) : null;
+                const prevWait = i > 0 ? waitAt(plan, (rows[i - 1]!.at + r.at) / 2) : null;
                 const shown = totalOf(plan, wait);
                 const height = heightOf(length);
-                const night = nextRow ? overlapsSleep(r.from, nextRow.at, zone) : false;
+                const nights = nightsOf[i]!;
                 const name = prevWait === wait ? undefined : WAIT_NAMES[wait];
-                const nowAt = showNow && nextRow && now! >= r.from && now! < nextRow.at ? Math.round(((now! - r.from) / length) * height) : null;
+                const nowAt = showNow && nextRow && now! >= r.at && now! < nextRow.at ? Math.round(((now! - r.at) / length) * height) : null;
                 return (
                     <li key={r.key} class={r.key === 'carve' ? 'rl-end' : ''}>
-                        {newDay && <p class="rl-day">{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
-                        <div class="rl-row">
+                        {newDay && <p class={`rl-day${headerTint[i] ? ` in-night${edges(i > 0 && gapBottomTint(i - 1), true)}` : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
+                        <div class={`rl-row${rowTint[i] ? ` in-night${edges(newDay ? headerTint[i]! : i > 0 && gapBottomTint(i - 1), nextRow ? gapTopTint(i) : false)}` : ''}`}>
                             <span class="rl-time">{clockOf(r.at, zone)}</span>
-                            <span class="rl-node"><i class={`rl-dot${asleep ? ' asleep' : ''}`} /></span>
+                            <span class="rl-node">
+                                <i class={`rl-dot${asleep ? ' asleep' : ''}${st && st !== 'upcoming' ? ` ${st}` : ''}`}>
+                                    {st === 'done' && <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5.2l2 2L8 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>}
+                                </i>
+                            </span>
                             <span class="rl-label">
-                                {r.label}
-                                {r.times && <span class="rl-sub">{r.times.map((t) => clockOf(t, zone)).join(' · ')}</span>}
+                                {renderLabel?.(step) ?? <>{r.label}</>}
                                 {asleep && <span class="rl-sub warn">In your sleeping hours</span>}
                             </span>
                         </div>
                         {nextRow && (
-                            <div class="rl-gap" style={{ height: `${height}px` }}>
-                                <span class="rl-time rl-moon">{night && <><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M11 8.5A5 5 0 0 1 5.5 3a5 5 0 1 0 5.5 5.5z" fill="currentColor" /></svg><span class="sr-only">Asleep</span></>}</span>
+                            <div class={`rl-gap${state?.(r.key) === 'done' ? ' is-done' : ''}`} style={{ height: `${height}px` }}>
+                                <span class="rl-time" />
                                 <span class="rl-node"><i class={`rl-bar ${wait}`} /></span>
                                 <span class="rl-wait">
                                     {name ? `${name} · ${lengthOf(shown)}` : ''}
-                                    {night && <span class="rl-sub">Asleep for part of this</span>}
+                                    {nights.map((n) => <span class="sr-only">Asleep from {clockOf(n.bed, zone)} to {clockOf(n.wake, zone)}.</span>)}
                                 </span>
+                                {nights.map((n) => {
+                                    const top = Math.round(((n.from - r.at) / length) * height);
+                                    const tall = Math.round(((n.to - n.from) / length) * height);
+                                    const whole = n.from === n.bed && n.to === n.wake;
+                                    const showBed = n.from === n.bed && tall >= TWO_LABELS_PX;
+                                    const showWake = n.to === n.wake && tall >= TWO_LABELS_PX;
+                                    const showOne = whole && tall >= ONE_LABEL_PX && tall < TWO_LABELS_PX;
+                                    return (
+                                        <span class={`rl-night${n.from === r.at && rowTint[i] ? ' cut-top' : ''}${n.to === nextRow.at && nextTint(i) ? ' cut-bottom' : ''}`} style={{ top: `${top}px`, height: `${tall}px` }} aria-hidden="true">
+                                            {showBed && <span class="bed">{bedLabel(n, zone)}</span>}
+                                            {showWake && <span class="wake">{wakeLabel(n, zone)}</span>}
+                                            {showOne && <span class="bed">{asleepLabel(n, zone)}</span>}
+                                        </span>
+                                    );
+                                })}
                                 {nowAt !== null && <span class="rl-now" style={{ top: `${nowAt}px` }}><b>Now</b></span>}
                             </div>
                         )}

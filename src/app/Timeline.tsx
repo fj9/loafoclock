@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { getWaking, isAwake, atLocalTime, addLocalDays, startOfLocalDay, partsOf, HOUR, type Plan, type Zone } from '../domain/plan';
+import { isAwake, addLocalDays, startOfLocalDay, partsOf, HOUR, type Plan, type Zone } from '../domain/plan';
 import { clockOf, lengthOf, weekdayOf } from './format';
+import { asleepLabel, bedLabel, nightsIn, wakeLabel } from './night';
 import { layoutTimeline } from './timelineLayout';
 
 /** Roughly how wide a label is, in pixels, at the chosen text size. */
@@ -55,14 +56,25 @@ export function Timeline({ plan, zone, now }: Props) {
     const days: number[] = [];
     for (let d = startOfLocalDay(start, zone); d < end; d = addLocalDays(d, 1, zone)) days.push(d);
 
-    // A sleeping band is drawn only where it shows (not inside the break), and named if there is room.
-    const sleepBand = (from: number, to: number) => pieces.filter((p) => !p.collapsed).map((p) => {
-        const a = Math.max(from, p.from);
-        const z = Math.min(to, p.to);
-        if (z <= a) return null;
-        const w = x(z) - x(a);
-        return <div class="tl-sleep" style={{ left: `${x(a)}px`, width: `${w}px` }}>{w >= 56 * textScale() && <span>Asleep</span>}</div>;
-    });
+    // Each night is one band, drawn only where it shows (not inside the break). It carries bedtime and getting up
+    // at its ends when there is room, a single label when there is less, and just "Asleep" when there is little.
+    const nightBands = nightsIn(start, end, zone).flatMap((n) => pieces.filter((p) => !p.collapsed).map((p) => {
+        const from = Math.max(n.from, p.from);
+        const to = Math.min(n.to, p.to);
+        if (to <= from) return null;
+        const w = x(to) - x(from);
+        const two = w >= (labelWidth('Bedtime 11:00 pm', true) + labelWidth('Up 6:00 am', true) + 16);
+        const one = !two && w >= labelWidth('Asleep 11:00 pm to 6:00 am', true) + 8;
+        const cutL = from !== n.bed, cutR = to !== n.wake;
+        return (
+            <div class={`tl-sleep${cutL ? ' cut-left' : ''}${cutR ? ' cut-right' : ''}`} style={{ left: `${x(from)}px`, width: `${w}px` }}>
+                {two && !cutL && <span class="bed">{bedLabel(n, zone)}</span>}
+                {two && !cutR && <span class="wake">{wakeLabel(n, zone)}</span>}
+                {one && !cutL && !cutR && <span class="bed">{asleepLabel(n, zone)}</span>}
+                {!two && !one && w >= 56 * textScale() && <span class="bed">Asleep</span>}
+            </div>
+        );
+    }));
 
     // Where a day label goes: its first visible moment. A day that starts inside the break is named after it.
     const dayLabels: Array<{ d: number; left: number }> = [];
@@ -107,12 +119,7 @@ export function Timeline({ plan, zone, now }: Props) {
         <div class="timeline">
             <div class="tl-scroll" ref={frame}>
                 <div class="tl-track" role="img" aria-label="The bake from the first feed to ready to carve. The steps are listed below." style={{ width: `${width}px` }}>
-                    {days.map((d) => (
-                        <>
-                            {sleepBand(d, atLocalTime(d, getWaking().fromMin, zone))}
-                            {sleepBand(atLocalTime(d, getWaking().toMin, zone), addLocalDays(d, 1, zone))}
-                        </>
-                    ))}
+                    {nightBands}
                     {dayLabels.map(({ d, left }) => (
                         <div class="tl-day" style={{ left: `${left}px` }}>{weekdayOf(d + 12 * HOUR, zone)} {partsOf(d + 12 * HOUR, zone).day}</div>
                     ))}
