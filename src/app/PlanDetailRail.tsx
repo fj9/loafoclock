@@ -12,7 +12,7 @@ import { dayTime, lengthOf } from './format';
  * The New plan layout for one plan. The answer is pinned to the top while you pull the levers, the steps
  * run down a rail, and on a wide screen the timeline goes across the top with the levers beside the rail.
  */
-export function PlanDetailRail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed, range }: PlanDetailProps) {
+export function PlanDetailRail({ levers, onChange, now, zone, carveAt, onStart, quickStreak, fed, range, notice }: PlanDetailProps) {
     const plan = useMemo(() => buildPlan(levers), [levers]);
     // A feed that has already happened is not held to waking hours.
     const problems = violations(plan, { zone, carveAt }).filter((v) => !(fed && v.kind === 'asleep' && v.stepId === 'feed'));
@@ -26,6 +26,7 @@ export function PlanDetailRail({ levers, onChange, now, zone, carveAt, onStart, 
                 <span class="np-len">{lengthOf(plan.readyToCarve - plan.byId.feed)} from the first feed</span>
             </div>
             {range && <p class="hint np-range">{range}</p>}
+            {notice}
             <div class="np-wide-only"><Timeline plan={plan} zone={zone} now={now} /></div>
             <div class="np-grid">
                 <div class="np-left">

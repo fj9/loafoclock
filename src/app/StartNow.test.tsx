@@ -142,3 +142,20 @@ describe('reminders on the plan page', () => {
         expect(saved).toContain('TRIGGER:-PT10M');
     });
 });
+
+describe('Start a loaf now explains an unexpected start', () => {
+    it('says when the dough temperature starts away from 24°C', () => {
+        const midday = zonedToMs({ year: 2026, month: 10, day: 23, hour: 12 }, LONDON);
+        render(<StartNow now={midday} zone={LONDON} layout="rail" />);
+        expect(screen.getByText(/Dough temperature starts at .*°C because that gets you bread soonest/)).toBeTruthy();
+    });
+    it('says when the first feed waits for the morning', () => {
+        const night = zonedToMs({ year: 2026, month: 10, day: 24, hour: 2 }, LONDON);
+        render(<StartNow now={night} zone={LONDON} layout="rail" />);
+        expect(screen.getByText(/Feeding right now would mean getting up in the night, so the first feed is Today 6:00 am|Feeding right now would mean getting up in the night, so the first feed is Today 06:00/)).toBeTruthy();
+    });
+    it('says nothing when the usual plan fits', () => {
+        render(<StartNow now={friday9} zone={LONDON} layout="rail" />);
+        expect(screen.queryByText(/Feeding right now would mean/)).toBeNull();
+    });
+});
