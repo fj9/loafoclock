@@ -161,9 +161,6 @@
 .clock-btn { width: 56px; padding: 0; display: grid; place-items: center; }
 .earlier { margin: 10px 0 4px; padding: 12px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--line); }
 .earlier .hint { margin: 0 0 8px; }
-.stepper { display: flex; flex-direction: column; gap: 8px; margin: 0 0 10px; }
-.nudge { display: flex; gap: 8px; }
-.nudge .btn { flex: 1; min-height: 48px; }
 .earlier .btn-row .btn { min-height: 48px; white-space: nowrap; }
 .earlier .btn-row .btn:first-child { flex: 0 0 auto; padding-inline: 20px; }
 .earlier .btn-row .btn:last-child { flex: 1; }
