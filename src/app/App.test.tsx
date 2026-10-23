@@ -436,6 +436,23 @@ describe('the New plan tab', () => {
         expect(document.querySelector('.live-rail')).toBeTruthy();
     });
 
+    it('has the new feed time picker under "I\'ve already fed my starter", and the classic Plan keeps its day chips and time boxes', () => {
+        render(<App />);
+        tab('Plan');
+        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        expect(screen.getByRole('group', { name: 'Day' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Adjust' })).toBeNull();
+        tab('New plan');
+        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        expect(screen.getByRole('button', { name: 'Adjust' })).toBeTruthy();
+        expect(screen.queryByRole('group', { name: 'Day' })).toBeNull();
+        // the default is last night, and the plan still comes out of it
+        expect(screen.getByRole('button', { name: 'Last night, 8 pm' }).getAttribute('aria-pressed')).toBe('true');
+        expect(document.querySelector('.np-bar')!.textContent).toContain('Ready to carve');
+        fireEvent.click(screen.getByRole('button', { name: '1 h ago' }));
+        expect(screen.getByRole('button', { name: '1 h ago' }).getAttribute('aria-pressed')).toBe('true');
+    });
+
     it('works backwards from a carve time too', () => {
         render(<App />);
         tab('New plan');

@@ -94,3 +94,17 @@
     .np-bar { padding: 12px 18px; }
     .np-when { font-size: var(--fs-lg); }
 }
+
+/* "When did you feed your starter?" on the New plan page: quick answers, a summary, and an exact time on request. */
+.fed-picker { display: grid; gap: 10px; margin: 0 0 8px; }
+.fed-picker .chips { margin: 0; }
+.fp-sum { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--line); }
+.fp-sum strong { display: block; font-size: var(--fs-base); white-space: nowrap; }
+.fp-sum .hint { display: block; margin: 0; }
+.fp-sum .btn { min-height: 44px; }
+.fp-nudges { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.fp-nudges .btn { min-height: 48px; padding-inline: 4px; white-space: nowrap; }
+.fp-wheel { width: 100%; min-height: 48px; padding: 4px 10px; font: inherit; font-size: var(--fs-md); border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.fp-adjust .hint { margin: 6px 0 0; }
+.fp-problem { margin: 0; min-height: 0; color: var(--danger); font-size: var(--fs-sm); font-weight: 700; }
+.fp-problem:empty { display: none; }
