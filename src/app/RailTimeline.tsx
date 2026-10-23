@@ -47,6 +47,11 @@ const nightAt = (t: number, zone: Zone) => nightsIn(t, t + 1, zone).length > 0;
 /** A night band this tall has room for bedtime at the top and getting up at the bottom; a shorter one gets a single label; a very short one none. */
 const TWO_LABELS_PX = 44;
 const ONE_LABEL_PX = 26;
+/**
+ * A piece of the band shorter than this cannot hold a full rounded corner (the browser would squash it), so it is left
+ * out and the step beside it closes the band instead. It only ever drops a sliver at the very start or end of a night.
+ */
+const MIN_PIECE_PX = 24;
 
 /** A wait is drawn taller the longer it is, but not in proportion: a night in the fridge must not fill the screen. */
 const heightOf = (ms: number) => Math.round(18 + 22 * Math.log2(1 + ms / 3_600_000));
@@ -70,7 +75,13 @@ export function RailTimeline({ plan, zone, now }: Props) {
     // Which pieces of the night band are drawn where, so that each piece rounds its corners only where the band
     // really begins or ends, and runs straight into its neighbour where the band carries on.
     const newDayAt = (i: number) => i === 0 || localDayNumber(rows[i]!.at, zone) !== localDayNumber(rows[i - 1]!.at, zone);
-    const nightsOf = rows.map((r, i) => (rows[i + 1] ? nightsIn(r.at, rows[i + 1]!.at, zone) : []));
+    const nightsOf = rows.map((r, i) => {
+        const next = rows[i + 1];
+        if (!next) return [];
+        const length = next.at - r.at;
+        const height = heightOf(length);
+        return nightsIn(r.at, next.at, zone).filter((n) => Math.round(((n.to - n.from) / length) * height) >= MIN_PIECE_PX);
+    });
     const headerTint = rows.map((r, i) => newDayAt(i) && nightAt(r.at, zone));
     const rowTint = rows.map((r) => nightAt(r.at, zone));
     const gapTopTint = (i: number) => nightsOf[i]!.some((n) => n.from === rows[i]!.at);
@@ -90,7 +101,7 @@ export function RailTimeline({ plan, zone, now }: Props) {
                 const prevWait = i > 0 ? waitAt(plan, (rows[i - 1]!.at + r.at) / 2) : null;
                 const shown = totalOf(plan, wait);
                 const height = heightOf(length);
-                const nights = nextRow ? nightsIn(r.at, nextRow.at, zone) : [];
+                const nights = nightsOf[i]!;
                 const name = prevWait === wait ? undefined : WAIT_NAMES[wait];
                 const nowAt = showNow && nextRow && now! >= r.at && now! < nextRow.at ? Math.round(((now! - r.at) / length) * height) : null;
                 return (

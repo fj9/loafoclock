@@ -47,7 +47,7 @@ describe('rail timeline', () => {
         expect(band.querySelector('.bed')!.textContent).toContain('11:00 pm');
         expect(band.querySelector('.wake')!.textContent).toContain('6:00 am');
         expect(fridge.querySelector('.sr-only')!.textContent).toBe('Asleep from 11:00 pm to 6:00 am.');
-        expect(container.querySelectorAll('.rl-night').length).toBeGreaterThanOrEqual(2);
+        expect(container.querySelectorAll('.rl-night').length).toBeGreaterThanOrEqual(1);
     });
 
     it('keeps the night in one block: a day heading is tinted only when the step under it is in the night', () => {
@@ -81,6 +81,19 @@ describe('rail timeline', () => {
         // Whichever step or heading first shows the band opens it with a rounded top.
         const firstTinted = Array.from(container.querySelectorAll('.rl-row, .rl-day, .rl-night')).find((e) => e.className.includes('in-night') || e.className.includes('rl-night'))!;
         if (!firstTinted.className.includes('rl-night')) expect(firstTinted.className).toContain('round-top');
+    });
+
+    it('leaves out a sliver of night too short to hold a rounded corner, and the step beside it closes the band', () => {
+        // The loaf goes in at 5:40 am, twenty minutes before getting up: the wait after it has only a sliver of night.
+        const plan = buildPlan(leversAt(Date.UTC(2026, 9, 23, 9, 55), { ratioN: 1, fridge: { kind: 'hours', hours: 8 } }));
+        const { container } = render(<RailTimeline plan={plan} zone="UTC" />);
+        const heights = Array.from(container.querySelectorAll('.rl-night')).map((n) => parseFloat((n as HTMLElement).style.height));
+        expect(heights.length).toBeGreaterThan(0);
+        for (const h of heights) expect(h).toBeGreaterThanOrEqual(24);
+        const tinted = Array.from(container.querySelectorAll('.rl-row')).filter((e) => e.className.includes('in-night'));
+        const last = tinted[tinted.length - 1]!;
+        expect(last.textContent).toContain('Into the oven');
+        expect(last.className).toContain('round-bottom');
     });
 
     it('gives a short night one label, and a very short one none', () => {
