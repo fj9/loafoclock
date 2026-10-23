@@ -266,13 +266,37 @@ describe('steps in the live view', () => {
 });
 
 describe('the done-earlier picker', () => {
-    it('has − and + buttons that say how much: −1 min and +1 min', () => {
+    it('has four buttons that say how much: −5 min, −1 min, +1 min and +5 min', () => {
         const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse} />);
         fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
         adjust();
-        expect(screen.getByRole('button', { name: 'A minute earlier' }).textContent).toBe('−1 min');
-        expect(screen.getByRole('button', { name: 'A minute later' }).textContent).toBe('+1 min');
+        const buttons = [...document.querySelectorAll('.qt-nudges button')];
+        expect(buttons.map((b) => b.textContent)).toEqual(['−5 min', '−1 min', '+1 min', '+5 min']);
+        expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['5 minutes earlier', 'A minute earlier', 'A minute later', '5 minutes later']);
+    });
+
+    it('moves five minutes or one, and a step of five does not jump past a limit', () => {
+        const t = plan.byId.autolyse + 30 * MINUTE;
+        const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: t - 12 * MINUTE } };
+        render(<Harness start={rec} at={t} />);
+        fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
+        adjust();
+        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
+        expect(shownTime()).toBe(hhmm(t - 5 * MINUTE));
+        fireEvent.click(screen.getByRole('button', { name: 'A minute earlier' }));
+        expect(shownTime()).toBe(hhmm(t - 6 * MINUTE));
+        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
+        expect(shownTime()).toBe(hhmm(t - 11 * MINUTE));
+        // another five would be before the step above it (12 minutes back): it stops and says why, rather than jumping
+        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
+        expect(shownTime()).toBe(hhmm(t - 11 * MINUTE));
+        expect(screen.getByRole('alert').textContent).toContain('before');
+        fireEvent.click(screen.getByRole('button', { name: 'A minute earlier' }));
+        expect(shownTime()).toBe(hhmm(t - 12 * MINUTE)); // one minute still fits, right up to the limit
+        fireEvent.click(screen.getByRole('button', { name: '5 minutes later' }));
+        expect(shownTime()).toBe(hhmm(t - 7 * MINUTE));
+        expect(screen.queryByRole('alert')).toBeNull();
     });
 
     it('shows how far each step has moved with the same minus sign', () => {
