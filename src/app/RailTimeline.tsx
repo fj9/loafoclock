@@ -82,11 +82,22 @@ export function RailTimeline({ plan, zone, now }: Props) {
     const first = rows[0]!.at;
     const showNow = now !== undefined && now > first && now < plan.readyToCarve;
 
+    // Which pieces of the night band are drawn where, so that each piece rounds its corners only where the band
+    // really begins or ends, and runs straight into its neighbour where the band carries on.
+    const newDayAt = (i: number) => i === 0 || localDayNumber(rows[i]!.at, zone) !== localDayNumber(rows[i - 1]!.at, zone);
+    const nightsOf = rows.map((r, i) => (rows[i + 1] ? nightsIn(r.from, rows[i + 1]!.at, zone) : []));
+    const headerTint = rows.map((r, i) => newDayAt(i) && nightAt(r.at, zone));
+    const rowTint = rows.map((r) => (r.times ?? [r.at]).some((t) => nightAt(t, zone)));
+    const gapTopTint = (i: number) => nightsOf[i]!.some((n) => n.from === rows[i]!.from);
+    const gapBottomTint = (i: number) => i < rows.length - 1 && nightsOf[i]!.some((n) => n.to === rows[i + 1]!.at);
+    const nextTint = (i: number) => (newDayAt(i + 1) ? headerTint[i + 1] : rowTint[i + 1]) ?? false;
+    const edges = (tintedAbove: boolean, tintedBelow: boolean) => `${tintedAbove ? '' : ' round-top'}${tintedBelow ? '' : ' round-bottom'}`;
+
     return (
         <ol class="rail" aria-label="The bake, step by step">
             {rows.map((r, i) => {
                 const nextRow = rows[i + 1];
-                const newDay = i === 0 || localDayNumber(r.at, zone) !== localDayNumber(rows[i - 1]!.at, zone);
+                const newDay = newDayAt(i);
                 const asleep = r.needsYou && (r.times ?? [r.at]).some((t) => !isAwake(t, zone));
                 const wait = nextRow ? waitAt(plan, (r.from + nextRow.at) / 2) : 'plain';
                 const length = nextRow ? nextRow.at - r.from : 0;
@@ -99,8 +110,8 @@ export function RailTimeline({ plan, zone, now }: Props) {
                 const nowAt = showNow && nextRow && now! >= r.from && now! < nextRow.at ? Math.round(((now! - r.from) / length) * height) : null;
                 return (
                     <li key={r.key} class={r.key === 'carve' ? 'rl-end' : ''}>
-                        {newDay && <p class={`rl-day${nightAt(r.at, zone) ? ' in-night' : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
-                        <div class={`rl-row${(r.times ?? [r.at]).some((t) => nightAt(t, zone)) ? ' in-night' : ''}`}>
+                        {newDay && <p class={`rl-day${headerTint[i] ? ` in-night${edges(i > 0 && gapBottomTint(i - 1), true)}` : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
+                        <div class={`rl-row${rowTint[i] ? ` in-night${edges(newDay ? headerTint[i]! : i > 0 && gapBottomTint(i - 1), nextRow ? gapTopTint(i) : false)}` : ''}`}>
                             <span class="rl-time">{clockOf(r.at, zone)}</span>
                             <span class="rl-node"><i class={`rl-dot${asleep ? ' asleep' : ''}`} /></span>
                             <span class="rl-label">
@@ -125,7 +136,7 @@ export function RailTimeline({ plan, zone, now }: Props) {
                                     const showWake = n.to === n.wake && tall >= TWO_LABELS_PX;
                                     const showOne = whole && tall >= ONE_LABEL_PX && tall < TWO_LABELS_PX;
                                     return (
-                                        <span class={`rl-night${n.from === n.bed ? '' : ' cut-top'}${n.to === n.wake ? '' : ' cut-bottom'}`} style={{ top: `${top}px`, height: `${tall}px` }} aria-hidden="true">
+                                        <span class={`rl-night${n.from === r.from && rowTint[i] ? ' cut-top' : ''}${n.to === nextRow.at && nextTint(i) ? ' cut-bottom' : ''}`} style={{ top: `${top}px`, height: `${tall}px` }} aria-hidden="true">
                                             {showBed && <span class="bed">{bedLabel(n, zone)}</span>}
                                             {showWake && <span class="wake">{wakeLabel(n, zone)}</span>}
                                             {showOne && <span class="bed">{asleepLabel(n, zone)}</span>}

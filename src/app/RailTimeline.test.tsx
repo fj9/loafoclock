@@ -68,6 +68,22 @@ describe('rail timeline', () => {
         expect(tinted.some((e) => e.className.includes('rl-row'))).toBe(true);
     });
 
+    it('rounds the band only where it begins and ends, including when a step is the first thing in it', () => {
+        // Bedtime falls inside the folds, so the "Four folds" row is where the tinted band first shows.
+        const plan = buildPlan(leversAt(Date.UTC(2026, 9, 23, 9, 50), { ratioN: 6 }));
+        const { container } = render(<RailTimeline plan={plan} zone="UTC" />);
+        const pieces = Array.from(container.querySelectorAll('.in-night, .rl-night'));
+        expect(pieces.length).toBeGreaterThan(2);
+        // Walking down the page, a piece that carries on from the one above is not rounded at its top, and one that
+        // carries on into the one below is not rounded at its bottom. So the band has exactly as many round tops as round bottoms.
+        const top = pieces.filter((e) => e.className.includes('round-top') || (e.className.includes('rl-night') && !e.className.includes('cut-top'))).length;
+        const bottom = pieces.filter((e) => e.className.includes('round-bottom') || (e.className.includes('rl-night') && !e.className.includes('cut-bottom'))).length;
+        expect(top).toBeGreaterThan(0);
+        expect(top).toBe(bottom);
+        const folds = Array.from(container.querySelectorAll('.rl-row')).find((e) => e.textContent!.includes('Four folds'))!;
+        if (folds.className.includes('in-night')) expect(folds.className).toContain('round-top');
+    });
+
     it('gives a short night one label, and a very short one none', () => {
         const { container } = render(<RailTimeline plan={buildPlan(levers)} zone="UTC" />);
         const whole = Array.from(container.querySelectorAll('.rl-night')).filter((n) => !n.className.includes('cut'));

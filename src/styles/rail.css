@@ -37,6 +37,9 @@
 /* A step or a day heading that falls in the night sits inside the band too, so the band runs unbroken. */
 .rl-row.in-night, .rl-day.in-night { position: relative; }
 .rl-row.in-night::before, .rl-day.in-night::before { content: ""; position: absolute; left: -8px; right: -8px; top: 0; bottom: 0; z-index: -1; background: var(--night-bg); border-left: 1px solid var(--night-edge); border-right: 1px solid var(--night-edge); }
+/* Where the band begins or ends at a step or a heading, that end is closed off and rounded like the gap bands. */
+.in-night.round-top::before { border-top: 1px solid var(--night-edge); border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+.in-night.round-bottom::before { border-bottom: 1px solid var(--night-edge); border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
 
 /* A wait is a bar between two dots, in the same colours as the timeline. */
 .rl-bar { display: block; width: 8px; height: calc(100% + 4px); margin: -2px 0; border-radius: var(--radius-xs); background: var(--line); }
