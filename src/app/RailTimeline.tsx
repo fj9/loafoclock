@@ -6,10 +6,6 @@ interface Row {
     key: string;
     label: string;
     at: number;
-    /** When the row stands for several steps (the folds), the moment of each. */
-    times?: number[];
-    /** The moment the wait after this row starts. For the folds it is the last one. */
-    from: number;
     needsYou: boolean;
 }
 
@@ -17,19 +13,8 @@ type Wait = 'rising' | 'bulk' | 'fridge' | 'proof' | 'bake' | 'cool' | 'plain';
 
 const WAIT_NAMES: Partial<Record<Wait, string>> = { rising: 'Starter rising', bulk: 'Bulk', fridge: 'In the fridge', proof: 'Proofing', bake: 'Baking', cool: 'Cooling' };
 
-/** The steps in order, with the four folds folded into one row. */
-function rowsOf(plan: Plan): Row[] {
-    const rows: Row[] = [];
-    for (const s of plan.steps) {
-        if (s.id === 'fold1') {
-            const times = (['fold1', 'fold2', 'fold3', 'fold4'] as const).map((id) => plan.byId[id]);
-            rows.push({ key: 'folds', label: 'Four folds', at: s.at, times, from: times[3]!, needsYou: true });
-        } else if (!s.id.startsWith('fold')) {
-            rows.push({ key: s.id, label: s.label, at: s.at, from: s.at, needsYou: s.needsYou });
-        }
-    }
-    return rows;
-}
+/** Every step in order, each fold on its own row. */
+const rowsOf = (plan: Plan): Row[] => plan.steps.map((s) => ({ key: s.id, label: s.label, at: s.at, needsYou: s.needsYou }));
 
 /** Which stretch of the bake a wait belongs to, from where its middle falls. */
 function waitAt(plan: Plan, mid: number): Wait {
@@ -85,10 +70,10 @@ export function RailTimeline({ plan, zone, now }: Props) {
     // Which pieces of the night band are drawn where, so that each piece rounds its corners only where the band
     // really begins or ends, and runs straight into its neighbour where the band carries on.
     const newDayAt = (i: number) => i === 0 || localDayNumber(rows[i]!.at, zone) !== localDayNumber(rows[i - 1]!.at, zone);
-    const nightsOf = rows.map((r, i) => (rows[i + 1] ? nightsIn(r.from, rows[i + 1]!.at, zone) : []));
+    const nightsOf = rows.map((r, i) => (rows[i + 1] ? nightsIn(r.at, rows[i + 1]!.at, zone) : []));
     const headerTint = rows.map((r, i) => newDayAt(i) && nightAt(r.at, zone));
-    const rowTint = rows.map((r) => (r.times ?? [r.at]).some((t) => nightAt(t, zone)));
-    const gapTopTint = (i: number) => nightsOf[i]!.some((n) => n.from === rows[i]!.from);
+    const rowTint = rows.map((r) => nightAt(r.at, zone));
+    const gapTopTint = (i: number) => nightsOf[i]!.some((n) => n.from === rows[i]!.at);
     const gapBottomTint = (i: number) => i < rows.length - 1 && nightsOf[i]!.some((n) => n.to === rows[i + 1]!.at);
     const nextTint = (i: number) => (newDayAt(i + 1) ? headerTint[i + 1] : rowTint[i + 1]) ?? false;
     const edges = (tintedAbove: boolean, tintedBelow: boolean) => `${tintedAbove ? '' : ' round-top'}${tintedBelow ? '' : ' round-bottom'}`;
@@ -98,16 +83,16 @@ export function RailTimeline({ plan, zone, now }: Props) {
             {rows.map((r, i) => {
                 const nextRow = rows[i + 1];
                 const newDay = newDayAt(i);
-                const asleep = r.needsYou && (r.times ?? [r.at]).some((t) => !isAwake(t, zone));
-                const wait = nextRow ? waitAt(plan, (r.from + nextRow.at) / 2) : 'plain';
-                const length = nextRow ? nextRow.at - r.from : 0;
+                const asleep = r.needsYou && !isAwake(r.at, zone);
+                const wait = nextRow ? waitAt(plan, (r.at + nextRow.at) / 2) : 'plain';
+                const length = nextRow ? nextRow.at - r.at : 0;
                 // A wait is named once, on its first stretch, with its whole length.
-                const prevWait = i > 0 ? waitAt(plan, (rows[i - 1]!.from + r.at) / 2) : null;
+                const prevWait = i > 0 ? waitAt(plan, (rows[i - 1]!.at + r.at) / 2) : null;
                 const shown = totalOf(plan, wait);
                 const height = heightOf(length);
-                const nights = nextRow ? nightsIn(r.from, nextRow.at, zone) : [];
+                const nights = nextRow ? nightsIn(r.at, nextRow.at, zone) : [];
                 const name = prevWait === wait ? undefined : WAIT_NAMES[wait];
-                const nowAt = showNow && nextRow && now! >= r.from && now! < nextRow.at ? Math.round(((now! - r.from) / length) * height) : null;
+                const nowAt = showNow && nextRow && now! >= r.at && now! < nextRow.at ? Math.round(((now! - r.at) / length) * height) : null;
                 return (
                     <li key={r.key} class={r.key === 'carve' ? 'rl-end' : ''}>
                         {newDay && <p class={`rl-day${headerTint[i] ? ` in-night${edges(i > 0 && gapBottomTint(i - 1), true)}` : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
@@ -116,7 +101,6 @@ export function RailTimeline({ plan, zone, now }: Props) {
                             <span class="rl-node"><i class={`rl-dot${asleep ? ' asleep' : ''}`} /></span>
                             <span class="rl-label">
                                 {r.label}
-                                {r.times && <span class="rl-sub">{r.times.map((t) => clockOf(t, zone)).join(' · ')}</span>}
                                 {asleep && <span class="rl-sub warn">In your sleeping hours</span>}
                             </span>
                         </div>
@@ -129,14 +113,14 @@ export function RailTimeline({ plan, zone, now }: Props) {
                                     {nights.map((n) => <span class="sr-only">Asleep from {clockOf(n.bed, zone)} to {clockOf(n.wake, zone)}.</span>)}
                                 </span>
                                 {nights.map((n) => {
-                                    const top = Math.round(((n.from - r.from) / length) * height);
+                                    const top = Math.round(((n.from - r.at) / length) * height);
                                     const tall = Math.round(((n.to - n.from) / length) * height);
                                     const whole = n.from === n.bed && n.to === n.wake;
                                     const showBed = n.from === n.bed && tall >= TWO_LABELS_PX;
                                     const showWake = n.to === n.wake && tall >= TWO_LABELS_PX;
                                     const showOne = whole && tall >= ONE_LABEL_PX && tall < TWO_LABELS_PX;
                                     return (
-                                        <span class={`rl-night${n.from === r.from && rowTint[i] ? ' cut-top' : ''}${n.to === nextRow.at && nextTint(i) ? ' cut-bottom' : ''}`} style={{ top: `${top}px`, height: `${tall}px` }} aria-hidden="true">
+                                        <span class={`rl-night${n.from === r.at && rowTint[i] ? ' cut-top' : ''}${n.to === nextRow.at && nextTint(i) ? ' cut-bottom' : ''}`} style={{ top: `${top}px`, height: `${tall}px` }} aria-hidden="true">
                                             {showBed && <span class="bed">{bedLabel(n, zone)}</span>}
                                             {showWake && <span class="wake">{wakeLabel(n, zone)}</span>}
                                             {showOne && <span class="bed">{asleepLabel(n, zone)}</span>}

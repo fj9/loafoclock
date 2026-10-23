@@ -14,14 +14,13 @@ const levers = leversAt(feedAt, { fridge: { kind: 'hours', hours: 15.25 } });
 const text = (c: Element) => Array.from(c.querySelectorAll('.rl-label')).map((e) => e.textContent);
 
 describe('rail timeline', () => {
-    it('lists the steps in order, with the four folds as one row', () => {
+    it('lists every step in order, each fold on its own row', () => {
         const { container } = render(<RailTimeline plan={buildPlan(levers)} zone="UTC" />);
         const rows = text(container);
         expect(rows[0]).toContain('Feed your starter');
         expect(rows[rows.length - 1]).toContain('Ready to carve');
-        expect(rows.filter((r) => r!.includes('Four folds'))).toHaveLength(1);
-        expect(rows.some((r) => /^Fold \d/.test(r!))).toBe(false);
-        expect(rows).toHaveLength(12);
+        expect(rows.filter((r) => /^Fold \d/.test(r!))).toHaveLength(4);
+        expect(rows).toHaveLength(15);
     });
 
     it('names each day where it starts', () => {
@@ -69,7 +68,6 @@ describe('rail timeline', () => {
     });
 
     it('rounds the band only where it begins and ends, including when a step is the first thing in it', () => {
-        // Bedtime falls inside the folds, so the "Four folds" row is where the tinted band first shows.
         const plan = buildPlan(leversAt(Date.UTC(2026, 9, 23, 9, 50), { ratioN: 6 }));
         const { container } = render(<RailTimeline plan={plan} zone="UTC" />);
         const pieces = Array.from(container.querySelectorAll('.in-night, .rl-night'));
@@ -80,8 +78,9 @@ describe('rail timeline', () => {
         const bottom = pieces.filter((e) => e.className.includes('round-bottom') || (e.className.includes('rl-night') && !e.className.includes('cut-bottom'))).length;
         expect(top).toBeGreaterThan(0);
         expect(top).toBe(bottom);
-        const folds = Array.from(container.querySelectorAll('.rl-row')).find((e) => e.textContent!.includes('Four folds'))!;
-        if (folds.className.includes('in-night')) expect(folds.className).toContain('round-top');
+        // Whichever step or heading first shows the band opens it with a rounded top.
+        const firstTinted = Array.from(container.querySelectorAll('.rl-row, .rl-day, .rl-night')).find((e) => e.className.includes('in-night') || e.className.includes('rl-night'))!;
+        if (!firstTinted.className.includes('rl-night')) expect(firstTinted.className).toContain('round-top');
     });
 
     it('gives a short night one label, and a very short one none', () => {
