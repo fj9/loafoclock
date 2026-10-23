@@ -25,17 +25,28 @@ const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
 
 type Mode = 'now' | 'at';
 type Tab = 'plan' | 'plan2' | 'bake' | 'bake2' | 'log' | 'settings' | 'help' | 'about';
-const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['plan2', 'New plan'], ['bake', 'Bake'], ['bake2', 'New bake'], ['log', 'Log']];
+/**
+ * The classic Plan and Bake pages are still in the code but not shown. Switch this on to bring their tabs back beside the
+ * new ones, which are then called New plan and New bake so the two can be told apart.
+ */
+export const SHOW_CLASSIC_TABS = false;
+
+const tabsFor = (classic: boolean): ReadonlyArray<[Tab, string]> => (classic
+    ? [['plan', 'Plan'], ['plan2', 'New plan'], ['bake', 'Bake'], ['bake2', 'New bake'], ['log', 'Log']]
+    : [['plan2', 'Plan'], ['bake2', 'Bake'], ['log', 'Log']]);
 /** The rest live in the menu at the top right. */
 const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['help', 'Help'], ['about', 'About']];
 
-export function App() {
+export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean } = {}) {
     const [now] = useState(startingPoint);
     const [mode, setMode] = useState<Mode>('now');
     // Under "Start a loaf now": feed the starter now, or say it was already fed.
     const [alreadyFed, setAlreadyFed] = useState(false);
     // A saved plan means a bake is under way, so open on it.
-    const [tab, setTab] = useState<Tab>(() => (loadLive() ? 'bake' : 'plan'));
+    // The Plan and Bake the app goes to: the new ones, unless the classic tabs are switched on.
+    const planHome: Tab = classicTabs ? 'plan' : 'plan2';
+    const bakeHome: Tab = classicTabs ? 'bake' : 'bake2';
+    const [tab, setTab] = useState<Tab>(() => (loadLive() ? bakeHome : planHome));
     const [menuOpen, setMenuOpen] = useState(false);
     // A plan waiting for you to confirm that it replaces the bake in progress.
     const [replacing, setReplacing] = useState<{ levers: Levers; actuals: Actuals; layout: Layout } | null>(null);
@@ -76,7 +87,7 @@ export function App() {
         setRepeat({ key: Date.now(), base: { loaves: e.loaves === 2 ? 2 : 1, size: e.size === 'large' ? 'large' : 'regular', ...(e.hydration ? { hydration: e.hydration } : {}), ...(e.doughTemp ? { doughTemp: e.doughTemp } : {}) } });
         setMode('now');
         setAlreadyFed(false);
-        setTab('plan');
+        setTab(planHome);
     };
     const streak = quickFeedStreak(log);
 
@@ -104,7 +115,7 @@ export function App() {
     // The classic Plan page and the New plan page share everything but the layout of the plan itself.
     const planPage = (layout: Layout) => (
         <>
-            {layout === 'rail' && (
+            {layout === 'rail' && classicTabs && (
                 <p class="hint np-note">
                     A new layout we are trying: the answer stays pinned as you change things, and the steps run down a timeline.
                     {' '}<button type="button" class="link" onClick={() => setTab('plan')}>Back to the classic Plan</button>
@@ -156,7 +167,7 @@ export function App() {
                 <p class="tagline">It's always Loaf O'Clock somewhere.</p>
             </header>
             <nav class="tabs" aria-label="Sections">
-                {TABS.map(([id, label]) => (
+                {tabsFor(classicTabs).map(([id, label]) => (
                     <button type="button" class={tab === id ? 'on' : ''} aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)}>
                         {label}
                         {(id === 'bake' || id === 'bake2') && live && <><span class="dot" aria-hidden="true" />{' '}<span class="sr-only">(in progress)</span></>}
@@ -170,7 +181,7 @@ export function App() {
                 {tab === 'bake2' && bakePage('rail')}
                 {tab === 'log' && (
                     <LogScreen
-                        entries={log} oldCount={oldCount} onRepeat={repeatBake} onPlan={() => setTab('plan')}
+                        entries={log} oldCount={oldCount} onRepeat={repeatBake} onPlan={() => setTab(planHome)}
                         onRemove={(i) => setLog(removeFromLog(i))}
                         onAdd={(entries) => { for (const e of [...entries].reverse()) if (!log.some((l) => l.date === e.date)) addToLog(e); setLog(loadLog().sort((a, b) => b.date - a.date)); }}
                         onImportOld={() => { importOldLog(); setLog(loadLog()); refreshOld(); }}

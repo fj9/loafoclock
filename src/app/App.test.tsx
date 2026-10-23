@@ -15,13 +15,13 @@ const menu = (name: string) => { fireEvent.click(screen.getByRole('button', { na
 
 describe('App shell', () => {
     it('shows the name and the tagline', () => {
-        render(<App />);
+        render(<App classicTabs />);
         expect(screen.getByRole('heading', { level: 1 }).textContent).toContain("Loaf O'Clock");
         expect(screen.getByText("It's always Loaf O'Clock somewhere.")).toBeTruthy();
     });
 
     it('moves between the sections', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('Log');
         expect(screen.getByRole('heading', { name: 'No bakes yet' })).toBeTruthy();
         expect(screen.getByText('When you finish a bake you can log how it went here.')).toBeTruthy();
@@ -36,7 +36,7 @@ describe('App shell', () => {
     });
 
     it('settings change the theme and the clock, and are remembered', () => {
-        render(<App />);
+        render(<App classicTabs />);
         menu('Settings');
         fireEvent.click(screen.getByText('Dark'));
         expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
@@ -55,7 +55,7 @@ describe('finishing a bake', () => {
 
     it('logs the bake with the feed ratio and clears the plan', () => {
         lockedAndDone();
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByText('Finish this bake'));
         fireEvent.click(screen.getByText('Excellent'));
         fireEvent.input(screen.getByLabelText('Notes'), { target: { value: 'crackly' } });
@@ -67,7 +67,7 @@ describe('finishing a bake', () => {
 
     it('can skip the log', () => {
         lockedAndDone();
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByText('Finish this bake'));
         fireEvent.click(screen.getByText('Skip the log'));
         expect(loadLog()).toHaveLength(0);
@@ -78,7 +78,7 @@ describe('finishing a bake', () => {
 describe('the log', () => {
     it('offers to add bakes from the first app, once', () => {
         localStorage.setItem('sourdoughLogs', JSON.stringify([{ date: '2026-05-01T10:00:00.000Z', loaves: 2, size: 'large', outcome: 'Good', notes: 'old one' }]));
-        render(<App />);
+        render(<App classicTabs />);
         tab('Log');
         fireEvent.click(screen.getByText('Add them to this log'));
         expect(screen.getByText('old one')).toBeTruthy();
@@ -88,7 +88,7 @@ describe('the log', () => {
 
     it('repeats a bake with the same loaves', () => {
         localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [{ date: 5, loaves: 2, size: 'large', hydration: 75, notes: '' }] }));
-        render(<App />);
+        render(<App classicTabs />);
         tab('Log');
         fireEvent.click(screen.getByText('Repeat this bake'));
         expect(screen.getByRole('button', { name: '2 loaves', pressed: true })).toBeTruthy();
@@ -99,7 +99,7 @@ describe('the log', () => {
     it('nudges after three quick feeds in a row', () => {
         const q = (date: number) => ({ date, loaves: 1, size: 'regular', ratioN: 2, notes: '' });
         localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [q(3), q(2), q(1)] }));
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.input(screen.getByLabelText(/^Starter feeding time/), { target: { value: '5' } });
         expect(screen.getByText(/last 3 bakes all used quick feeds/)).toBeTruthy();
     });
@@ -107,7 +107,7 @@ describe('the log', () => {
 
 describe('already fed', () => {
     it('plans from a feed in the past and starts with the feed ticked', () => {
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
         expect(screen.getByText('When did you feed your starter?')).toBeTruthy();
         // the feed ratio cannot change: it has already happened, so the slider only covers that ratio's window
@@ -124,7 +124,7 @@ describe('already fed', () => {
 
 describe('waking hours setting', () => {
     it('is chosen in Settings, remembered, and shown in the wording', () => {
-        render(<App />);
+        render(<App classicTabs />);
         menu('Settings');
         expect(screen.getByText(/between 6:00 am and 11:00 pm/)).toBeTruthy();
         fireEvent.change(screen.getByLabelText(/Up from/), { target: { value: String(7 * 60) } });
@@ -138,7 +138,7 @@ describe('stopping and removing, without the browser popup', () => {
     it('stopping a bake clears the plan', () => {
         window.confirm = () => false;
         localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByText('Stop this bake'));
         fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Stop this bake'));
         expect(localStorage.getItem(LIVE_KEY)).toBeNull();
@@ -147,7 +147,7 @@ describe('stopping and removing, without the browser popup', () => {
 
     it('Remove is a red button like Stop this bake, and its confirm is red', () => {
         localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [{ date: 5, loaves: 1, size: 'regular', notes: '' }] }));
-        render(<App />);
+        render(<App classicTabs />);
         tab('Log');
         const remove = screen.getByRole('button', { name: 'Remove' });
         expect(remove.className).toContain('danger');
@@ -159,7 +159,7 @@ describe('stopping and removing, without the browser popup', () => {
     it('removing a bake from the log asks first', () => {
         window.confirm = () => false;
         localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [{ date: 5, loaves: 1, size: 'regular', notes: 'keep me' }] }));
-        render(<App />);
+        render(<App classicTabs />);
         tab('Log');
         fireEvent.click(screen.getByText('Remove'));
         fireEvent.click(within(screen.getByRole('alertdialog')).getByText('Cancel'));
@@ -172,7 +172,7 @@ describe('stopping and removing, without the browser popup', () => {
 
 describe('footer', () => {
     it('has the Ko-fi link on every page', () => {
-        render(<App />);
+        render(<App classicTabs />);
         for (const name of ['Plan', 'New plan', 'Bake', 'New bake', 'Log']) {
             tab(new RegExp(`^${name}`));
             const link = screen.getByRole('link', { name: 'Tip me on Ko-fi' }) as HTMLAnchorElement;
@@ -190,7 +190,7 @@ describe('tabs, the menu and the bake', () => {
     const plant = () => localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
 
     it('has Plan, New plan, Bake, New bake and Log as tabs, with Settings, Help and About in the menu', () => {
-        render(<App />);
+        render(<App classicTabs />);
         expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanNew planBakeNew bakeLog$/);
         expect(screen.queryByRole('button', { name: 'Settings' })).toBeNull();
         fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
@@ -201,7 +201,7 @@ describe('tabs, the menu and the bake', () => {
 
     it('opens on the bake when one is running, and marks the tab', () => {
         plant();
-        render(<App />);
+        render(<App classicTabs />);
         expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
         expect(screen.getByRole('button', { name: /^Bake \(in progress\)/ }).getAttribute('aria-current')).toBe('page');
         tab('Plan');
@@ -211,7 +211,7 @@ describe('tabs, the menu and the bake', () => {
     });
 
     it('starting a plan opens the Bake tab', () => {
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByText('Start this plan'));
         expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
         expect(localStorage.getItem(LIVE_KEY)).not.toBeNull();
@@ -220,7 +220,7 @@ describe('tabs, the menu and the bake', () => {
     it('starts each section at the top of the page', () => {
         const scrolled: number[] = [];
         window.scrollTo = ((o: ScrollToOptions) => { scrolled.push(o.top ?? -1); }) as typeof window.scrollTo;
-        render(<App />);
+        render(<App classicTabs />);
         scrolled.length = 0;
         fireEvent.click(screen.getByText('Start this plan'));
         expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
@@ -231,7 +231,7 @@ describe('tabs, the menu and the bake', () => {
 
     it('the headings say what they are: planned steps on Plan, your progress on Bake', () => {
         plant();
-        render(<App />);
+        render(<App classicTabs />);
         expect(screen.getByRole('heading', { name: 'Your progress' })).toBeTruthy();
         tab('Plan');
         expect(screen.getByRole('heading', { name: 'Planned steps' })).toBeTruthy();
@@ -240,7 +240,7 @@ describe('tabs, the menu and the bake', () => {
 
     it('asks before a new plan replaces the bake in progress', () => {
         plant();
-        render(<App />);
+        render(<App classicTabs />);
         tab('Plan');
         const before = localStorage.getItem(LIVE_KEY);
         fireEvent.click(screen.getByText('Start this plan'));
@@ -257,7 +257,7 @@ describe('tabs, the menu and the bake', () => {
 
     it('the bake tab has no reminders button; the plan page does', () => {
         plant();
-        render(<App />);
+        render(<App classicTabs />);
         expect(screen.queryByText('Add reminders to my calendar')).toBeNull();
         tab('Plan');
         expect(screen.getByText('Add reminders to my calendar')).toBeTruthy();
@@ -266,7 +266,7 @@ describe('tabs, the menu and the bake', () => {
 
 describe('actions and links', () => {
     it('Add reminders to my calendar is an outline button under Start this plan', () => {
-        render(<App />);
+        render(<App classicTabs />);
         const b = screen.getByRole('button', { name: 'Add reminders to my calendar' });
         expect(b.className).toContain('outline');
         expect(b.closest('.reminders')?.previousElementSibling?.textContent).toBe('Start this plan');
@@ -274,13 +274,13 @@ describe('actions and links', () => {
 
     it('adding the first app\'s bakes is an outline button', () => {
         localStorage.setItem('sourdoughLogs', JSON.stringify([{ date: '2026-05-01T10:00:00.000Z', loaves: 1, size: 'regular', notes: '' }]));
-        render(<App />);
+        render(<App classicTabs />);
         tab('Log');
         expect(screen.getByRole('button', { name: 'Add them to this log' }).className).toContain('outline');
     });
 
     it('About is in the menu and the footer, not also on the Help page', () => {
-        render(<App />);
+        render(<App classicTabs />);
         menu('Help');
         expect(screen.queryByText("About Loaf O'Clock")).toBeNull();
         menu('About');
@@ -290,14 +290,14 @@ describe('actions and links', () => {
 
 describe('time fields follow the Clock setting', () => {
     it('no screen uses the phone\'s own time box', () => {
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
         expect(document.querySelector('input[type="time"]')).toBeNull();
         expect(screen.getByLabelText('Hour')).toBeTruthy();
     });
 
     it('the already-fed time shows am/pm with the 12-hour setting, and not with the 24-hour one', () => {
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
         expect(screen.getByLabelText('am or pm')).toBeTruthy(); // 12-hour is the default
         menu('Settings');
@@ -319,7 +319,7 @@ describe('button pairs: the safe action first, the primary or destructive one af
         const plan = buildPlan(levers);
         const actuals = Object.fromEntries(STEP_ORDER.filter((id) => id !== 'carve').map((id) => [id, plan.byId[id]]));
         localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: { ...lockPlan(levers, 0), actuals } }));
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByText('Finish this bake'));
         expect(rowOf('Skip the log')).toEqual(['Skip the log', 'Save to the log']);
         expect(screen.getByRole('button', { name: 'Skip the log' }).className).toContain('outline');
@@ -327,20 +327,20 @@ describe('button pairs: the safe action first, the primary or destructive one af
 
     it('Cancel comes before the confirm button on every confirmation', () => {
         localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByRole('button', { name: 'Stop this bake' }));
         expect(rowOf('Cancel', screen.getByRole('alertdialog'))).toEqual(['Cancel', 'Stop this bake']);
     });
 
     it('in the Change the plan and Stop this bake row, the red one is on the right', () => {
         localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
-        render(<App />);
+        render(<App classicTabs />);
         expect(rowOf('Change the plan')).toEqual(['Change the plan', 'Stop this bake']);
     });
 
     it('the time picker has Cancel before Save', () => {
         localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByRole('button', { name: 'Done earlier' }));
         const order = rowOf('Cancel', screen.getByRole('group', { name: 'Done earlier' }));
         expect(order[0]).toBe('Cancel');
@@ -350,7 +350,7 @@ describe('button pairs: the safe action first, the primary or destructive one af
 
 describe('page titles match their tabs', () => {
     it('the Log tab has a Log heading, and the Plan tab has no page heading', () => {
-        render(<App />);
+        render(<App classicTabs />);
         expect(screen.queryByRole('heading', { level: 2, name: 'Plan' })).toBeNull();
         tab('Log');
         expect(screen.getByRole('heading', { level: 2, name: 'Log' })).toBeTruthy();
@@ -362,7 +362,7 @@ describe('empty states look the same', () => {
     const empty = () => document.querySelector('.empty-state')!;
 
     it('the empty Log has a heading, one sentence and a button to plan a loaf', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('Log');
         expect(empty().querySelector('h2')!.textContent).toBe('No bakes yet');
         expect(empty().querySelectorAll('p')).toHaveLength(1);
@@ -371,7 +371,7 @@ describe('empty states look the same', () => {
     });
 
     it('the empty Bake tab uses the same pattern', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('Bake');
         expect(empty().querySelector('h2')!.textContent).toBe('No bake running');
         expect(empty().querySelectorAll('p')).toHaveLength(1);
@@ -379,7 +379,7 @@ describe('empty states look the same', () => {
     });
 
     it('"I want bread at…" with no plan that fits uses it too, announced as a status, with no button', () => {
-        render(<App />);
+        render(<App classicTabs />);
         fireEvent.click(screen.getByText('I want bread at…'));
         fireEvent.click(screen.getByText('Today'));
         const status = screen.getByRole('status');
@@ -391,7 +391,7 @@ describe('empty states look the same', () => {
 
 describe('the New plan tab', () => {
     it('plans the same bake as the classic Plan, with the answer pinned and the steps on a rail', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('Plan');
         expect(document.querySelector('.rail')).toBeNull();
         expect(document.querySelector('.np-bar')).toBeNull();
@@ -404,21 +404,21 @@ describe('the New plan tab', () => {
     });
 
     it('starts a bake from the New plan tab and opens Bake', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('New plan');
         fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
         expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
     });
 
     it('opens the New bake tab when a plan is started from the New plan tab, and the classic Bake from the classic Plan', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('New plan');
         fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
         expect(document.querySelector('.live-rail')).toBeTruthy();
         expect(screen.getByRole('button', { name: /^New bake/ }).getAttribute('aria-current')).toBe('page');
         cleanup();
         localStorage.clear();
-        render(<App />);
+        render(<App classicTabs />);
         tab('Plan');
         fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
         expect(document.querySelector('.live-rail')).toBeNull();
@@ -426,7 +426,7 @@ describe('the New plan tab', () => {
     });
 
     it('shows the same running bake on both Bake tabs', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('New plan');
         fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
         tab(/^Bake/);
@@ -437,7 +437,7 @@ describe('the New plan tab', () => {
     });
 
     it('has the new feed time picker under "I\'ve already fed my starter", and the classic Plan keeps its day chips and time boxes', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('Plan');
         fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
         expect(screen.getByRole('group', { name: 'Day' })).toBeTruthy();
@@ -454,10 +454,88 @@ describe('the New plan tab', () => {
     });
 
     it('works backwards from a carve time too', () => {
-        render(<App />);
+        render(<App classicTabs />);
         tab('New plan');
         fireEvent.click(screen.getByRole('button', { name: 'I want bread at…' }));
         fireEvent.click(document.querySelector('.plan-card')!);
         expect(document.querySelector('.rail')).toBeTruthy();
+    });
+});
+
+describe('the default tabs: one Plan and one Bake', () => {
+    const NAMES = () => Array.from(document.querySelectorAll('.tabs button')).map((b) => b.textContent!.replace(/\s*\(in progress\)$/, '').trim());
+
+    it('shows Plan, Bake and Log, with the new layouts under those names', () => {
+        render(<App />);
+        expect(NAMES()).toEqual(['Plan', 'Bake', 'Log']);
+        expect(screen.queryByRole('button', { name: /^New/ })).toBeNull();
+        // opens on the Plan with the pinned answer and the rail, which is the new layout
+        expect(screen.getByRole('button', { name: 'Plan' }).getAttribute('aria-current')).toBe('page');
+        expect(document.querySelector('.np-bar')).toBeTruthy();
+    });
+
+    it('does not offer a way back to the classic pages', () => {
+        render(<App />);
+        expect(screen.queryByText(/classic/i)).toBeNull();
+        expect(screen.queryByText(/A new layout we are trying/)).toBeNull();
+        for (const t of ['Bake', 'Log', 'Plan']) tab(t);
+        expect(document.querySelector('.rows')).toBeNull(); // the classic list of progress rows
+        expect(document.querySelector('.steps ol')).toBeNull(); // the classic list of planned steps
+    });
+
+    it('starts a plan and opens the Bake, which is the rail view', () => {
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
+        expect(document.querySelector('.live-rail')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /^Bake/ }).getAttribute('aria-current')).toBe('page');
+    });
+
+    it('opens on the Bake when one is running, and marks only that tab', () => {
+        localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
+        render(<App />);
+        expect(screen.getByRole('button', { name: /^Bake/ }).getAttribute('aria-current')).toBe('page');
+        expect(document.querySelector('.live-rail')).toBeTruthy();
+        expect(document.querySelectorAll('.tabs .dot')).toHaveLength(1);
+        tab('Plan');
+        fireEvent.click(screen.getByText('Go to Bake'));
+        expect(document.querySelector('.live-rail')).toBeTruthy();
+    });
+
+    it('asks before a new plan replaces the bake, then opens the Bake', () => {
+        localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
+        render(<App />);
+        tab('Plan');
+        fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Replace bake' }));
+        expect(document.querySelector('.live-rail')).toBeTruthy();
+    });
+
+    it('sends "Repeat this bake" and "Plan a loaf" to the Plan', () => {
+        localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [{ date: 5, loaves: 2, size: 'large', hydration: 75, notes: '' }] }));
+        render(<App />);
+        tab('Log');
+        fireEvent.click(screen.getByText('Repeat this bake'));
+        expect(document.querySelector('.np-bar')).toBeTruthy();
+        expect(screen.getByRole('button', { name: '2 loaves', pressed: true })).toBeTruthy();
+        cleanup();
+        localStorage.clear();
+        render(<App />);
+        tab('Log');
+        fireEvent.click(screen.getByRole('button', { name: 'Plan a loaf' }));
+        expect(document.querySelector('.np-bar')).toBeTruthy();
+    });
+
+    it('the empty Bake offers to plan a loaf, and goes to the Plan', () => {
+        render(<App />);
+        tab('Bake');
+        expect(screen.getByText('No bake running')).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Plan a loaf' }));
+        expect(document.querySelector('.np-bar')).toBeTruthy();
+    });
+
+    it('brings the classic tabs back, as Plan and New plan, Bake and New bake, when the switch is on', () => {
+        render(<App classicTabs />);
+        expect(NAMES()).toEqual(['Plan', 'New plan', 'Bake', 'New bake', 'Log']);
+        expect(document.querySelector('.np-bar')).toBeNull(); // opens on the classic Plan
     });
 });
