@@ -205,3 +205,7 @@
 .tl-now { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--accent); z-index: 2; }
 .tl-now span { position: absolute; bottom: 4px; left: 5px; padding: 0 4px; border-radius: var(--radius-xs); background: var(--card); font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
 .tl-now.flip span { left: auto; right: 5px; }
+
+.fed-check { margin: 0 0 16px; }
+.missing { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
+.your-plan { scroll-margin-top: 8px; }

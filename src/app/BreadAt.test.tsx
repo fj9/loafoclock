@@ -72,3 +72,26 @@ describe('meal chips', () => {
         expect(meals).toEqual(['Breakfast', 'Late breakfast', 'Lunch', 'Tea', 'Supper']);
     });
 });
+
+describe('Bread at… pick a plan', () => {
+    it('opens the chosen plan and scrolls to it', () => {
+        const scrolled: Element[] = [];
+        const original = Element.prototype.scrollIntoView;
+        Element.prototype.scrollIntoView = function (this: Element) { scrolled.push(this); };
+        try {
+            render(<BreadAt now={wed} zone={LONDON} layout="rail" />);
+            fireEvent.click(screen.getAllByRole('button', { pressed: false }).find((b) => b.classList.contains('plan-card'))!);
+            expect(scrolled).toHaveLength(1);
+            expect(scrolled[0]!.getAttribute('aria-label')).toBe('Your plan');
+        } finally {
+            Element.prototype.scrollIntoView = original;
+        }
+    });
+
+    it('says why a kind of plan is not offered, here a bedtime bake for a supper carve', () => {
+        render(<BreadAt now={wed} zone={LONDON} layout="rail" />);
+        fireEvent.click(screen.getByText('Supper'));
+        const list = screen.getByRole('list', { name: 'Plans not offered' });
+        expect(within(list).getByText(/A bedtime bake is not offered: it only suits carving the next morning/)).toBeTruthy();
+    });
+});

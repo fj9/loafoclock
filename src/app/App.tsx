@@ -40,7 +40,7 @@ const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['help', '
 export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean } = {}) {
     const [now] = useState(startingPoint);
     const [mode, setMode] = useState<Mode>('now');
-    // Under "Start a loaf now": feed the starter now, or say it was already fed.
+    // Under "Start now": feed the starter now, or say it was already fed.
     const [alreadyFed, setAlreadyFed] = useState(false);
     // A saved plan means a bake is under way, so open on it.
     // The Plan and Bake the app goes to: the new ones, unless the classic tabs are switched on.
@@ -127,14 +127,14 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
                 </p>
             )}
             <div class="seg-choice mode" role="group" aria-label="How do you want to plan?">
-                <button type="button" class={mode === 'now' ? 'on' : ''} aria-pressed={mode === 'now'} onClick={() => setMode('now')}>Start a loaf now</button>
-                <button type="button" class={mode === 'at' ? 'on' : ''} aria-pressed={mode === 'at'} onClick={() => setMode('at')}>I want bread at…</button>
+                <button type="button" class={mode === 'now' ? 'on' : ''} aria-pressed={mode === 'now'} onClick={() => setMode('now')}>Start now</button>
+                <button type="button" class={mode === 'at' ? 'on' : ''} aria-pressed={mode === 'at'} onClick={() => setMode('at')}>Bread at…</button>
             </div>
             {mode === 'now' && (
-                <div class="seg-choice mode" role="group" aria-label="Your starter">
-                    <button type="button" class={!alreadyFed ? 'on' : ''} aria-pressed={!alreadyFed} onClick={() => setAlreadyFed(false)}>Feed it now</button>
-                    <button type="button" class={alreadyFed ? 'on' : ''} aria-pressed={alreadyFed} onClick={() => setAlreadyFed(true)}>I've already fed my starter</button>
-                </div>
+                <label class="check fed-check">
+                    <input type="checkbox" checked={alreadyFed} onChange={() => setAlreadyFed(!alreadyFed)} />
+                    I've already fed my starter
+                </label>
             )}
             {mode === 'at'
                 ? <BreadAt key={wakeKey} now={now} onStart={(l) => start(l, {}, layout)} quickStreak={streak} layout={layout} />

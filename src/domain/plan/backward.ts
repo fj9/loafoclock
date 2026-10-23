@@ -102,10 +102,36 @@ function bedtimeOuts(carveAt: number, cooling: number, zone: Zone): number[] {
     return outs.sort((a, b) => b - a);
 }
 
+/** Why a kind of plan is not on offer, when the plan for it above did not turn up. */
+export interface Missing {
+    category: 'fresh' | 'moreFlavour' | 'bedtime';
+    why:
+        /** Only quick feeds fit, and more flavour is not worth one. */
+        | 'quickFeedsOnly'
+        /** No fridge time at least 12 hours longer fits your waking hours. */
+        | 'noLongerFridge'
+        /** No evening for the loaf to come out suits this carve time (it has to wait overnight, but not more than 16 hours). */
+        | 'timeOfDay'
+        /** There is an evening that would suit, but a step would land in your sleeping hours. */
+        | 'noFit';
+}
+
+export interface BackwardResult {
+    candidates: Candidate[];
+    /** The kinds of plan that are not offered, and why. Empty if there are no plans at all, since that is its own message. */
+    missing: Missing[];
+}
+
 /** Plans that land on the carve time, best first, one per kind of plan. */
 export function planBackward(input: BackwardInput): Candidate[] {
+    return planBackwardWithReasons(input).candidates;
+}
+
+/** The same plans, and why the others are not offered. */
+export function planBackwardWithReasons(input: BackwardInput): BackwardResult {
     const base = leversAt(0, input.base);
     const out: Candidate[] = [];
+    const missing: Missing[] = [];
     const fridges = allFridges();
     const wrap = (category: Category, plan: Plan): Candidate => ({ category, plan, quickFeed: isQuickFeed(plan.levers.ratioN) });
 
@@ -118,18 +144,23 @@ export function planBackward(input: BackwardInput): Candidate[] {
         const standard = fresh.filter((p) => !isQuickFeed(p.levers.ratioN));
         const long = standard.sort((a, b) => b.fridgeHours - a.fridgeHours)[0];
         if (long && long.fridgeHours >= fresh[0].fridgeHours + 12) out.push(wrap('moreFlavour', long));
+        else missing.push({ category: 'moreFlavour', why: standard.length === 0 ? 'quickFeedsOnly' : 'noLongerFridge' });
+    } else {
+        missing.push({ category: 'fresh', why: 'noFit' });
     }
 
     // Bedtime: out of the oven in the evening and carved the next morning.
-    for (const o of bedtimeOuts(input.carveAt, base.cooling, input.zone)) {
+    const outs = bedtimeOuts(input.carveAt, base.cooling, input.zone);
+    let bedtime = false;
+    for (const o of outs) {
         const plans = plansForOut(o, input, fridges);
-        if (plans[0]) { out.push(wrap('bedtime', plans[0])); break; }
+        if (plans[0]) { out.push(wrap('bedtime', plans[0])); bedtime = true; break; }
     }
+    if (!bedtime) missing.push({ category: 'bedtime', why: outs.length === 0 ? 'timeOfDay' : 'noFit' });
 
     if (input.allowNoFridge) {
         const none = plansForOut(freshOut, input, [{ kind: 'none' }]);
         if (none[0]) out.push(wrap('noFridge', none[0]));
     }
-    return out;
+    return { candidates: out, missing: out.length > 0 ? missing : [] };
 }
-

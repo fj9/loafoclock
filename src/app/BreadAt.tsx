@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'preact/hooks';
-import { planBackward, atLocalTime, addLocalDays, startOfLocalDay, type Candidate, type Category, type Levers as LeverSet, type Zone } from '../domain/plan';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { planBackwardWithReasons, atLocalTime, addLocalDays, startOfLocalDay, type Candidate, type Category, type Levers as LeverSet, type Missing, type Zone } from '../domain/plan';
 import { CarvePicker } from './CarvePicker';
 import { EmptyState } from './EmptyState';
 import { PlanView, type Layout } from './PlanView';
@@ -10,6 +10,18 @@ const TITLES: Record<Category, string> = {
     moreFlavour: 'More flavour',
     bedtime: 'Bake at bedtime',
     noFridge: 'No fridge'
+};
+
+const WHY_NOT: Record<Missing['category'], Partial<Record<Missing['why'], string>>> = {
+    fresh: { noFit: 'Baked fresh is not offered: the oven or the shaping would fall in your sleeping hours.' },
+    moreFlavour: {
+        quickFeedsOnly: 'More flavour is not offered: only a quick feed fits this time.',
+        noLongerFridge: 'More flavour is not offered: a fridge stay 12 hours or more longer would put a step in your sleeping hours.'
+    },
+    bedtime: {
+        timeOfDay: 'A bedtime bake is not offered: it only suits carving the next morning, after the loaf has waited overnight.',
+        noFit: 'A bedtime bake is not offered: it would put a step in your sleeping hours.'
+    }
 };
 
 interface Props {
@@ -38,10 +50,16 @@ export function BreadAt({ now, zone, onStart, quickStreak, layout }: Props) {
     const [chosen, setChosen] = useState<number | null>(null);
     const [edited, setEdited] = useState<LeverSet | null>(null);
 
-    const candidates = useMemo(() => planBackward({ carveAt, zone, notBefore: now, allowNoFridge: true }), [carveAt, now, zone]);
+    const { candidates, missing } = useMemo(() => planBackwardWithReasons({ carveAt, zone, notBefore: now, allowNoFridge: true }), [carveAt, now, zone]);
     const main = candidates.filter((c) => c.category !== 'noFridge');
     const noFridge = candidates.find((c) => c.category === 'noFridge');
     const picked = chosen === null ? null : candidates[chosen] ?? null;
+
+    // Choosing a plan opens it further down the page, so go there.
+    const yourPlan = useRef<HTMLElement>(null);
+    useEffect(() => {
+        if (chosen !== null) yourPlan.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    }, [chosen]);
 
     const pick = (c: Candidate) => { setChosen(candidates.indexOf(c)); setEdited(c.plan.levers); };
     const change = (t: number) => { setCarveAt(t); setChosen(null); setEdited(null); };
@@ -66,6 +84,11 @@ export function BreadAt({ now, zone, onStart, quickStreak, layout }: Props) {
                     </button>
                 ))}
             </div>
+            {missing.length > 0 && (
+                <ul class="hint missing" aria-label="Plans not offered">
+                    {missing.map((m) => <li>{WHY_NOT[m.category][m.why]}</li>)}
+                </ul>
+            )}
             {noFridge && (
                 <p class="hint">
                     No fridge also fits.{' '}
@@ -74,7 +97,7 @@ export function BreadAt({ now, zone, onStart, quickStreak, layout }: Props) {
             )}
 
             {picked && edited && (
-                <section aria-label="Your plan">
+                <section ref={yourPlan} class="your-plan" aria-label="Your plan">
                     <h2>{TITLES[picked.category]}</h2>
                     <PlanView layout={layout} levers={edited} onChange={setEdited} now={now} zone={zone} carveAt={carveAt} onStart={onStart} quickStreak={quickStreak} />
                 </section>
