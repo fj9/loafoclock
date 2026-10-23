@@ -103,7 +103,7 @@ describe('Start now', () => {
 
     it('warns about quick feeds', () => {
         render(<StartNow now={friday9} zone={LONDON} />);
-        fireEvent.input(screen.getByLabelText(/^Starter feeding time/), { target: { value: '5' } });
+        fireEvent.input(screen.getByLabelText(/^Wait after feeding/), { target: { value: '5' } });
         expect(screen.getByText(/Quick feeds are fine/)).toBeTruthy();
     });
 

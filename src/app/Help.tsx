@@ -16,7 +16,7 @@ export function Help() {
     return (
         <div class="help">
             <h2>Help</h2>
-            <p>Pick <strong>Start a loaf now</strong> to see the range of times and pull the levers, or <strong>I want bread at…</strong> to say when you want to carve and let the app work backwards. When you are happy, press <strong>Start this plan</strong>. It then tells you what is next and how long you are free.</p>
+            <p>Pick <strong>Start now</strong> to see the range of times and pull the levers, or <strong>Bread at…</strong> to say when you want to carve and let the app work backwards. When you are happy, press <strong>Start this plan</strong>. It then tells you what is next and how long you are free.</p>
             <p>Times are estimates: they assume the dough temperature you give. Use the plan as a guide, and trust how the dough looks and feels.</p>
             <h2>Questions and answers</h2>
             {FAQ.map((f) => (
