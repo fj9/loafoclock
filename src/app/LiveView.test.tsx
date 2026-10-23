@@ -82,22 +82,22 @@ describe('live view', () => {
         expect(nextUp().textContent).toContain('Add the starter');
     });
 
-    it('the picker steps back in 5 minutes, and cannot go into the future', () => {
+    it('the picker steps a minute at a time, and cannot go into the future', () => {
         const rec = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         const t = plan.byId.autolyse + 30 * MINUTE;
         render(<Harness start={rec} at={t} />);
         fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
         adjust();
-        fireEvent.click(screen.getByRole('button', { name: '5 minutes later' })); // already at the current time
+        fireEvent.click(screen.getByRole('button', { name: 'A minute later' })); // already at the current time
         expect(screen.getByRole('alert').textContent).toBe('That has not happened yet.');
         expect(shownTime()).toBe(hhmm(t));
-        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
-        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
-        expect(shownTime()).toBe(hhmm(t - 10 * MINUTE));
+        fireEvent.click(screen.getByRole('button', { name: 'A minute earlier' }));
+        fireEvent.click(screen.getByRole('button', { name: 'A minute earlier' }));
+        expect(shownTime()).toBe(hhmm(t - 2 * MINUTE));
         expect(screen.queryByRole('alert')).toBeNull();
-        fireEvent.click(screen.getByRole('button', { name: '5 minutes later' }));
-        expect(shownTime()).toBe(hhmm(t - 5 * MINUTE));
-        expect(screen.getByText(`Save ${clockOf(t - 5 * MINUTE, LONDON)}`)).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'A minute later' }));
+        expect(shownTime()).toBe(hhmm(t - MINUTE));
+        expect(screen.getByText(`Save ${clockOf(t - MINUTE, LONDON)}`)).toBeTruthy();
     });
 
     it('offers quick answers, and one tap sets the time', () => {
@@ -155,9 +155,9 @@ describe('live view', () => {
         const picker = screen.getByRole('group', { name: 'Change the time for Feed your starter' });
         expect(shownTime(picker)).toBe(hhmm(feedAt + 20 * MINUTE));
         adjust(picker);
-        fireEvent.click(within(picker).getByRole('button', { name: '5 minutes earlier' }));
-        fireEvent.click(within(picker).getByText(`Save ${clockOf(feedAt + 15 * MINUTE, LONDON)}`));
-        expect(screen.getByText(new RegExp(`^Done ${clockOf(feedAt + 15 * MINUTE, LONDON)}`))).toBeTruthy();
+        fireEvent.click(within(picker).getByRole('button', { name: 'A minute earlier' }));
+        fireEvent.click(within(picker).getByText(`Save ${clockOf(feedAt + 19 * MINUTE, LONDON)}`));
+        expect(screen.getByText(new RegExp(`^Done ${clockOf(feedAt + 19 * MINUTE, LONDON)}`))).toBeTruthy();
         expect(screen.queryByRole('group')).toBeNull();
     });
 
@@ -266,13 +266,13 @@ describe('steps in the live view', () => {
 });
 
 describe('the done-earlier picker', () => {
-    it('has − and + buttons that say how much: −5 min and +5 min', () => {
+    it('has − and + buttons that say how much: −1 min and +1 min', () => {
         const rec: LiveRecord = { ...lockPlan(levers, feedAt), actuals: { feed: feedAt } };
         render(<Harness start={rec} at={plan.byId.autolyse} />);
         fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
         adjust();
-        expect(screen.getByRole('button', { name: '5 minutes earlier' }).textContent).toBe('−5 min');
-        expect(screen.getByRole('button', { name: '5 minutes later' }).textContent).toBe('+5 min');
+        expect(screen.getByRole('button', { name: 'A minute earlier' }).textContent).toBe('−1 min');
+        expect(screen.getByRole('button', { name: 'A minute later' }).textContent).toBe('+1 min');
     });
 
     it('shows how far each step has moved with the same minus sign', () => {
@@ -526,9 +526,9 @@ describe('the progress list rows', () => {
         const panel = within(rowPanel('Add salt, honey and oil'));
         fireEvent.click(panel.getByRole('button', { name: 'Done earlier' }));
         adjust();
-        fireEvent.click(screen.getByRole('button', { name: '5 minutes earlier' }));
-        fireEvent.click(screen.getByText(`Save ${clockOf(t - 5 * MINUTE, LONDON)}`));
-        expect(screen.getByText(new RegExp(`^Done ${clockOf(t - 5 * MINUTE, LONDON)}`))).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'A minute earlier' }));
+        fireEvent.click(screen.getByText(`Save ${clockOf(t - MINUTE, LONDON)}`));
+        expect(screen.getByText(new RegExp(`^Done ${clockOf(t - MINUTE, LONDON)}`))).toBeTruthy();
     });
 
     it('closes the row when you tick it', () => {
@@ -554,8 +554,8 @@ describe('times always run in order', () => {
         render(<Harness start={rec} at={feedTime + 3 * HOUR} />);
         fireEvent.click(within(nextUp()).getByRole('button', { name: 'Done earlier' }));
         adjust();
-        const earlier = screen.getByRole('button', { name: '5 minutes earlier' });
-        for (let i = 0; i < 60 && !screen.queryByRole('alert'); i++) fireEvent.click(earlier);
+        const earlier = screen.getByRole('button', { name: 'A minute earlier' });
+        for (let i = 0; i < 400 && !screen.queryByRole('alert'); i++) fireEvent.click(earlier);
         // The buttons stop at the feed time and say why
         expect(screen.getByRole('alert').textContent).toContain(`before ${clockOf(feedTime, LONDON)}`);
         expect(shownTime()).toBe(hhmm(feedTime));
@@ -591,8 +591,8 @@ describe('times always run in order', () => {
         fireEvent.click(row('Feed your starter'));
         fireEvent.click(within(rowPanel('Feed your starter')).getByRole('button', { name: 'Change time' }));
         adjust();
-        const later = screen.getByRole('button', { name: '5 minutes later' });
-        for (let i = 0; i < 60 && !screen.queryByRole('alert'); i++) fireEvent.click(later);
+        const later = screen.getByRole('button', { name: 'A minute later' });
+        for (let i = 0; i < 400 && !screen.queryByRole('alert'); i++) fireEvent.click(later);
         expect(screen.getByRole('alert').textContent).toBe('That has not happened yet.');
         expect(shownTime()).toBe(hhmm(feedAt + 2 * HOUR)); // no later than the autolyse
     });
