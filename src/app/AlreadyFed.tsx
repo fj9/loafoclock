@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'preact/hooks';
 import { FEEDING_RATIOS } from '../domain/feeding';
 import {
-    addLocalDays, atLocalTime, buildPlan, fedActuals, fedLevers, leversAt, minDelayFor, minutesOfDay, starterState, startOfLocalDay,
+    addLocalDays, atLocalTime, buildPlan, fedActuals, fedLevers, leversAt, localDayNumber, minDelayFor, minutesOfDay, starterState, startOfLocalDay,
     type Actuals, type Levers as LeverSet, type Zone
 } from '../domain/plan';
+import { FedTimePicker } from './FedTimePicker';
 import { PlanView, type Layout } from './PlanView';
 import { TimeField } from './TimeField';
 import { clockOf, dayInSentence, dayTime } from './format';
@@ -47,15 +48,24 @@ export function AlreadyFed({ now, zone, onStart, quickStreak, layout }: Props) {
         <div class="already-fed">
             <section class="panel" aria-label="Your feed">
                 <h2>When did you feed your starter?</h2>
-                <div class="chips" role="group" aria-label="Day">
-                    {([[1, 'Yesterday'], [0, 'Today']] as const).map(([d, label]) => (
-                        <button type="button" class={`chip${fed.dayBack === d ? ' on' : ''}`} aria-pressed={fed.dayBack === d} onClick={() => change({ dayBack: d })}>{label}</button>
-                    ))}
-                </div>
-                <div class="lever">
-                    <span class="label" id="fed-time">Time</span>
-                    <TimeField label="Time" minutes={fed.min} onChange={(min) => change({ min })} />
-                </div>
+                {layout === 'rail' ? (
+                    <FedTimePicker
+                        fedAt={fedAt} now={now} zone={zone}
+                        onChange={(at) => change({ dayBack: localDayNumber(now, zone) - localDayNumber(at, zone) === 0 ? 0 : 1, min: minutesOfDay(at, zone) })}
+                    />
+                ) : (
+                    <>
+                        <div class="chips" role="group" aria-label="Day">
+                            {([[1, 'Yesterday'], [0, 'Today']] as const).map(([d, label]) => (
+                                <button type="button" class={`chip${fed.dayBack === d ? ' on' : ''}`} aria-pressed={fed.dayBack === d} onClick={() => change({ dayBack: d })}>{label}</button>
+                            ))}
+                        </div>
+                        <div class="lever">
+                            <span class="label" id="fed-time">Time</span>
+                            <TimeField label="Time" minutes={fed.min} onChange={(min) => change({ min })} />
+                        </div>
+                    </>
+                )}
                 <div class="lever">
                     <label for="fed-ratio">Feed</label>
                     <select id="fed-ratio" value={fed.ratioN} onChange={(e) => change({ ratioN: Number((e.target as HTMLSelectElement).value) })}>
