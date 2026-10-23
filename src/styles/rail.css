@@ -1,0 +1,47 @@
+/* The New plan page: a pinned answer, the rail timeline, and a wide layout. Colours come from tokens.css. */
+.np-note { margin: 0 0 16px; }
+
+.np-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; margin: 0 0 12px; padding: 10px 14px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: 0 4px 10px rgba(43, 33, 28, .12); }
+.np-when { display: block; font-family: var(--font-display); font-size: var(--fs-md); font-weight: 400; }
+.np-len { color: var(--muted); font-size: var(--fs-sm); }
+.np-range { margin: 0 0 16px; }
+.np-wide-only { display: none; }
+.np-right > h2 { font-size: var(--fs-md); }
+
+/* The rail: time, rail, text. The time column is sized by the text size so "10:05 am" always fits. */
+.rail { list-style: none; margin: 0 0 16px; padding: 0; }
+.rl-row, .rl-gap { display: grid; grid-template-columns: calc(var(--fs-xs) * 5.6) 20px minmax(0, 1fr); column-gap: 8px; }
+.rl-gap { position: relative; }
+.rl-day { margin: 10px 0 6px; padding-top: 6px; border-top: 1px solid var(--line); font-size: var(--fs-xs); font-weight: 700; color: var(--muted); }
+.rl-time { text-align: right; font-size: var(--fs-xs); color: var(--muted); padding-top: 2px; }
+.rl-node { display: flex; justify-content: center; }
+.rl-dot { display: block; width: 14px; height: 14px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--ink); background: var(--card); z-index: 1; }
+.rl-dot.asleep { border-color: var(--danger); background: var(--danger); }
+.rl-end .rl-dot { background: var(--good); border-color: var(--good); }
+.rl-end .rl-label { font-weight: 700; }
+.rl-label { min-width: 0; padding-top: 0; }
+.rl-sub { display: block; color: var(--muted); font-size: var(--fs-xs); font-weight: 400; }
+.rl-sub.warn { color: var(--danger); font-weight: 700; }
+.rl-wait { display: flex; flex-direction: column; justify-content: center; color: var(--muted); font-size: var(--fs-xs); }
+.rl-moon { display: flex; justify-content: flex-end; align-items: center; padding: 0; }
+
+/* A wait is a bar between two dots, in the same colours as the timeline. */
+.rl-bar { display: block; width: 8px; height: calc(100% + 4px); margin: -2px 0; border-radius: var(--radius-xs); background: var(--line); }
+.rl-bar.rising { background: var(--good-bg); box-shadow: inset 0 0 0 1px var(--good); }
+.rl-bar.bulk { background: var(--fill-a); }
+.rl-bar.fridge { background: var(--cold-fill); box-shadow: inset 0 0 0 1.5px var(--cold-edge); }
+.rl-bar.proof { background: var(--warn); }
+.rl-bar.bake { background: var(--fill-b); }
+.rl-bar.cool { background: var(--good); opacity: .6; }
+
+.rl-now { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--accent); z-index: 2; }
+.rl-now b { position: absolute; left: 0; top: -11px; padding: 0 6px; border-radius: var(--radius-pill); background: var(--accent-strong); color: var(--on-accent); font-size: var(--fs-xs); }
+
+/* Wide screens: the timeline across the top, then the levers beside the rail. */
+@media (min-width: 900px) {
+    .app.wide { max-width: 1040px; }
+    .np-wide-only { display: block; }
+    .np-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+    .np-bar { padding: 12px 18px; }
+    .np-when { font-size: var(--fs-lg); }
+}

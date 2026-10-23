@@ -16,6 +16,7 @@ import { LiveView } from './LiveView';
 import { LogScreen } from './LogScreen';
 import { Logo } from './Logo';
 import { SettingsScreen } from './SettingsScreen';
+import type { Layout } from './PlanView';
 import { StartNow } from './StartNow';
 import { UpdatePrompt } from './UpdatePrompt';
 
@@ -23,8 +24,8 @@ import { UpdatePrompt } from './UpdatePrompt';
 const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
 
 type Mode = 'now' | 'at';
-type Tab = 'plan' | 'bake' | 'log' | 'settings' | 'help' | 'about';
-const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['bake', 'Bake'], ['log', 'Log']];
+type Tab = 'plan' | 'plan2' | 'bake' | 'log' | 'settings' | 'help' | 'about';
+const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['plan2', 'New plan'], ['bake', 'Bake'], ['log', 'Log']];
 /** The rest live in the menu at the top right. */
 const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['help', 'Help'], ['about', 'About']];
 
@@ -99,8 +100,15 @@ export function App() {
         </EmptyState>
     );
 
-    const plan = (
+    // The classic Plan page and the New plan page share everything but the layout of the plan itself.
+    const planPage = (layout: Layout) => (
         <>
+            {layout === 'rail' && (
+                <p class="hint np-note">
+                    A new layout we are trying: the answer stays pinned as you change things, and the steps run down a timeline.
+                    {' '}<button type="button" class="link" onClick={() => setTab('plan')}>Back to the classic Plan</button>
+                </p>
+            )}
             {live && (
                 <p class="panel bake-banner" role="status">
                     You have a bake in progress. <button type="button" class="link" onClick={() => setTab('bake')}>Go to Bake</button>
@@ -117,15 +125,15 @@ export function App() {
                 </div>
             )}
             {mode === 'at'
-                ? <BreadAt key={wakeKey} now={now} onStart={start} quickStreak={streak} />
+                ? <BreadAt key={wakeKey} now={now} onStart={start} quickStreak={streak} layout={layout} />
                 : alreadyFed
-                    ? <AlreadyFed key={wakeKey} now={now} onStart={start} quickStreak={streak} />
-                    : <StartNow key={`${repeat?.key ?? 0}-${wakeKey}`} now={now} onStart={start} quickStreak={streak} base={repeat?.base} />}
+                    ? <AlreadyFed key={wakeKey} now={now} onStart={start} quickStreak={streak} layout={layout} />
+                    : <StartNow key={`${repeat?.key ?? 0}-${wakeKey}`} now={now} onStart={start} quickStreak={streak} base={repeat?.base} layout={layout} />}
         </>
     );
 
     return (
-        <div class="app">
+        <div class={`app${tab === 'plan2' ? ' wide' : ''}`}>
             <header class="app-header">
                 <button type="button" class="menu-btn" aria-label="Menu" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>
                     <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none" /></svg>
@@ -155,7 +163,8 @@ export function App() {
                 ))}
             </nav>
             <main class="app-main">
-                {tab === 'plan' && plan}
+                {tab === 'plan' && planPage('classic')}
+                {tab === 'plan2' && planPage('rail')}
                 {tab === 'bake' && bake}
                 {tab === 'log' && (
                     <LogScreen

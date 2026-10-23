@@ -173,7 +173,7 @@ describe('stopping and removing, without the browser popup', () => {
 describe('footer', () => {
     it('has the Ko-fi link on every page', () => {
         render(<App />);
-        for (const name of ['Plan', 'Bake', 'Log']) {
+        for (const name of ['Plan', 'New plan', 'Bake', 'Log']) {
             tab(new RegExp(`^${name}`));
             const link = screen.getByRole('link', { name: 'Tip me on Ko-fi' }) as HTMLAnchorElement;
             expect(link.href).toBe('https://ko-fi.com/fjnine');
@@ -189,9 +189,9 @@ describe('footer', () => {
 describe('tabs, the menu and the bake', () => {
     const plant = () => localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
 
-    it('has Plan, Bake and Log as tabs, with Settings, Help and About in the menu', () => {
+    it('has Plan, New plan, Bake and Log as tabs, with Settings, Help and About in the menu', () => {
         render(<App />);
-        expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanBakeLog$/);
+        expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanNew planBakeLog$/);
         expect(screen.queryByRole('button', { name: 'Settings' })).toBeNull();
         fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
         expect(screen.getAllByRole('menuitem').map((e) => e.textContent)).toEqual(['Settings', 'Help', 'About']);
@@ -386,5 +386,35 @@ describe('empty states look the same', () => {
         expect(status.className).toContain('empty-state');
         expect(status.querySelector('h2')!.textContent).toBe('No plan fits that time');
         expect(status.querySelector('button')).toBeNull();
+    });
+});
+
+describe('the New plan tab', () => {
+    it('plans the same bake as the classic Plan, with the answer pinned and the steps on a rail', () => {
+        render(<App />);
+        tab('Plan');
+        expect(document.querySelector('.rail')).toBeNull();
+        expect(document.querySelector('.np-bar')).toBeNull();
+        tab('New plan');
+        expect(document.querySelector('.np-bar')!.textContent).toContain('Ready to carve');
+        expect(document.querySelectorAll('.rail > li').length).toBeGreaterThan(8);
+        expect(document.querySelector('.app')!.className).toContain('wide');
+        tab('Plan');
+        expect(document.querySelector('.app')!.className).not.toContain('wide');
+    });
+
+    it('starts a bake from the New plan tab and opens Bake', () => {
+        render(<App />);
+        tab('New plan');
+        fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
+        expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
+    });
+
+    it('works backwards from a carve time too', () => {
+        render(<App />);
+        tab('New plan');
+        fireEvent.click(screen.getByRole('button', { name: 'I want bread at…' }));
+        fireEvent.click(document.querySelector('.plan-card')!);
+        expect(document.querySelector('.rail')).toBeTruthy();
     });
 });
