@@ -19,7 +19,8 @@ interface Props {
 }
 
 const NUDGES: readonly Nudge[] = [
-    { label: '−5 min', spoken: '5 minutes earlier', by: -5 * MINUTE }, { label: '+5 min', spoken: '5 minutes later', by: 5 * MINUTE }
+    { label: '−5 min', spoken: '5 minutes earlier', by: -5 * MINUTE }, { label: '−1 min', spoken: 'A minute earlier', by: -MINUTE },
+    { label: '+1 min', spoken: 'A minute later', by: MINUTE }, { label: '+5 min', spoken: '5 minutes later', by: 5 * MINUTE }
 ];
 // No "Just now": the picker opens at the current time, and Done and Save already mean that.
 const AGO: ReadonlyArray<[label: string, minutes: number]> = [['5 min ago', 5], ['10 min ago', 10], ['30 min ago', 30], ['1 h ago', 60]];
