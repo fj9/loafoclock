@@ -1,9 +1,10 @@
-import { isAwake, localDayNumber, type Plan, type Zone } from '../domain/plan';
+import type { ComponentChildren } from 'preact';
+import { isAwake, localDayNumber, type Plan, type StepId, type Step, type Zone } from '../domain/plan';
 import { clockOf, lengthOf, shortDate } from './format';
 import { asleepLabel, bedLabel, nightsIn, wakeLabel } from './night';
 
 interface Row {
-    key: string;
+    key: StepId;
     label: string;
     at: number;
     needsYou: boolean;
@@ -61,13 +62,19 @@ interface Props {
     zone?: Zone;
     /** Shows a Now line if it falls inside the bake. */
     now?: number;
+    /** For a bake under way: where each step stands, so done steps are ticked, the next one stands out and a late one is flagged. */
+    state?: (id: StepId) => StepState;
+    /** Replaces what is written beside a step, so the caller can make a row open in place. Return nothing to keep the usual name. */
+    renderLabel?: (step: Step) => ComponentChildren | undefined;
 }
+
+export type StepState = 'done' | 'next' | 'overdue' | 'upcoming';
 
 /**
  * The bake as a list down the page: the time on the left, a rail of coloured waits in the middle and what to do
  * on the right. Days are named where they start, and the night is a tinted band behind the waits that run into it.
  */
-export function RailTimeline({ plan, zone, now }: Props) {
+export function RailTimeline({ plan, zone, now, state, renderLabel }: Props) {
     const rows = rowsOf(plan);
     const first = rows[0]!.at;
     const showNow = now !== undefined && now > first && now < plan.readyToCarve;
@@ -90,11 +97,13 @@ export function RailTimeline({ plan, zone, now }: Props) {
     const edges = (tintedAbove: boolean, tintedBelow: boolean) => `${tintedAbove ? '' : ' round-top'}${tintedBelow ? '' : ' round-bottom'}`;
 
     return (
-        <ol class="rail" aria-label="The bake, step by step">
+        <ol class={`rail${state ? ' live' : ''}`} aria-label="The bake, step by step">
             {rows.map((r, i) => {
                 const nextRow = rows[i + 1];
                 const newDay = newDayAt(i);
-                const asleep = r.needsYou && !isAwake(r.at, zone);
+                const step = plan.steps[i]!;
+                const st = state?.(r.key);
+                const asleep = r.needsYou && !isAwake(r.at, zone) && st !== 'done';
                 const wait = nextRow ? waitAt(plan, (r.at + nextRow.at) / 2) : 'plain';
                 const length = nextRow ? nextRow.at - r.at : 0;
                 // A wait is named once, on its first stretch, with its whole length.
@@ -109,14 +118,18 @@ export function RailTimeline({ plan, zone, now }: Props) {
                         {newDay && <p class={`rl-day${headerTint[i] ? ` in-night${edges(i > 0 && gapBottomTint(i - 1), true)}` : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
                         <div class={`rl-row${rowTint[i] ? ` in-night${edges(newDay ? headerTint[i]! : i > 0 && gapBottomTint(i - 1), nextRow ? gapTopTint(i) : false)}` : ''}`}>
                             <span class="rl-time">{clockOf(r.at, zone)}</span>
-                            <span class="rl-node"><i class={`rl-dot${asleep ? ' asleep' : ''}`} /></span>
+                            <span class="rl-node">
+                                <i class={`rl-dot${asleep ? ' asleep' : ''}${st && st !== 'upcoming' ? ` ${st}` : ''}`}>
+                                    {st === 'done' && <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5.2l2 2L8 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>}
+                                </i>
+                            </span>
                             <span class="rl-label">
-                                {r.label}
+                                {renderLabel?.(step) ?? <>{r.label}</>}
                                 {asleep && <span class="rl-sub warn">In your sleeping hours</span>}
                             </span>
                         </div>
                         {nextRow && (
-                            <div class="rl-gap" style={{ height: `${height}px` }}>
+                            <div class={`rl-gap${state?.(r.key) === 'done' ? ' is-done' : ''}`} style={{ height: `${height}px` }}>
                                 <span class="rl-time" />
                                 <span class="rl-node"><i class={`rl-bar ${wait}`} /></span>
                                 <span class="rl-wait">

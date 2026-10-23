@@ -24,8 +24,8 @@ import { UpdatePrompt } from './UpdatePrompt';
 const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
 
 type Mode = 'now' | 'at';
-type Tab = 'plan' | 'plan2' | 'bake' | 'log' | 'settings' | 'help' | 'about';
-const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['plan2', 'New plan'], ['bake', 'Bake'], ['log', 'Log']];
+type Tab = 'plan' | 'plan2' | 'bake' | 'bake2' | 'log' | 'settings' | 'help' | 'about';
+const TABS: ReadonlyArray<[Tab, string]> = [['plan', 'Plan'], ['plan2', 'New plan'], ['bake', 'Bake'], ['bake2', 'New bake'], ['log', 'Log']];
 /** The rest live in the menu at the top right. */
 const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['help', 'Help'], ['about', 'About']];
 
@@ -38,7 +38,7 @@ export function App() {
     const [tab, setTab] = useState<Tab>(() => (loadLive() ? 'bake' : 'plan'));
     const [menuOpen, setMenuOpen] = useState(false);
     // A plan waiting for you to confirm that it replaces the bake in progress.
-    const [replacing, setReplacing] = useState<{ levers: Levers; actuals: Actuals } | null>(null);
+    const [replacing, setReplacing] = useState<{ levers: Levers; actuals: Actuals; layout: Layout } | null>(null);
     const [settings, setSettings] = useState<Settings>(() => loadSettings());
     const [live, setLive] = useState<LiveRecord | null>(() => loadLive());
     const [finishing, setFinishing] = useState<LiveRecord | null>(null);
@@ -65,8 +65,9 @@ export function App() {
     const go = (t: Tab) => { setTab(t); setMenuOpen(false); };
 
     const update = (rec: LiveRecord) => { saveLive(rec); setLive(rec); };
-    const begin = (levers: Levers, actuals: Actuals) => { update({ ...lockPlan(levers, Date.now()), actuals }); setTab('bake'); };
-    const start = (levers: Levers, actuals: Actuals = {}) => (live ? setReplacing({ levers, actuals }) : begin(levers, actuals));
+    // A plan started from the New plan tab opens the New bake tab, and one from the classic Plan opens the classic Bake.
+    const begin = (levers: Levers, actuals: Actuals, layout: Layout) => { update({ ...lockPlan(levers, Date.now()), actuals }); setTab(layout === 'rail' ? 'bake2' : 'bake'); };
+    const start = (levers: Levers, actuals: Actuals = {}, layout: Layout = 'classic') => (live ? setReplacing({ levers, actuals, layout }) : begin(levers, actuals, layout));
     const discard = () => { clearLive(); setLive(null); setFinishing(null); };
     const saveEntry = (entry: LogEntry) => { setLog(addToLog(entry)); discard(); setTab('log'); };
 
@@ -79,7 +80,7 @@ export function App() {
     };
     const streak = quickFeedStreak(log);
 
-    const bake = finishing ? (
+    const bakePage = (layout: Layout) => finishing ? (
         <FinishForm
             entry={(() => {
                 const p = buildPlan(finishing.levers, finishing.actuals);
@@ -93,9 +94,9 @@ export function App() {
             onSave={saveEntry} onSkip={discard}
         />
     ) : live ? (
-        <LiveView record={live} onChange={update} onFinish={() => setFinishing(live)} onStop={discard} />
+        <LiveView record={live} onChange={update} onFinish={() => setFinishing(live)} onStop={discard} layout={layout} />
     ) : (
-        <EmptyState title="No bake running" action={{ label: 'Plan a loaf', onClick: () => setTab('plan') }}>
+        <EmptyState title="No bake running" action={{ label: 'Plan a loaf', onClick: () => setTab(layout === 'rail' ? 'plan2' : 'plan') }}>
             Plan a loaf and press Start this plan. It will show up here, with what to do next and how long you are free.
         </EmptyState>
     );
@@ -111,7 +112,7 @@ export function App() {
             )}
             {live && (
                 <p class="panel bake-banner" role="status">
-                    You have a bake in progress. <button type="button" class="link" onClick={() => setTab('bake')}>Go to Bake</button>
+                    You have a bake in progress. <button type="button" class="link" onClick={() => setTab(layout === 'rail' ? 'bake2' : 'bake')}>Go to Bake</button>
                 </p>
             )}
             <div class="seg-choice mode" role="group" aria-label="How do you want to plan?">
@@ -125,10 +126,10 @@ export function App() {
                 </div>
             )}
             {mode === 'at'
-                ? <BreadAt key={wakeKey} now={now} onStart={start} quickStreak={streak} layout={layout} />
+                ? <BreadAt key={wakeKey} now={now} onStart={(l) => start(l, {}, layout)} quickStreak={streak} layout={layout} />
                 : alreadyFed
-                    ? <AlreadyFed key={wakeKey} now={now} onStart={start} quickStreak={streak} layout={layout} />
-                    : <StartNow key={`${repeat?.key ?? 0}-${wakeKey}`} now={now} onStart={start} quickStreak={streak} base={repeat?.base} layout={layout} />}
+                    ? <AlreadyFed key={wakeKey} now={now} onStart={(l, a) => start(l, a, layout)} quickStreak={streak} layout={layout} />
+                    : <StartNow key={`${repeat?.key ?? 0}-${wakeKey}`} now={now} onStart={(l) => start(l, {}, layout)} quickStreak={streak} base={repeat?.base} layout={layout} />}
         </>
     );
 
@@ -158,14 +159,15 @@ export function App() {
                 {TABS.map(([id, label]) => (
                     <button type="button" class={tab === id ? 'on' : ''} aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)}>
                         {label}
-                        {id === 'bake' && live && <><span class="dot" aria-hidden="true" />{' '}<span class="sr-only">(in progress)</span></>}
+                        {(id === 'bake' || id === 'bake2') && live && <><span class="dot" aria-hidden="true" />{' '}<span class="sr-only">(in progress)</span></>}
                     </button>
                 ))}
             </nav>
-            <main class={`app-main${tab === 'plan2' ? '' : ' narrow'}`}>
+            <main class={`app-main${tab === 'plan2' || tab === 'bake2' ? '' : ' narrow'}`}>
                 {tab === 'plan' && planPage('classic')}
                 {tab === 'plan2' && planPage('rail')}
-                {tab === 'bake' && bake}
+                {tab === 'bake' && bakePage('classic')}
+                {tab === 'bake2' && bakePage('rail')}
                 {tab === 'log' && (
                     <LogScreen
                         entries={log} oldCount={oldCount} onRepeat={repeatBake} onPlan={() => setTab('plan')}
@@ -187,7 +189,7 @@ export function App() {
                 <ConfirmSheet
                     title="Replace your current bake?" body="You already have a bake in progress. Replacing it throws that one away."
                     confirmLabel="Replace bake" danger onCancel={() => setReplacing(null)}
-                    onConfirm={() => { begin(replacing.levers, replacing.actuals); setReplacing(null); }}
+                    onConfirm={() => { begin(replacing.levers, replacing.actuals, replacing.layout); setReplacing(null); }}
                 />
             )}
             <UpdatePrompt />
