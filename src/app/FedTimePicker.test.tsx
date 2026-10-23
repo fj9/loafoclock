@@ -60,7 +60,7 @@ describe('feed time picker', () => {
         render(<Harness start={at(23, 8)} />);
         expect(screen.queryByRole('button', { name: '15 minutes earlier' })).toBeNull();
         press('Adjust');
-        expect(screen.getByRole('button', { name: 'Done' }).getAttribute('aria-expanded')).toBe('true');
+        expect(screen.getByRole('button', { name: 'Close' }).getAttribute('aria-expanded')).toBe('true');
         press('15 minutes earlier');
         expect(summary()).toContain('7:45 am');
         press('One hour later');
@@ -68,7 +68,7 @@ describe('feed time picker', () => {
         press('One hour earlier');
         press('15 minutes later');
         expect(summary()).toContain('8:00 am');
-        press('Done');
+        press('Close');
         expect(screen.queryByRole('button', { name: '15 minutes earlier' })).toBeNull();
     });
 
@@ -79,7 +79,7 @@ describe('feed time picker', () => {
         expect(screen.getByRole('alert').textContent).toBe('That has not happened yet.');
         expect(summary()).toContain('10 min ago');
         press('15 minutes earlier');
-        expect(screen.getByRole('alert').textContent).toBe('');
+        expect(screen.queryByRole('alert')).toBeNull();
     });
 
     it('cannot go back past the start of yesterday, and says so', () => {

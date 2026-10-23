@@ -3,6 +3,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/plan.css';
 import './styles/rail.css';
+import './styles/quicktime.css';
 import { render } from 'preact';
 import { App } from './app/App';
 
