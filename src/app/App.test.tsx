@@ -173,7 +173,7 @@ describe('stopping and removing, without the browser popup', () => {
 describe('footer', () => {
     it('has the Ko-fi link on every page', () => {
         render(<App />);
-        for (const name of ['Plan', 'New plan', 'Bake', 'Log']) {
+        for (const name of ['Plan', 'New plan', 'Bake', 'New bake', 'Log']) {
             tab(new RegExp(`^${name}`));
             const link = screen.getByRole('link', { name: 'Tip me on Ko-fi' }) as HTMLAnchorElement;
             expect(link.href).toBe('https://ko-fi.com/fjnine');
@@ -189,9 +189,9 @@ describe('footer', () => {
 describe('tabs, the menu and the bake', () => {
     const plant = () => localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
 
-    it('has Plan, New plan, Bake and Log as tabs, with Settings, Help and About in the menu', () => {
+    it('has Plan, New plan, Bake, New bake and Log as tabs, with Settings, Help and About in the menu', () => {
         render(<App />);
-        expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanNew planBakeLog$/);
+        expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanNew planBakeNew bakeLog$/);
         expect(screen.queryByRole('button', { name: 'Settings' })).toBeNull();
         fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
         expect(screen.getAllByRole('menuitem').map((e) => e.textContent)).toEqual(['Settings', 'Help', 'About']);
@@ -408,6 +408,32 @@ describe('the New plan tab', () => {
         tab('New plan');
         fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
         expect(screen.getByRole('region', { name: 'Next up' })).toBeTruthy();
+    });
+
+    it('opens the New bake tab when a plan is started from the New plan tab, and the classic Bake from the classic Plan', () => {
+        render(<App />);
+        tab('New plan');
+        fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
+        expect(document.querySelector('.live-rail')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /^New bake/ }).getAttribute('aria-current')).toBe('page');
+        cleanup();
+        localStorage.clear();
+        render(<App />);
+        tab('Plan');
+        fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
+        expect(document.querySelector('.live-rail')).toBeNull();
+        expect(document.querySelector('.live')).toBeTruthy();
+    });
+
+    it('shows the same running bake on both Bake tabs', () => {
+        render(<App />);
+        tab('New plan');
+        fireEvent.click(screen.getByRole('button', { name: 'Start this plan' }));
+        tab(/^Bake/);
+        expect(screen.getByRole('region', { name: 'Next up' }).textContent).toContain('Feed your starter');
+        expect(document.querySelector('.live-rail')).toBeNull();
+        tab(/^New bake/);
+        expect(document.querySelector('.live-rail')).toBeTruthy();
     });
 
     it('has the new feed time picker under "I\'ve already fed my starter", and the classic Plan keeps its day chips and time boxes', () => {

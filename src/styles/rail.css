@@ -19,12 +19,34 @@
 .rl-node { display: flex; justify-content: center; }
 .rl-dot { display: block; width: 14px; height: 14px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--ink); background: var(--card); z-index: 1; }
 .rl-dot.asleep { border-color: var(--danger); background: var(--danger); }
+.rl-dot { display: flex; align-items: center; justify-content: center; }
+/* A bake under way: done steps are ticked, the next one glows, a late one is red, and what is still to come is paler. */
+.rl-dot.done { background: var(--ink); border-color: var(--ink); color: var(--card); }
+.rl-dot.next { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--glow); }
+.rl-dot.overdue { border-color: var(--danger); box-shadow: 0 0 0 4px rgba(179, 38, 30, .18); }
+.rail.live .rl-gap:not(.is-done) .rl-bar { opacity: .5; }
+.rail.live .rl-gap:not(.is-done) .rl-bar.cool { opacity: .35; }
 .rl-end .rl-dot { background: var(--good); border-color: var(--good); }
 .rl-end .rl-label { font-weight: 700; }
 .rl-label { min-width: 0; padding-top: 0; }
 .rl-sub { display: block; color: var(--muted); font-size: var(--fs-xs); font-weight: 400; }
 .rl-sub.warn { color: var(--danger); font-weight: 700; }
 .rl-wait { display: flex; flex-direction: column; justify-content: center; color: var(--muted); font-size: var(--fs-xs); }
+
+/* A row that opens in place: the whole line is one button, 56px tall at least, with a chevron. */
+.rl-btn { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; width: 100%; min-height: 40px; margin: -8px 0; padding: 8px 0; font: inherit; color: var(--ink); background: none; border: 0; text-align: left; cursor: pointer; }
+.rl-btn .rl-name { min-width: 0; }
+.rl-btn .chev { margin-left: auto; flex: none; color: var(--muted); transition: transform var(--dur-fast, .15s); }
+.rl-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.rl-static { display: flex; align-items: center; gap: 8px; }
+.rl-static .tag { margin-left: auto; flex: none; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.rl-shift { color: var(--muted); font-weight: 400; font-size: var(--fs-sm); }
+.rl-done .rl-name { color: var(--muted); text-decoration: line-through; }
+.rl-late .rl-name { color: var(--danger); }
+.rl-label .expand { margin: 6px 0 10px; padding: 12px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--line); font-weight: 400; }
+.rl-label .expand .step-detail { margin: 0 0 10px; }
+.rl-label .expand .ingredients { list-style: disc; }
+.rl-label .expand .done-row { margin-top: 0; }
 
 /* The night: a soft band behind the waits that run into it, with bedtime and getting up at its edges. */
 .rl-night { position: absolute; left: -8px; right: -8px; z-index: -1; background: var(--night-bg); border: 1px solid var(--night-edge); border-radius: var(--radius-md); }
@@ -52,6 +74,15 @@
 
 .rl-now { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--accent); z-index: 2; }
 .rl-now b { position: absolute; left: 0; top: -11px; padding: 0 6px; border-radius: var(--radius-pill); background: var(--accent-strong); color: var(--on-accent); font-size: var(--fs-xs); }
+
+/* The New bake view: what to do now, then the rail. On a wide screen they sit side by side. */
+.lr-rail > h2 { font-size: var(--fs-md); }
+@media (min-width: 900px) {
+    .lr-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "top rail" "more rail"; gap: 0 32px; align-items: start; }
+    .lr-top { grid-area: top; }
+    .lr-rail { grid-area: rail; }
+    .lr-more { grid-area: more; }
+}
 
 /* Wide screens: the timeline across the top, then the levers beside the rail. */
 @media (min-width: 900px) {

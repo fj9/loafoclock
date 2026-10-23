@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { LiveRecord } from '../domain/liveStore';
 import {
-    FOLD_IDS, MINUTE, STEP_ORDER, buildPlan, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type StepId, type Zone
+    FOLD_IDS, MINUTE, STEP_ORDER, buildPlan, reconcile, tick, untick, withKeptBakeTime, type LiveStep, type Step, type StepId, type Zone
 } from '../domain/plan';
 import { guideFor } from '../domain/stepGuide';
 import { ConfirmSheet } from './ConfirmSheet';
 import { EarlierPicker } from './EarlierPicker';
 import { Levers } from './Levers';
+import { RailTimeline, type StepState } from './RailTimeline';
 import { StepDetail } from './StepDetail';
 import { Timeline } from './Timeline';
 import { clockOf, countdownText, dayTime, lengthOf, signedMin } from './format';
@@ -20,6 +21,8 @@ interface Props {
     /** The current time. Replaced in tests. */
     clock?: () => number;
     zone?: Zone;
+    /** The classic progress list, or the New bake layout with the progress on the vertical rail. */
+    layout?: 'classic' | 'rail';
 }
 
 const Chevron = () => (
@@ -32,7 +35,7 @@ const Chevron = () => (
 const doneLabel = (s: LiveStep) => (s.id.startsWith('fold') ? `Done fold ${s.id.slice(4)}` : 'Done');
 
 /** The locked plan: where you are, what is next and how long you are free. */
-export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock = Date.now, zone }: Props) {
+export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock = Date.now, zone, layout = 'classic' }: Props) {
     const [now, setNow] = useState(clock);
     useEffect(() => {
         const t = setInterval(() => setNow(clock()), 15_000);
@@ -95,81 +98,181 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
     const howOpen = (s: LiveStep, isNext: boolean) => how[s.id] ?? (isNext && s.status !== 'upcoming');
     const detail = (s: LiveStep) => <StepDetail id={s.id} plan={view.plan} zone={zone} />;
 
+    // What opens under a row: for a step that is done, change its time or undo it; for one still to do, the how-to and its buttons.
+    const expansion = (s: LiveStep) => (s.status === 'done' ? (
+        picker?.id === s.id
+            ? <EarlierPicker now={Math.min(clock(), bounds(s.id).hi)} notBefore={bounds(s.id).lo} zone={zone} start={s.actualAt!} label={`Change the time for ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
+            : (
+                <div class="btn-row">
+                    <button type="button" class="btn outline" onClick={() => openPicker(s.id, 'change')}>Change time</button>
+                    <button type="button" class="btn outline" onClick={() => undo(s.id)}>Undo</button>
+                </div>
+            )
+    ) : (
+        <>
+            {detail(s)}
+            <div class="done-row">
+                <button type="button" class="btn big-btn" onClick={() => press(s)}>{doneLabel(s)}</button>
+                <button type="button" class="btn outline clock-btn" aria-label="Done earlier" aria-expanded={picker?.id === s.id} onClick={() => openPicker(s.id, 'earlier')}>
+                    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="M11 6.5V11l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </button>
+            </div>
+            {picker?.id === s.id && (
+                <EarlierPicker now={Math.min(clock(), bounds(s.id).hi)} notBefore={bounds(s.id).lo} zone={zone} start={clock()} label={`Done earlier: ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
+            )}
+        </>
+    ));
+
+    const timersEl = running && (
+        <section class="panel timers" aria-label="Timers">
+            {(Object.entries(record.timers ?? {}) as [StepId, number][]).map(([id, end]) => {
+                const left = end - fast;
+                const label = view.steps.find((x) => x.id === id)?.label ?? id;
+                return (
+                    <p class={`timer-row${left <= 0 ? ' up' : ''}`} role="timer" aria-label={`Timer for ${label}`}>
+                        <span class="timer-name">{label}</span>
+                        {left > 0
+                            ? <><strong class="timer-time">{countdownText(left)}</strong> <span class="hint">left, until {clockOf(end, zone)}</span></>
+                            : <strong class="timer-time">Time is up</strong>}
+                        {' '}<button type="button" class="btn outline small" onClick={() => clearTimer(id)}>{left > 0 ? 'Stop timer' : 'Clear'}</button>
+                    </p>
+                );
+            })}
+        </section>
+    );
+
+    const nextEl = next ? (
+        <section class={`panel next-up ${next.status}`} aria-label="Next up">
+            <p class="eyebrow">Next up</p>
+            <p class="big">{next.label}</p>
+            <p class="hint">{when(next.at)} · <strong>{countdown(view.untilNext!)}</strong></p>
+            {FOLD_IDS.includes(next.id) && (
+                <ol class="folds" aria-label="Folds">
+                    {view.steps.filter((s) => FOLD_IDS.includes(s.id)).map((s) => (
+                        <li class={s.status === 'done' ? 'done' : s.id === next.id ? 'now' : ''} aria-label={`Fold ${s.id.slice(4)} ${s.status === 'done' ? 'done' : 'to do'}`} />
+                    ))}
+                </ol>
+            )}
+            <button type="button" class="how-toggle" aria-expanded={howOpen(next, true)} aria-controls="next-how" onClick={() => setHow({ ...how, [next.id]: !howOpen(next, true) })}>
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                {howOpen(next, true) ? 'Hide how-to' : 'Show how-to'}
+            </button>
+            {howOpen(next, true) && <div id="next-how">{detail(next)}</div>}
+            <div class="done-row">
+                <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next)}</button>
+                <button type="button" class="btn outline clock-btn" aria-label="Done earlier" aria-expanded={picker?.id === next.id} onClick={() => openPicker(next.id, 'earlier')}>
+                    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="M11 6.5V11l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </button>
+            </div>
+            {picker?.id === next.id && (
+                <EarlierPicker now={Math.min(clock(), bounds(next.id).hi)} notBefore={bounds(next.id).lo} zone={zone} start={clock()} label="Done earlier" onCancel={() => setPicker(null)} onSave={(ms) => doTick(next.id, ms)} />
+            )}
+            {view.freeMs! > 0 && next.status === 'upcoming' && <p class="hint free">You are free for {lengthOf(view.freeMs!)}.</p>}
+        </section>
+    ) : (
+        <section class="panel next-up done" aria-label="Next up">
+            <p class="eyebrow">All done</p>
+            <p class="big">Ready to carve {when(view.plan.readyToCarve)}</p>
+            <p class="hint">Let it cool, then enjoy it.</p>
+            <button type="button" class="btn big-btn" onClick={onFinish}>Finish this bake</button>
+        </section>
+    );
+
+    const keptEl = kept && (() => {
+        const late = view.plan.byId.bake > original.byId.bake;
+        return (
+            <p class="problems keep" role="status">
+                You are {lengthOf(Math.abs(view.plan.byId.bake - original.byId.bake))} {late ? 'behind' : 'ahead'}.{' '}
+                {kept.possible ? (
+                    <>
+                        To bake when you planned, {late ? 'cut' : 'extend'} the fridge to {lengthOf(kept.fridgeHours * 3_600_000)}.{' '}
+                        <button type="button" class="btn outline" onClick={() => onChange({ ...record, levers: withKeptBakeTime(record.levers, kept) })}>Keep my bake time</button>
+                    </>
+                ) : (
+                    <>The fridge can not go {late ? 'below 8' : 'above 72'} hours, so the bake moves to {when(view.plan.byId.bake)}.</>
+                )}
+            </p>
+        );
+    })();
+
+    const actionsEl = (
+        <>
+            <div class="actions-row">
+                <button type="button" class="btn outline" onClick={() => setEditing(!editing)} aria-expanded={editing}>
+                    {editing ? 'Hide changes' : 'Change the plan'}
+                </button>
+                <button type="button" class="btn outline danger" onClick={() => setStopping(true)}>Stop this bake</button>
+            </div>
+            {editing && (
+                <Levers levers={record.levers} zone={zone} locked={{ feedRatio: view.locked.feedRatio, doughTemp: view.locked.doughTemp, fridge: view.locked.fridge }}
+                    onChange={(levers) => onChange({ ...record, levers })} />
+            )}
+        </>
+    );
+
+    const stopSheet = stopping && (
+        <ConfirmSheet
+            title="Stop this bake?" body="The plan and any timers will be thrown away. Nothing is added to your log."
+            confirmLabel="Stop this bake" danger onCancel={() => setStopping(false)} onConfirm={() => { setStopping(false); onStop(); }}
+        />
+    );
+
+    if (layout === 'rail') {
+        const stateOf = (id: StepId): StepState => {
+            const st = view.steps.find((x) => x.id === id)!;
+            if (st.status === 'done') return 'done';
+            if (st.status === 'overdue') return 'overdue';
+            return next?.id === id ? 'next' : 'upcoming';
+        };
+        // Each step on the rail is a button that opens in place, as in the classic list. The step that is next is the card above.
+        const railLabel = (step: Step) => {
+            if (step.id === 'carve') return undefined;
+            const s = view.steps.find((x) => x.id === step.id)!;
+            const isNext = next?.id === s.id;
+            const done = s.status === 'done';
+            const open = !isNext && (how[s.id] ?? false);
+            const cls = done ? ' rl-done' : s.status === 'overdue' ? ' rl-late' : '';
+            const title = <span class="rl-name">{s.label}{!done && s.shiftMin !== 0 && <span class="rl-shift"> {signedMin(s.shiftMin)}</span>}</span>;
+            return isNext ? (
+                <div class={`rl-static${cls}`}>{title}<span class="tag">Next up</span></div>
+            ) : (
+                <>
+                    <button type="button" class={`rl-btn${cls}`} aria-expanded={open} aria-controls={`row-${s.id}`} onClick={() => setHow({ ...how, [s.id]: !open })}>
+                        {title}<Chevron />
+                    </button>
+                    {open && <div class="expand" id={`row-${s.id}`}>{expansion(s)}</div>}
+                </>
+            );
+        };
+        return (
+            <div class="live live-rail">
+                <div class="np-bar" role="status">
+                    <div>
+                        <span class="eyebrow">Ready to carve</span>
+                        <strong class="np-when">{when(view.plan.readyToCarve)}</strong>
+                    </div>
+                    <span class="np-len">{next ? `${next.label} ${countdown(view.untilNext!)}` : 'All done'}</span>
+                </div>
+                <div class="np-wide-only"><Timeline plan={view.plan} zone={zone} now={now} /></div>
+                <div class="lr-grid">
+                    <div class="lr-top">{timersEl}{nextEl}{keptEl}</div>
+                    <section class="lr-rail" aria-label="Your progress">
+                        <h2>Your progress</h2>
+                        <RailTimeline plan={view.plan} zone={zone} now={now} state={stateOf} renderLabel={railLabel} />
+                    </section>
+                    <div class="lr-more">{actionsEl}</div>
+                </div>
+                {stopSheet}
+            </div>
+        );
+    }
+
     return (
         <div class="live">
             <Timeline plan={view.plan} zone={zone} now={now} />
-
-            {running && (
-                <section class="panel timers" aria-label="Timers">
-                    {(Object.entries(record.timers ?? {}) as [StepId, number][]).map(([id, end]) => {
-                        const left = end - fast;
-                        const label = view.steps.find((x) => x.id === id)?.label ?? id;
-                        return (
-                            <p class={`timer-row${left <= 0 ? ' up' : ''}`} role="timer" aria-label={`Timer for ${label}`}>
-                                <span class="timer-name">{label}</span>
-                                {left > 0
-                                    ? <><strong class="timer-time">{countdownText(left)}</strong> <span class="hint">left, until {clockOf(end, zone)}</span></>
-                                    : <strong class="timer-time">Time is up</strong>}
-                                {' '}<button type="button" class="btn outline small" onClick={() => clearTimer(id)}>{left > 0 ? 'Stop timer' : 'Clear'}</button>
-                            </p>
-                        );
-                    })}
-                </section>
-            )}
-
-            {next ? (
-                <section class={`panel next-up ${next.status}`} aria-label="Next up">
-                    <p class="eyebrow">Next up</p>
-                    <p class="big">{next.label}</p>
-                    <p class="hint">{when(next.at)} · <strong>{countdown(view.untilNext!)}</strong></p>
-                    {FOLD_IDS.includes(next.id) && (
-                        <ol class="folds" aria-label="Folds">
-                            {view.steps.filter((s) => FOLD_IDS.includes(s.id)).map((s) => (
-                                <li class={s.status === 'done' ? 'done' : s.id === next.id ? 'now' : ''} aria-label={`Fold ${s.id.slice(4)} ${s.status === 'done' ? 'done' : 'to do'}`} />
-                            ))}
-                        </ol>
-                    )}
-                    <button type="button" class="how-toggle" aria-expanded={howOpen(next, true)} aria-controls="next-how" onClick={() => setHow({ ...how, [next.id]: !howOpen(next, true) })}>
-                        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                        {howOpen(next, true) ? 'Hide how-to' : 'Show how-to'}
-                    </button>
-                    {howOpen(next, true) && <div id="next-how">{detail(next)}</div>}
-                    <div class="done-row">
-                        <button type="button" class="btn big-btn" onClick={() => press(next)}>{doneLabel(next)}</button>
-                        <button type="button" class="btn outline clock-btn" aria-label="Done earlier" aria-expanded={picker?.id === next.id} onClick={() => openPicker(next.id, 'earlier')}>
-                            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="M11 6.5V11l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                        </button>
-                    </div>
-                    {picker?.id === next.id && (
-                        <EarlierPicker now={Math.min(clock(), bounds(next.id).hi)} notBefore={bounds(next.id).lo} zone={zone} start={clock()} label="Done earlier" onCancel={() => setPicker(null)} onSave={(ms) => doTick(next.id, ms)} />
-                    )}
-                    {view.freeMs! > 0 && next.status === 'upcoming' && <p class="hint free">You are free for {lengthOf(view.freeMs!)}.</p>}
-                </section>
-            ) : (
-                <section class="panel next-up done" aria-label="Next up">
-                    <p class="eyebrow">All done</p>
-                    <p class="big">Ready to carve {when(view.plan.readyToCarve)}</p>
-                    <p class="hint">Let it cool, then enjoy it.</p>
-                    <button type="button" class="btn big-btn" onClick={onFinish}>Finish this bake</button>
-                </section>
-            )}
-
-            {kept && (() => {
-                const late = view.plan.byId.bake > original.byId.bake;
-                return (
-                    <p class="problems keep" role="status">
-                        You are {lengthOf(Math.abs(view.plan.byId.bake - original.byId.bake))} {late ? 'behind' : 'ahead'}.{' '}
-                        {kept.possible ? (
-                            <>
-                                To bake when you planned, {late ? 'cut' : 'extend'} the fridge to {lengthOf(kept.fridgeHours * 3_600_000)}.{' '}
-                                <button type="button" class="btn outline" onClick={() => onChange({ ...record, levers: withKeptBakeTime(record.levers, kept) })}>Keep my bake time</button>
-                            </>
-                        ) : (
-                            <>The fridge can not go {late ? 'below 8' : 'above 72'} hours, so the bake moves to {when(view.plan.byId.bake)}.</>
-                        )}
-                    </p>
-                );
-            })()}
+            {timersEl}
+            {nextEl}
+            {keptEl}
 
             <section class="panel steps live-steps">
                 <h2>Your progress</h2>
@@ -193,56 +296,15 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                                             {text}<Chevron />
                                         </button>
                                     )}
-                                {open && (
-                                    <div class="expand" id={`row-${s.id}`}>
-                                        {done ? (
-                                            picker?.id === s.id
-                                                ? <EarlierPicker now={Math.min(clock(), bounds(s.id).hi)} notBefore={bounds(s.id).lo} zone={zone} start={s.actualAt!} label={`Change the time for ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
-                                                : (
-                                                    <div class="btn-row">
-                                                        <button type="button" class="btn outline" onClick={() => openPicker(s.id, 'change')}>Change time</button>
-                                                        <button type="button" class="btn outline" onClick={() => undo(s.id)}>Undo</button>
-                                                    </div>
-                                                )
-                                        ) : (
-                                            <>
-                                                {detail(s)}
-                                                <div class="done-row">
-                                                    <button type="button" class="btn big-btn" onClick={() => press(s)}>{doneLabel(s)}</button>
-                                                    <button type="button" class="btn outline clock-btn" aria-label="Done earlier" aria-expanded={picker?.id === s.id} onClick={() => openPicker(s.id, 'earlier')}>
-                                                        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="M11 6.5V11l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                                                    </button>
-                                                </div>
-                                                {picker?.id === s.id && (
-                                                    <EarlierPicker now={Math.min(clock(), bounds(s.id).hi)} notBefore={bounds(s.id).lo} zone={zone} start={clock()} label={`Done earlier: ${s.label}`} onCancel={() => setPicker(null)} onSave={(ms) => doTick(s.id, ms)} />
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                )}
+                                {open && <div class="expand" id={`row-${s.id}`}>{expansion(s)}</div>}
                             </li>
                         );
                     })}
                 </ul>
             </section>
 
-            <div class="actions-row">
-                <button type="button" class="btn outline" onClick={() => setEditing(!editing)} aria-expanded={editing}>
-                    {editing ? 'Hide changes' : 'Change the plan'}
-                </button>
-                <button type="button" class="btn outline danger" onClick={() => setStopping(true)}>Stop this bake</button>
-            </div>
-            {editing && (
-                <Levers levers={record.levers} zone={zone} locked={{ feedRatio: view.locked.feedRatio, doughTemp: view.locked.doughTemp, fridge: view.locked.fridge }}
-                    onChange={(levers) => onChange({ ...record, levers })} />
-            )}
-
-            {stopping && (
-                <ConfirmSheet
-                    title="Stop this bake?" body="The plan and any timers will be thrown away. Nothing is added to your log."
-                    confirmLabel="Stop this bake" danger onCancel={() => setStopping(false)} onConfirm={() => { setStopping(false); onStop(); }}
-                />
-            )}
+            {actionsEl}
+            {stopSheet}
         </div>
     );
 }
