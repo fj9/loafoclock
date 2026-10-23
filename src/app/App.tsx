@@ -133,7 +133,7 @@ export function App() {
     );
 
     return (
-        <div class={`app${tab === 'plan2' ? ' wide' : ''}`}>
+        <div class="app">
             <header class="app-header">
                 <button type="button" class="menu-btn" aria-label="Menu" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>
                     <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none" /></svg>
@@ -162,7 +162,7 @@ export function App() {
                     </button>
                 ))}
             </nav>
-            <main class="app-main">
+            <main class={`app-main${tab === 'plan2' ? '' : ' narrow'}`}>
                 {tab === 'plan' && planPage('classic')}
                 {tab === 'plan2' && planPage('rail')}
                 {tab === 'bake' && bake}

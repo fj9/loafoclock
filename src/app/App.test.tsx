@@ -398,9 +398,9 @@ describe('the New plan tab', () => {
         tab('New plan');
         expect(document.querySelector('.np-bar')!.textContent).toContain('Ready to carve');
         expect(document.querySelectorAll('.rail > li').length).toBeGreaterThan(8);
-        expect(document.querySelector('.app')!.className).toContain('wide');
+        expect(document.querySelector('.app-main')!.className).not.toContain('narrow');
         tab('Plan');
-        expect(document.querySelector('.app')!.className).not.toContain('wide');
+        expect(document.querySelector('.app-main')!.className).toContain('narrow');
     });
 
     it('starts a bake from the New plan tab and opens Bake', () => {

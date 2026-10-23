@@ -39,7 +39,9 @@
 
 /* Wide screens: the timeline across the top, then the levers beside the rail. */
 @media (min-width: 900px) {
-    .app.wide { max-width: 1040px; }
+    /* The frame is this wide on every tab, so nothing jumps when you switch. Pages that are not laid out for it keep a reading width in the middle. */
+    .app { max-width: 1040px; }
+    .app-main.narrow > * { max-width: 600px; margin-left: auto; margin-right: auto; }
     .np-wide-only { display: block; }
     .np-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
     .np-bar { padding: 12px 18px; }
