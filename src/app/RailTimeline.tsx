@@ -1,4 +1,4 @@
-import { isAwake, localDayNumber, startOfLocalDay, type Plan, type Zone } from '../domain/plan';
+import { isAwake, localDayNumber, type Plan, type Zone } from '../domain/plan';
 import { clockOf, lengthOf, shortDate } from './format';
 import { asleepLabel, bedLabel, nightsIn, wakeLabel } from './night';
 
@@ -99,7 +99,7 @@ export function RailTimeline({ plan, zone, now }: Props) {
                 const nowAt = showNow && nextRow && now! >= r.from && now! < nextRow.at ? Math.round(((now! - r.from) / length) * height) : null;
                 return (
                     <li key={r.key} class={r.key === 'carve' ? 'rl-end' : ''}>
-                        {newDay && <p class={`rl-day${nightAt(startOfLocalDay(r.at, zone), zone) ? ' in-night' : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
+                        {newDay && <p class={`rl-day${nightAt(r.at, zone) ? ' in-night' : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
                         <div class={`rl-row${(r.times ?? [r.at]).some((t) => nightAt(t, zone)) ? ' in-night' : ''}`}>
                             <span class="rl-time">{clockOf(r.at, zone)}</span>
                             <span class="rl-node"><i class={`rl-dot${asleep ? ' asleep' : ''}`} /></span>

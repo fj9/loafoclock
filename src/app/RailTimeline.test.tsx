@@ -51,6 +51,23 @@ describe('rail timeline', () => {
         expect(container.querySelectorAll('.rl-night').length).toBeGreaterThanOrEqual(2);
     });
 
+    it('keeps the night in one block: a day heading is tinted only when the step under it is in the night', () => {
+        // The night falls inside the fridge wait and the heading under it is for 6 am, so it is not part of the band.
+        const plan = buildPlan(leversAt(Date.UTC(2026, 9, 23, 5, 25), { fridge: { kind: 'hours', hours: 8.75 } }));
+        const fine = render(<RailTimeline plan={plan} zone="UTC" />);
+        const days = Array.from(fine.container.querySelectorAll('.rl-day'));
+        expect(days.length).toBeGreaterThanOrEqual(2);
+        for (const day of days) expect(day.className.includes('in-night')).toBe(day.nextElementSibling!.className.includes('in-night'));
+        const wake = days.find((d) => d.nextElementSibling!.textContent!.includes('Turn the oven on'))!;
+        expect(wake.className).not.toContain('in-night');
+        cleanup();
+        // Steps in the night: the band runs through the rows and the heading between them.
+        const late = render(<RailTimeline plan={buildPlan(leversAt(Date.UTC(2026, 9, 23, 20, 0)))} zone="UTC" />);
+        const tinted = Array.from(late.container.querySelectorAll('.in-night'));
+        expect(tinted.some((e) => e.className.includes('rl-day'))).toBe(true);
+        expect(tinted.some((e) => e.className.includes('rl-row'))).toBe(true);
+    });
+
     it('gives a short night one label, and a very short one none', () => {
         const { container } = render(<RailTimeline plan={buildPlan(levers)} zone="UTC" />);
         const whole = Array.from(container.querySelectorAll('.rl-night')).filter((n) => !n.className.includes('cut'));
