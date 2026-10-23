@@ -2,9 +2,10 @@
 import { cleanup, render } from '@testing-library/preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { RailTimeline } from './RailTimeline';
+import { setClock12 } from '../domain/clock';
 import { HOUR, buildPlan, leversAt, setWaking } from '../domain/plan';
 
-beforeEach(() => setWaking());
+beforeEach(() => { setWaking(); setClock12(true); });
 afterEach(cleanup);
 
 // Thursday 22 Oct 2026, 10:05 pm UTC
@@ -36,6 +37,30 @@ describe('rail timeline', () => {
         const fridge = container.querySelector('.rl-bar.fridge')!.closest('.rl-gap')!;
         expect(fridge.textContent).toContain('In the fridge · 15 h 15 min');
         expect(fridge.textContent).toContain('Asleep');
+    });
+
+    it('draws the night as a band with bedtime and getting up at its edges', () => {
+        // A shorter stay in the fridge makes the wait, and so the night inside it, tall enough for both labels.
+        const short = buildPlan(leversAt(Date.UTC(2026, 9, 23, 5, 25), { fridge: { kind: 'hours', hours: 8.75 } }));
+        const { container } = render(<RailTimeline plan={short} zone="UTC" />);
+        const fridge = container.querySelector('.rl-bar.fridge')!.closest('.rl-gap')!;
+        const band = fridge.querySelector('.rl-night')!;
+        expect(band.querySelector('.bed')!.textContent).toContain('11:00 pm');
+        expect(band.querySelector('.wake')!.textContent).toContain('6:00 am');
+        expect(fridge.querySelector('.sr-only')!.textContent).toBe('Asleep from 11:00 pm to 6:00 am.');
+        expect(container.querySelectorAll('.rl-night').length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('gives a short night one label, and a very short one none', () => {
+        const { container } = render(<RailTimeline plan={buildPlan(levers)} zone="UTC" />);
+        const whole = Array.from(container.querySelectorAll('.rl-night')).filter((n) => !n.className.includes('cut'));
+        expect(whole.length).toBeGreaterThan(0);
+        const labels = whole.map((n) => ({ h: parseFloat((n as HTMLElement).style.height), text: n.textContent! }));
+        for (const { h, text } of labels) {
+            if (h >= 44) expect(text).toMatch(/Bedtime.*Up/);
+            else if (h >= 26) expect(text).toMatch(/^\s*Asleep 11:00 pm to 6:00 am$/);
+            else expect(text).toBe('');
+        }
     });
 
     it('names each wait once, with its whole length', () => {

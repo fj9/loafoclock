@@ -55,16 +55,37 @@ function totalOf(plan: Plan, wait: Wait): number {
     }
 }
 
-/** True if any of the stretch from `a` to `b` falls in sleeping hours. */
-function overlapsSleep(a: number, b: number, zone: Zone): boolean {
-    const { fromMin, toMin } = getWaking();
-    for (let d = addLocalDays(startOfLocalDay(a, zone), -1, zone); d < b; d = addLocalDays(d, 1, zone)) {
-        const from = atLocalTime(d, toMin, zone);
-        const to = atLocalTime(addLocalDays(d, 1, zone), fromMin, zone);
-        if (from < b && a < to) return true;
-    }
-    return false;
+interface Night {
+    /** The part of the night inside this stretch. */
+    from: number;
+    to: number;
+    /** Where the whole night runs from and to: bedtime and getting up. */
+    bed: number;
+    wake: number;
 }
+
+/** The sleeping hours that fall inside the stretch from `a` to `b`. */
+function nightsIn(a: number, b: number, zone: Zone): Night[] {
+    const { fromMin, toMin } = getWaking();
+    const found: Night[] = [];
+    for (let d = addLocalDays(startOfLocalDay(a, zone), -1, zone); d < b; d = addLocalDays(d, 1, zone)) {
+        const bed = atLocalTime(d, toMin, zone);
+        const wake = atLocalTime(addLocalDays(d, 1, zone), fromMin, zone);
+        if (bed < b && a < wake) found.push({ from: Math.max(a, bed), to: Math.min(b, wake), bed, wake });
+    }
+    return found;
+}
+
+const Moon = () => <svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M11 8.5A5 5 0 0 1 5.5 3a5 5 0 1 0 5.5 5.5z" fill="currentColor" /></svg>;
+const Sunrise = () => (
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+        <path d="M2 11h10M4.5 11a2.5 2.5 0 0 1 5 0M7 3v2M3 5.5l1 1M11 5.5l-1 1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+    </svg>
+);
+
+/** A night band this tall has room for bedtime at the top and getting up at the bottom; a shorter one gets a single label; a very short one none. */
+const TWO_LABELS_PX = 44;
+const ONE_LABEL_PX = 26;
 
 /** A wait is drawn taller the longer it is, but not in proportion: a night in the fridge must not fill the screen. */
 const heightOf = (ms: number) => Math.round(18 + 22 * Math.log2(1 + ms / 3_600_000));
@@ -78,7 +99,7 @@ interface Props {
 
 /**
  * The bake as a list down the page: the time on the left, a rail of coloured waits in the middle and what to do
- * on the right. Days are named where they start, and a moon marks a wait that runs into the night.
+ * on the right. Days are named where they start, and the night is a tinted band behind the waits that run into it.
  */
 export function RailTimeline({ plan, zone, now }: Props) {
     const rows = rowsOf(plan);
@@ -97,7 +118,7 @@ export function RailTimeline({ plan, zone, now }: Props) {
                 const prevWait = i > 0 ? waitAt(plan, (rows[i - 1]!.from + r.at) / 2) : null;
                 const shown = totalOf(plan, wait);
                 const height = heightOf(length);
-                const night = nextRow ? overlapsSleep(r.from, nextRow.at, zone) : false;
+                const nights = nextRow ? nightsIn(r.from, nextRow.at, zone) : [];
                 const name = prevWait === wait ? undefined : WAIT_NAMES[wait];
                 const nowAt = showNow && nextRow && now! >= r.from && now! < nextRow.at ? Math.round(((now! - r.from) / length) * height) : null;
                 return (
@@ -114,12 +135,27 @@ export function RailTimeline({ plan, zone, now }: Props) {
                         </div>
                         {nextRow && (
                             <div class="rl-gap" style={{ height: `${height}px` }}>
-                                <span class="rl-time rl-moon">{night && <><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M11 8.5A5 5 0 0 1 5.5 3a5 5 0 1 0 5.5 5.5z" fill="currentColor" /></svg><span class="sr-only">Asleep</span></>}</span>
+                                <span class="rl-time" />
                                 <span class="rl-node"><i class={`rl-bar ${wait}`} /></span>
                                 <span class="rl-wait">
                                     {name ? `${name} · ${lengthOf(shown)}` : ''}
-                                    {night && <span class="rl-sub">Asleep for part of this</span>}
+                                    {nights.map((n) => <span class="sr-only">Asleep from {clockOf(n.bed, zone)} to {clockOf(n.wake, zone)}.</span>)}
                                 </span>
+                                {nights.map((n) => {
+                                    const top = Math.round(((n.from - r.from) / length) * height);
+                                    const tall = Math.round(((n.to - n.from) / length) * height);
+                                    const whole = n.from === n.bed && n.to === n.wake;
+                                    const showBed = n.from === n.bed && tall >= TWO_LABELS_PX;
+                                    const showWake = n.to === n.wake && tall >= TWO_LABELS_PX;
+                                    const showOne = whole && tall >= ONE_LABEL_PX && tall < TWO_LABELS_PX;
+                                    return (
+                                        <span class={`rl-night${n.from === n.bed ? '' : ' cut-top'}${n.to === n.wake ? '' : ' cut-bottom'}`} style={{ top: `${top}px`, height: `${tall}px` }} aria-hidden="true">
+                                            {showBed && <span class="bed"><Moon /> Bedtime {clockOf(n.bed, zone)}</span>}
+                                            {showWake && <span class="wake"><Sunrise /> Up {clockOf(n.wake, zone)}</span>}
+                                            {showOne && <span class="bed"><Moon /> Asleep {clockOf(n.bed, zone)} to {clockOf(n.wake, zone)}</span>}
+                                        </span>
+                                    );
+                                })}
                                 {nowAt !== null && <span class="rl-now" style={{ top: `${nowAt}px` }}><b>Now</b></span>}
                             </div>
                         )}

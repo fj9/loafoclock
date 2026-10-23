@@ -26,6 +26,7 @@
     --warn: #C98A1B; --warn-ink: #6E4A07; --warn-bg: #F8E7C1; --calc-bg: #F5E4CC;
     --cold-fill: #C9DCEB; --cold-edge: #3F6F99; /* the fridge: cold blue */
     --glow: rgba(154, 74, 34, .25);
+    --night-bg: rgba(127, 119, 221, .13); --night-edge: rgba(127, 119, 221, .4); /* sleeping hours on the rail; a translucent violet reads on both themes */
     --font-display: 'Alfa Slab One', Georgia, 'Times New Roman', serif;
     color-scheme: light;
 }

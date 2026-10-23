@@ -9,7 +9,7 @@
 .np-right > h2 { font-size: var(--fs-md); }
 
 /* The rail: time, rail, text. The time column is sized by the text size so "10:05 am" always fits. */
-.rail { list-style: none; margin: 0 0 16px; padding: 0; }
+.rail { list-style: none; margin: 0 0 16px; padding: 0; isolation: isolate; }
 .rl-row, .rl-gap { display: grid; grid-template-columns: calc(var(--fs-xs) * 5.6) 20px minmax(0, 1fr); column-gap: 8px; }
 .rl-gap { position: relative; }
 .rl-day { margin: 10px 0 6px; padding-top: 6px; border-top: 1px solid var(--line); font-size: var(--fs-xs); font-weight: 700; color: var(--muted); }
@@ -23,7 +23,14 @@
 .rl-sub { display: block; color: var(--muted); font-size: var(--fs-xs); font-weight: 400; }
 .rl-sub.warn { color: var(--danger); font-weight: 700; }
 .rl-wait { display: flex; flex-direction: column; justify-content: center; color: var(--muted); font-size: var(--fs-xs); }
-.rl-moon { display: flex; justify-content: flex-end; align-items: center; padding: 0; }
+
+/* The night: a soft band behind the waits that run into it, with bedtime and getting up at its edges. */
+.rl-night { position: absolute; left: -8px; right: -8px; z-index: -1; background: var(--night-bg); border: 1px solid var(--night-edge); border-radius: var(--radius-md); }
+.rl-night.cut-top { border-top-color: transparent; border-top-left-radius: 0; border-top-right-radius: 0; }
+.rl-night.cut-bottom { border-bottom-color: transparent; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.rl-night span { position: absolute; right: 12px; display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-xs); color: var(--muted); }
+.rl-night .bed { top: 6px; }
+.rl-night .wake { bottom: 6px; }
 
 /* A wait is a bar between two dots, in the same colours as the timeline. */
 .rl-bar { display: block; width: 8px; height: calc(100% + 4px); margin: -2px 0; border-radius: var(--radius-xs); background: var(--line); }
