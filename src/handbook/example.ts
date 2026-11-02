@@ -5,6 +5,7 @@
 //   temp      dough temperature in °C
 //   fridge    hours in the fridge, or none
 //   cooling   30 or 60 minutes (60 if left out)
+//   loaves    1 or 2 (1 if left out); only the amounts change
 import { DEFAULT_WAKING, STEP_ORDER, buildPlan, feedForWait, fitsWakingHours, leversAt, localDayNumber, type Levers, type Plan, type StepId } from '../domain/plan';
 import examples from '../../content/handbook/examples.json';
 
@@ -25,7 +26,8 @@ export function parseExample(spec: string): Levers {
         ...feedChoice,
         doughTemp: Number(kv.temp),
         fridge: kv.fridge === 'none' ? { kind: 'none' } : { kind: 'hours', hours: Number(kv.fridge) },
-        cooling: kv.cooling === '30' ? 30 : 60
+        cooling: kv.cooling === '30' ? 30 : 60,
+        loaves: kv.loaves === '2' ? 2 : 1
     });
 }
 

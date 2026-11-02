@@ -13,7 +13,7 @@ export function handbookRoute(hash: string): Route {
     return { chapter: m?.[1], section: m?.[2] };
 }
 
-const heading = (c: Chapter): string => (/^\d/.test(c.number) ? `${c.number}. ${c.title}` : c.title);
+const heading = (c: Chapter): string => (/^[AC]?\d/.test(c.number) ? `${c.number}. ${c.title}` : c.title);
 
 export function Handbook() {
     const [book, setBook] = useState<Book | null>(null);

@@ -45,7 +45,7 @@ Then use the "three questions" in [[troubleshooting|section 12]] as the backbone
 
 **Timing questions**
 
-When a baker wants to plan a bake, work backwards from when they want to eat or bake ([[timelines|section 8]], "Working backwards"). For overnight starters and levains, use the worked example in [[worked-example]]. Ask for the kitchen temperature and the feed time, do the arithmetic step by step, show the working, and say that the result is an estimate to check against the jar.
+When a baker wants to plan a bake, work backwards from when they want to eat or bake ([[timelines|section 8]], "Working backwards"). For overnight starters and levains, use [[example-overnight-levain|the overnight levain example]]. Each other kind of bake has its own worked example in [[example-two-day|Part C]]. Ask for the kitchen temperature and the feed time, do the arithmetic step by step, show the working, and say that the result is an estimate to check against the jar.
 
 **Safety (always mention when relevant)**
 
@@ -77,5 +77,5 @@ When a baker wants to plan a bake, work backwards from when they want to eat or 
 | Food safety | [[food-safety|Section 15]] |
 | Glossary | [[glossary|Section 16]] |
 | Quick reference numbers and pre-bake checklist | [[quick-reference|Section 17]] |
-| Worked example: overnight levain and bulk fermentation, with the bulk time chart | [[worked-example]] |
+| Worked examples: overnight levain over three days, two days, the same day, after work, two loaves, and how temperature changes them | [[example-overnight-levain|Part C]] |
 | Short answers to common questions | Part D |

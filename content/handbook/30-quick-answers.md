@@ -29,7 +29,7 @@ No. A starter can float and still be weak, and a ripe starter can sink if it has
 
 ## How long should bulk fermentation take?
 
-It depends on the dough temperature, not on the clock. Measure the dough with a probe thermometer just after mixing, then look it up in the chart in [[worked-example#bulk-chart|section C6]]. For example, dough at 24°C needs {{bulk 24}}, dough at 21°C needs {{bulk 21}}, and dough at 27°C needs {{bulk 27}}. These times are for the app's recipe (about {{starterPercent}}% starter); more starter is quicker and less is slower. Always check the actual rise. ([[process#bulk|Section 6, step 5]], and [[worked-example#bulk-chart|section C6]])
+It depends on the dough temperature, not on the clock. Measure the dough with a probe thermometer just after mixing, then look it up in the chart in [[process#bulk|section 6, step 5]]. For example, dough at 24°C needs {{bulk 24}}, dough at 21°C needs {{bulk 21}}, and dough at 27°C needs {{bulk 27}}. These times are for the app's recipe (about {{starterPercent}}% starter); more starter is quicker and less is slower. Always check the actual rise. ([[process#bulk|Section 6, step 5]])
 
 ## How do I know bulk fermentation is finished?
 
@@ -61,7 +61,7 @@ Yes. The most common and predictable method is to shape the dough and put it in 
 
 ## My kitchen is cold. How do I warm the dough?
 
-Use warm water when mixing (see the dough temperature formula in [[levers|section 7]]), and keep the dough somewhere warm: an oven with only the light on, a proving box, near (not on) a radiator, or beside a bowl of warm water in a cooler box. Measure the dough temperature after mixing and use the chart in [[worked-example#bulk-chart|section C6]] for the bulk time. ([[levers|Section 7]])
+Use warm water when mixing (see the dough temperature formula in [[levers|section 7]]), and keep the dough somewhere warm: an oven with only the light on, a proving box, near (not on) a radiator, or beside a bowl of warm water in a cooler box. Measure the dough temperature after mixing and use the chart in [[process#bulk|section 6, step 5]] for the bulk time. ([[levers|Section 7]])
 
 ## How hot should the oven be, and how do I know the bread is done?
 
@@ -81,11 +81,11 @@ Keep it cut side down on a board, or in a linen bag, bread bin or paper bag, for
 
 ## What is a levain, and do I need one?
 
-A levain is a portion of starter built up in a separate jar for one bake, so the main starter jar stays untouched. Many bakers make just enough for the recipe plus a spoonful to keep going. [[worked-example]] shows a worked example for an overnight levain. ([[process#step-1-prepare-the-starter-or-levain|Section 6, step 1]], and [[worked-example]])
+A levain is a portion of starter built up in a separate jar for one bake, so the main starter jar stays untouched. Many bakers make just enough for the recipe plus a spoonful to keep going. [[example-overnight-levain|Part C]] has a worked example for an overnight levain. ([[process#step-1-prepare-the-starter-or-levain|Section 6, step 1]], and [[example-overnight-levain|section C1]])
 
 ## How do I plan an overnight levain?
 
-[[worked-example]] gives a worked example. With 20 g of starter fed at 9pm in a kitchen of about 18°C, a 1:6:6 feed (20 g starter, 120 g flour, 120 g water) peaks at about 8 to 9am with room-temperature water, or at about 3am with 30°C water. For an 8am peak with warm water, feed at about 2am instead. These are estimates, so check the jar. ([[worked-example]])
+[[example-overnight-levain|Section C1]] gives a worked example. With 20 g of starter fed at 9pm in a kitchen of about 18°C, a 1:6:6 feed (20 g starter, 120 g flour, 120 g water) peaks at about 8 to 9am with room-temperature water, or at about 3am with 30°C water. For an 8am peak with warm water, feed at about 2am instead. These are estimates, so check the jar. ([[example-overnight-levain|Section C1]])
 
 ## Can I just follow the times in the recipe?
 

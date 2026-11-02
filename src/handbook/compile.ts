@@ -153,7 +153,7 @@ export function compileHandbook(files: Record<string, string>, options: CompileO
                 if (index < 0) throw new Error(`${where}: [[${cid}#${sid}]] is not a section`);
                 text = `section ${numberOf(chapter, index) || chapter.number}`;
             } else {
-                text = /^\d|^A\d/.test(chapter.number) ? `section ${chapter.number}` : `Part ${chapter.number}`;
+                text = /^[AC]?\d/.test(chapter.number) ? `section ${chapter.number}` : `Part ${chapter.number}`;
             }
             return `[${label ?? text}](${options.href(cid, sid)})`;
         });

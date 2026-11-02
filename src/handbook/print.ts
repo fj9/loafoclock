@@ -55,7 +55,7 @@ th, td { border: 0.5pt solid #C9B79B; padding: 3pt 6pt; text-align: left; vertic
 .compact .rl-dot { width: 10px; height: 10px; border-width: 1.5px; margin-top: 2px; } .compact .rl-time { padding-top: 1px; white-space: nowrap; }
 `;
 
-const chapterHeading = (c: Chapter): string => (/^\d|^A\d/.test(c.number) ? `${c.number}. ${c.title}` : c.title);
+const chapterHeading = (c: Chapter): string => (/^[AC]?\d/.test(c.number) ? `${c.number}. ${c.title}` : c.title);
 
 function renderChapter(c: Chapter, heading: 'h1' | 'h2', withHeading: boolean, render?: PrintOptions['renderFigure']): string {
     const sections = c.sections.map((s) => `<h3 id="${c.id}--${s.id}">${s.number ? `<span class="num">${s.number}</span> ` : ''}${escape(s.title)}</h3>\n${drawFigure(s.html, render)}`).join('\n');

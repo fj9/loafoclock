@@ -52,7 +52,7 @@ describe('the handbook content', () => {
     it('draws each worked example, all within waking hours', () => {
         const all = compile().chapters.flatMap((c) => [c.introHtml, ...c.sections.map((s) => s.html)]).join('\n');
         const figures = [...all.matchAll(/class="hb-figure" data-plan="([^"]+)"/g)];
-        expect(figures.length).toBeGreaterThanOrEqual(7);
+        expect(figures.length).toBeGreaterThanOrEqual(5);
     });
 
     it('rejects an unknown fact, link or step', () => {

@@ -11,7 +11,7 @@ function settings(plan: ExamplePlan): string {
     const l = plan.levers;
     const wait = lengthOf(plan.byId.starterIn - plan.byId.feed);
     const fridge = l.fridge.kind === 'none' ? 'no fridge, proofed on the counter' : `${lengthOf(plan.fridgeHours * 3_600_000)} in the fridge`;
-    return `1:${l.ratioN}:${l.ratioN} feed, starter added ${wait} after feeding, dough ${l.doughTemp}°C, ${fridge}, ${l.cooling} minutes cooling.`;
+    return `${l.loaves === 2 ? 'Two loaves, ' : ''}1:${l.ratioN}:${l.ratioN} feed, starter added ${wait} after feeding, dough ${l.doughTemp}°C, ${fridge}, ${l.cooling} minutes cooling.`;
 }
 
 /** When it is ready to carve, and the whole bake on one bar. */

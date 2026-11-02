@@ -1,6 +1,6 @@
 // The numbers the handbook quotes, taken from the same code that builds the plan, so they cannot drift.
 // The markdown names them as {{name}} or {{name value}}.
-import { FEEDING_RATIOS, ASSUMED_RATIO_N, findRatio } from '../domain/feeding';
+import { FEEDING_RATIOS, ASSUMED_RATIO_N, feedAt, findRatio } from '../domain/feeding';
 import { BAKE_TIMES, LOAF_SIZES, OVEN_C, DEFAULT_HYDRATION, recipeFor, type LoafSize } from '../domain/recipe';
 import { BULK_TABLE, COOLING_CHOICES, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bulkFor } from '../domain/plan';
 import { KEEP_BACK_G } from '../domain/stepGuide';
@@ -50,6 +50,21 @@ export const FACTS: Facts = {
         return `about ${hoursText(row.hours)}, until the dough has risen by about ${row.rise}%`;
     },
     /** {{feedWindow 6}}: how long a 1:6:6 feed takes to be ready. */
+    /** {{amountsTable 2}}: the amounts for one regular loaf and for that many. */
+    amountsTable: (arg) => {
+        const n = Number(arg);
+        const one = recipeFor({ loaves: 1, size: 'regular' });
+        const many = recipeFor({ loaves: n, size: 'regular' });
+        const rows = ([['Flour', 'flour'], ['Water', 'water'], ['Active starter', 'starter'], ['Salt', 'salt'], ['Honey', 'honey'], ['Extra virgin olive oil', 'oil']] as const)
+            .map(([label, key]) => [label, `${one[key]} g`, `${many[key]} g`]);
+        return table(['Ingredient', 'One regular loaf', `${n} regular loaves`], rows);
+    },
+    /** {{feedFor 6 2}}: the feed for that ratio and number of regular loaves, with the starter to keep back included. */
+    feedFor: (arg) => {
+        const [ratio = '', loaves = '1'] = arg.split(/\s+/);
+        const f = feedAt(Number(ratio), recipeFor({ loaves: Number(loaves), size: 'regular' }).starter + KEEP_BACK_G);
+        return `${f.starter} g starter, ${f.flour} g flour and ${f.water} g water`;
+    },
     /** {{planFigure afterWork}}: a worked example (named in examples.json) drawn as the app draws a plan. */
     planFigure: (arg) => {
         const spec = exampleSpec(arg);
