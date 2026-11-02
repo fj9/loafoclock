@@ -13,7 +13,7 @@ Feed in the morning, mix in the afternoon and shape at bedtime, then leave the d
 
 **Day 1.** Feed the starter at {{time afterWork feed}}, before you leave. It is ready when you are back, so the flour and water go together at {{time afterWork autolyse}} and the starter goes in at {{time afterWork starterIn}}. The folds are over by {{time afterWork fold4}}, and the dough is shaped at {{time afterWork finalShape}} and goes into the fridge.
 
-**Day 2.** Turn the oven on at {{time afterWork ovenOn}} and bake at {{time afterWork bake}}. The loaf is ready to carve at {{time afterWork carve}}.
+**Day 2.** Turn the oven on at {{time afterWork ovenOn}} and bake at {{time afterWork bake}}. The loaf is ready to carve at {{time afterWork carve}}, {{fromFeed afterWork}} after the first feed.
 
 ## Working backwards {#working-backwards}
 

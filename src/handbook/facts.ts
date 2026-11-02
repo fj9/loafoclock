@@ -6,7 +6,7 @@ import { BULK_TABLE, COOLING_CHOICES, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_M
 import { KEEP_BACK_G } from '../domain/stepGuide';
 import { REST_DEFAULT, REST_MAX, REST_MIN } from '../domain/timing';
 import type { Facts } from './compile';
-import { exampleFor, exampleSpec, exampleStepAt, exampleTimeAt } from './example';
+import { exampleFor, exampleLength, exampleSpec, exampleStepAt, exampleTimeAt } from './example';
 
 const table = (head: string[], rows: string[][]): string =>
     [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.join(' | ')} |`)].join('\n');
@@ -75,6 +75,18 @@ export const FACTS: Facts = {
     at: (arg) => {
         const [name = '', step = ''] = arg.split(/\s+/);
         return exampleStepAt(name, step);
+    },
+    /** {{fromFeed afterWork}}: how long the example takes from the first feed to ready to carve, "36 h 30 min". */
+    fromFeed: (arg) => exampleLength(arg),
+    /** {{feedChoices 6 7 8}}: the feed for each ratio, with the starter chosen so each makes the same amount: one regular loaf plus the starter to keep. */
+    feedChoices: (arg) => {
+        const need = recipeFor({ loaves: 1, size: 'regular' }).starter + KEEP_BACK_G;
+        const rows = arg.split(/\s+/).map((n) => {
+            const f = feedAt(Number(n), need);
+            const r = findRatio(`1:${n}:${n}`)!;
+            return [`1:${n}:${n}`, `${f.starter} g`, `${f.flour} g`, `${f.water} g`, `${f.total} g`, `${r.minHours} to ${r.maxHours} hours`];
+        });
+        return table(['Feed', 'Starter', 'Flour', 'Water', 'Makes', 'Ready after'], rows);
     },
     /** {{time afterWork ovenOn}}: just the time, "5:15 pm". */
     time: (arg) => {

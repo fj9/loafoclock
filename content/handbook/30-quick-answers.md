@@ -85,7 +85,7 @@ A levain is a portion of starter built up in a separate jar for one bake, so the
 
 ## How do I plan an overnight levain?
 
-[[example-overnight-levain|Section C1]] gives a worked example. With 20 g of starter fed at 9pm in a kitchen of about 18°C, a 1:6:6 feed (20 g starter, 120 g flour, 120 g water) peaks at about 8 to 9am with room-temperature water, or at about 3am with 30°C water. For an 8am peak with warm water, feed at about 2am instead. These are estimates, so check the jar. ([[example-overnight-levain|Section C1]])
+[[example-overnight-levain|Section C1]] gives a worked example. Feed {{feedFor 7 1}} (a 1:7:7) at 9 pm and it is ready in {{feedWindow 7}}, so you can mix at about 8 am. In a cooler kitchen it takes a couple of hours longer, and warm water gives it a head start. These are estimates, so check the jar. ([[example-overnight-levain|Section C1]])
 
 ## Can I just follow the times in the recipe?
 

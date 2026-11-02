@@ -13,7 +13,7 @@ The starter is fed in the morning, the dough is mixed in the afternoon and the w
 
 **Day 1.** Feed the starter at {{time twoDay feed}}. The flour and water go together at {{time twoDay autolyse}}, and the starter goes in at {{time twoDay starterIn}}, when it is at its peak. The salt, honey and oil follow at {{time twoDay salt}}, then four folds, {{foldGap}} minutes apart. At 24°C the bulk takes about 7 hours, so the dough is shaped in the evening and goes into the fridge at {{time twoDay fridge}}.
 
-**Day 2.** Turn the oven on at {{time twoDay ovenOn}} and bake straight from the fridge at {{time twoDay bake}}. The loaf is out at {{time twoDay out}}, and ready to carve an hour later, at {{time twoDay carve}}.
+**Day 2.** Turn the oven on at {{time twoDay ovenOn}} and bake straight from the fridge at {{time twoDay bake}}. The loaf is out at {{time twoDay out}}, and ready to carve an hour later, at {{time twoDay carve}}, {{fromFeed twoDay}} after the first feed.
 
 ## The feed
 

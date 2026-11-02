@@ -68,3 +68,11 @@ export function exampleTimeAt(name: string, step: string): string {
     if (!(STEP_ORDER as readonly string[]).includes(step)) throw new Error(`"${step}" is not a step`);
     return clockText(exampleFor(exampleSpec(name)).byId[step as StepId]);
 }
+
+/** "36 h 30 min": how long a named example takes from the first feed to ready to carve. */
+export function exampleLength(name: string): string {
+    const plan = exampleFor(exampleSpec(name));
+    const minutes = Math.round((plan.readyToCarve - plan.byId.feed) / 60_000);
+    const h = Math.floor(minutes / 60), m = minutes % 60;
+    return m ? `${h} h ${m} min` : `${h} h`;
+}

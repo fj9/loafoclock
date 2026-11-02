@@ -66,6 +66,7 @@ describe('the worked examples', () => {
         const days = Array.from(document.querySelectorAll('.hb-plan .rl-day')).map((e) => e.textContent);
         expect(days).toContain('Day 2');
         expect(days.some((d) => /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/.test(d ?? ''))).toBe(false);
-        expect(document.querySelector('.hb-plan .np-when')!.textContent).toMatch(/^Day \d, \d{1,2}:\d{2} (am|pm)$/);
+        expect(document.querySelector('.hb-plan .np-bar')).toBeNull(); // when it is ready to carve is in the text
+        expect(document.querySelector('.hb-plan .timeline')).not.toBeNull();
     });
 });

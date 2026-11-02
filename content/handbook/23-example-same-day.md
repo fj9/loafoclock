@@ -11,7 +11,7 @@ A quick feed, a warm dough and 2 to 3 hours of proofing on the counter, all in o
 
 {{planFigure sameDay}}
 
-Everything happens on the one day. The starter is fed at {{time sameDay feed}} and goes in at {{time sameDay starterIn}}. A warm dough (27°C) bulks for about 5 and a half hours, so it is shaped at {{time sameDay finalShape}} and proofs on the counter. The oven goes on at {{time sameDay ovenOn}}, the loaf goes in at {{time sameDay bake}} and it is ready to carve at {{time sameDay carve}}.
+Everything happens on the one day. The starter is fed at {{time sameDay feed}} and goes in at {{time sameDay starterIn}}. A warm dough (27°C) bulks for about 5 and a half hours, so it is shaped at {{time sameDay finalShape}} and proofs on the counter. The oven goes on at {{time sameDay ovenOn}}, the loaf goes in at {{time sameDay bake}} and it is ready to carve at {{time sameDay carve}}, {{fromFeed sameDay}} after the first feed.
 
 ## The feed
 

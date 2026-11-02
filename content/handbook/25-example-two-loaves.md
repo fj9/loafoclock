@@ -27,7 +27,7 @@ This is the first loaf, with 16 hours in the fridge. It is the same plan as the 
 
 **Day 2.** The flour and water go together at {{time twoLoavesFirst autolyse}}, the starter goes in at {{time twoLoavesFirst starterIn}} and the salt, honey and oil at {{time twoLoavesFirst salt}}. After four folds the bulk runs on into the afternoon. When it is done, at {{time twoLoavesFirst preShape}}, divide the dough in half, pre-shape both pieces, rest them {{benchRest}} minutes and shape them. Both go into the fridge at {{time twoLoavesFirst fridge}}.
 
-**Day 3.** Bake the first loaf and leave the other in the fridge. Turn the oven on at {{time twoLoavesFirst ovenOn}}, bake at {{time twoLoavesFirst bake}}, and carve at {{time twoLoavesFirst carve}}.
+**Day 3.** Bake the first loaf and leave the other in the fridge. Turn the oven on at {{time twoLoavesFirst ovenOn}}, bake at {{time twoLoavesFirst bake}}, and carve at {{time twoLoavesFirst carve}}, {{fromFeed twoLoavesFirst}} after the first feed.
 
 ## The second loaf
 
