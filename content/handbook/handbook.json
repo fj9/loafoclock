@@ -1,0 +1,10 @@
+{
+    "title": "The Sourdough Handbook",
+    "subtitle": "A practical guide to making sourdough bread, from first starter to fixing a bad loaf, with a worked example for planning an overnight levain.",
+    "parts": [
+        { "id": "A", "title": "Start here", "intro": "How to use this handbook with an AI assistant, and what to note while you bake." },
+        { "id": "B", "title": "The Sourdough Guide", "intro": "A practical reference for making sourdough bread, from first starter to troubleshooting a bad loaf. Figures are typical ranges, not laws: every kitchen, flour and starter behaves a little differently, so treat the dough (not the clock) as the final judge." },
+        { "id": "C", "title": "Worked example", "intro": "Planning an overnight levain and the bulk fermentation that follows it, with the bulk time chart." },
+        { "id": "D", "title": "Quick answers", "intro": "Short answers to common questions." }
+    ]
+}

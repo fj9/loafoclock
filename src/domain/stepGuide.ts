@@ -1,6 +1,6 @@
 // What to do at each step: the amounts, the instructions and any timer.
 import { feedAt } from './feeding';
-import { bakePlan, recipeFor } from './recipe';
+import { OVEN_C, bakePlan, recipeFor } from './recipe';
 import type { TipKey } from './tips';
 import { STEP_MINUTES, type Levers, type Plan, type StepId } from './plan';
 
@@ -102,7 +102,7 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
         case 'ovenOn':
             return {
                 title: 'Turn the oven on', ingredients: [],
-                instructions: ['Put the Dutch oven in the oven and heat it to 240°C'],
+                instructions: [`Put the Dutch oven in the oven and heat it to ${OVEN_C.lidOn}°C`],
                 timerMinutes: STEP_MINUTES.preheat, tip: 'baking'
             };
         case 'bake': {

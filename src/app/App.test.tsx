@@ -179,7 +179,7 @@ describe('footer', () => {
             expect(link.href).toBe('https://ko-fi.com/fjnine');
             expect(link.rel).toContain('noopener');
         }
-        for (const name of ['Settings', 'Help', 'About']) {
+        for (const name of ['Settings', 'Handbook', 'Help', 'About']) {
             menu(name);
             expect(screen.getByRole('link', { name: 'Tip me on Ko-fi' })).toBeTruthy();
         }
@@ -189,12 +189,12 @@ describe('footer', () => {
 describe('tabs, the menu and the bake', () => {
     const plant = () => localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
 
-    it('has Plan, New plan, Bake, New bake and Log as tabs, with Settings, Help and About in the menu', () => {
+    it('has Plan, New plan, Bake, New bake and Log as tabs, with Settings, Handbook, Help and About in the menu', () => {
         render(<App classicTabs />);
         expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanNew planBakeNew bakeLog$/);
         expect(screen.queryByRole('button', { name: 'Settings' })).toBeNull();
         fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-        expect(screen.getAllByRole('menuitem').map((e) => e.textContent)).toEqual(['Settings', 'Help', 'About']);
+        expect(screen.getAllByRole('menuitem').map((e) => e.textContent)).toEqual(['Settings', 'Handbook', 'Help', 'About']);
         fireEvent.keyDown(document, { key: 'Escape' });
         expect(screen.queryByRole('menu')).toBeNull();
     });

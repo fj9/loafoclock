@@ -11,6 +11,7 @@ import { BreadAt } from './BreadAt';
 import { ConfirmSheet } from './ConfirmSheet';
 import { EmptyState } from './EmptyState';
 import { FinishForm } from './FinishForm';
+import { Handbook } from './Handbook';
 import { Help } from './Help';
 import { LiveView } from './LiveView';
 import { LogScreen } from './LogScreen';
@@ -24,18 +25,20 @@ import { UpdatePrompt } from './UpdatePrompt';
 const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
 
 type Mode = 'now' | 'at';
-type Tab = 'plan' | 'plan2' | 'bake' | 'bake2' | 'log' | 'settings' | 'help' | 'about';
+type Tab = 'plan' | 'plan2' | 'bake' | 'bake2' | 'log' | 'settings' | 'handbook' | 'help' | 'about';
 /**
  * The classic Plan and Bake pages are still in the code but not shown. Switch this on to bring their tabs back beside the
  * new ones, which are then called New plan and New bake so the two can be told apart.
  */
 export const SHOW_CLASSIC_TABS = false;
+/** Links to the handbook are hash links that start like this. */
+const HANDBOOK_HASH = '#/handbook';
 
 const tabsFor = (classic: boolean): ReadonlyArray<[Tab, string]> => (classic
     ? [['plan', 'Plan'], ['plan2', 'New plan'], ['bake', 'Bake'], ['bake2', 'New bake'], ['log', 'Log']]
     : [['plan2', 'Plan'], ['bake2', 'Bake'], ['log', 'Log']]);
 /** The rest live in the menu at the top right. */
-const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['help', 'Help'], ['about', 'About']];
+const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['handbook', 'Handbook'], ['help', 'Help'], ['about', 'About']];
 
 export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean } = {}) {
     const [now] = useState(startingPoint);
@@ -46,7 +49,7 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
     // The Plan and Bake the app goes to: the new ones, unless the classic tabs are switched on.
     const planHome: Tab = classicTabs ? 'plan' : 'plan2';
     const bakeHome: Tab = classicTabs ? 'bake' : 'bake2';
-    const [tab, setTab] = useState<Tab>(() => (loadLive() ? bakeHome : planHome));
+    const [tab, setTab] = useState<Tab>(() => (window.location.hash.startsWith(HANDBOOK_HASH) ? 'handbook' : loadLive() ? bakeHome : planHome));
     const [menuOpen, setMenuOpen] = useState(false);
     // A plan waiting for you to confirm that it replaces the bake in progress.
     const [replacing, setReplacing] = useState<{ levers: Levers; actuals: Actuals; layout: Layout } | null>(null);
@@ -74,6 +77,15 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
         return () => document.removeEventListener('keydown', esc);
     }, [menuOpen]);
     const go = (t: Tab) => { setTab(t); setMenuOpen(false); };
+    // A link to the handbook, from anywhere, opens it. Leaving it takes its place in the address with it.
+    useEffect(() => {
+        const onHash = () => { if (window.location.hash.startsWith(HANDBOOK_HASH)) setTab('handbook'); };
+        window.addEventListener('hashchange', onHash);
+        return () => window.removeEventListener('hashchange', onHash);
+    }, []);
+    useEffect(() => {
+        try { if (tab !== 'handbook' && window.location.hash.startsWith(HANDBOOK_HASH)) window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch { /* no history here */ }
+    }, [tab]);
 
     const update = (rec: LiveRecord) => { saveLive(rec); setLive(rec); };
     // A plan started from the New plan tab opens the New bake tab, and one from the classic Plan opens the classic Bake.
@@ -188,6 +200,7 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
                     />
                 )}
                 {tab === 'settings' && <SettingsScreen settings={settings} onChange={change} />}
+                {tab === 'handbook' && <Handbook />}
                 {tab === 'help' && <Help />}
                 {tab === 'about' && <About />}
             </main>

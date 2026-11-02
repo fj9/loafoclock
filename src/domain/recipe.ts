@@ -71,14 +71,16 @@ export function loafDescription(bake: BakeChoices): string {
 }
 
 // Bake times: the large loaf needs longer in the pot than the regular one
-interface BakeTimes {
+export interface BakeTimes {
     lidOn: string;
     lidOff: string;
     total: string;
     minutes: number;
 }
 
-const BAKE_TIMES: Record<LoafSize, BakeTimes> = {
+export const OVEN_C = { lidOn: 240, lidOff: 230 } as const;
+
+export const BAKE_TIMES: Record<LoafSize, BakeTimes> = {
     regular: { lidOn: '20', lidOff: '20-25', total: '40-45 minutes total', minutes: 45 },
     large: { lidOn: '25', lidOff: '25', total: '50 minutes total', minutes: 50 }
 };
@@ -89,11 +91,11 @@ export function bakePlan(bake: { size?: string }): { duration: string; totalMinu
         duration: t.total,
         totalMinutes: t.minutes, // the longer end, for planning
         instructions: [
-            'Preheat oven and Dutch oven to 240°C',
+            `Preheat oven and Dutch oven to ${OVEN_C.lidOn}°C`,
             'Place dough directly from fridge into hot Dutch oven',
             'Add ice to Dutch oven for steam',
-            `Bake at 240°C for ${t.lidOn} minutes (lid on)`,
-            `Reduce to 230°C and bake ${t.lidOff === '25' ? '25 more' : `${t.lidOff} more`} minutes (lid off)`
+            `Bake at ${OVEN_C.lidOn}°C for ${t.lidOn} minutes (lid on)`,
+            `Reduce to ${OVEN_C.lidOff}°C and bake ${t.lidOff === '25' ? '25 more' : `${t.lidOff} more`} minutes (lid off)`
         ]
     };
 }
