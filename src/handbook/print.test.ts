@@ -32,9 +32,9 @@ describe('the printed handbook', () => {
     });
 
     it('draws the worked examples when it is given the means to', () => {
-        const page = buildPrintHtml(book, { edition: 'reader', date: 'today', renderFigure: (spec) => `<figure data-drawn="${spec.length}">drawn</figure>` });
+        const page = buildPrintHtml(book, { edition: 'reader', date: 'today', renderFigure: (spec) => ({ top: `<p data-drawn="${spec.length}">top</p>`, side: '<p>side</p>' }) });
         expect(page).not.toContain('class="hb-figure"');
-        expect((page.match(/<figure data-drawn/g) ?? []).length).toBeGreaterThanOrEqual(7);
+        expect((page.match(/<p data-drawn/g) ?? []).length).toBeGreaterThanOrEqual(7);
     });
 
     it('quotes the same bulk chart as the app', () => {

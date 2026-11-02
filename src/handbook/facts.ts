@@ -6,7 +6,7 @@ import { BULK_TABLE, COOLING_CHOICES, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_M
 import { KEEP_BACK_G } from '../domain/stepGuide';
 import { REST_DEFAULT, REST_MAX, REST_MIN } from '../domain/timing';
 import type { Facts } from './compile';
-import { exampleFor, exampleSpec, exampleStepAt } from './example';
+import { exampleFor, exampleSpec, exampleStepAt, exampleTimeAt } from './example';
 
 const table = (head: string[], rows: string[][]): string =>
     [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.join(' | ')} |`)].join('\n');
@@ -60,6 +60,11 @@ export const FACTS: Facts = {
     at: (arg) => {
         const [name = '', step = ''] = arg.split(/\s+/);
         return exampleStepAt(name, step);
+    },
+    /** {{time afterWork ovenOn}}: just the time, "5:15 pm". */
+    time: (arg) => {
+        const [name = '', step = ''] = arg.split(/\s+/);
+        return exampleTimeAt(name, step);
     },
     feedWindow: (arg) => `${ratioOf(arg).minHours} to ${ratioOf(arg).maxHours} hours`,
 

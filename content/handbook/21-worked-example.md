@@ -100,19 +100,23 @@ All times are estimates, based on the charts used in this plan and the kitchen a
 
 ## The whole bake, as the app plans it
 
-Here is the same bake in the app. The kitchen is warmer than 18°C (the app's feed windows are for about 21 to 22°C), so the feed is a 1:7:7 and the starter goes in {{feedWindow 7}} later. Fed at 9 pm, it is ready for the autolyse at {{at overnightLevain autolyse}}, and the starter goes in at {{at overnightLevain starterIn}}. With dough at 24°C the bulk takes about 7 hours, so the dough is shaped at {{at overnightLevain finalShape}} and goes into the fridge. The loaf is ready to carve at {{at overnightLevain carve}}.
+The same bake in the app. The kitchen is warmer than 18°C (the app's feed windows are for about 21 to 22°C), so the feed is a 1:7:7.
 
 {{planFigure overnightLevain}}
 
+Fed at 9 pm, the starter is ready for the autolyse at {{at overnightLevain autolyse}} and goes in at {{at overnightLevain starterIn}}: a 1:7:7 is ready in {{feedWindow 7}}. With dough at 24°C the bulk takes about 7 hours, so the dough is shaped at {{at overnightLevain finalShape}} and goes into the fridge. The loaf is ready to carve at {{at overnightLevain carve}}.
+
 ## The same bake with a cooler dough
 
-A dough at 22°C bulks for 10 hours instead of 7 and needs to rise by 50%. It still fits the day: the starter goes in at {{at coolDough starterIn}}, bulk ends at {{at coolDough preShape}}, and the dough is in the fridge by {{at coolDough fridge}}. The bake is at {{at coolDough bake}}. The cooler dough is slower and more sour. Measure it, because the chart in [[worked-example#bulk-chart|section C6]] decides how long the bulk takes.
+A dough at 22°C bulks for 10 hours instead of 7 and needs to rise by 50%.
 
 {{planFigure coolDough}}
 
-## Working backwards
+It still fits the day: the starter goes in at {{at coolDough starterIn}}, the bulk ends at {{at coolDough preShape}}, and the dough is in the fridge by {{at coolDough fridge}}. The bake is at {{at coolDough bake}}. The cooler dough is slower and more sour. Measure it, because the chart in [[worked-example#bulk-chart|section C6]] decides how long the bulk takes.
 
-You want to carve at about {{at afterWork carve}}, after work. Start there and subtract each step in turn. The numbers below are the app's, so you can check them against the plan.
+## Working backwards {#working-backwards}
+
+You want to carve at about {{at afterWork carve}}, after work. Start there and subtract each step in turn. The numbers are the app's, so you can check them against the plan.
 
 {{planFigure afterWork}}
 

@@ -60,3 +60,9 @@ export function exampleStepAt(name: string, step: string): string {
     const at = plan.byId[step as StepId];
     return `${dayName(localDayNumber(at) - localDayNumber(plan.byId.feed))}, ${clockText(at)}`;
 }
+
+/** "5:15 pm": just the time of a step of a named example, for text that is already under a Day heading. */
+export function exampleTimeAt(name: string, step: string): string {
+    if (!(STEP_ORDER as readonly string[]).includes(step)) throw new Error(`"${step}" is not a step`);
+    return clockText(exampleFor(exampleSpec(name)).byId[step as StepId]);
+}

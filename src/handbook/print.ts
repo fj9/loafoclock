@@ -13,8 +13,11 @@ export interface PrintOptions {
     date: string;
     /** Where the heading font can be read from, as a URL. Left out, the headings use a serif. */
     fontUrl?: string;
-    /** Draws a worked example (as HTML) from its settings. Left out, examples are left as they are. */
-    renderFigure?: (spec: string) => string;
+    /**
+     * Draws a worked example (as HTML) from its settings, in two pieces: the ready-to-carve bar and timeline, which run the
+     * full width, and the steps rail, which goes in a narrow column beside the text that follows. Left out, examples are left as they are.
+     */
+    renderFigure?: (spec: string) => { top: string; side: string };
     /** The app's own styles, so the examples look as they do in the app. */
     appCss?: string;
 }
@@ -41,28 +44,45 @@ th, td { border: 0.5pt solid #C9B79B; padding: 3pt 6pt; text-align: left; vertic
 .toc ul { list-style: none; padding: 0; } .toc li { margin: 0; }
 .part { break-before: page; } .chapter { margin-top: 10pt; }
 .num { color: #6B5B51; }
-.hb-plan { break-inside: auto; margin: 6pt 0 12pt; padding: 8pt; border: 0.5pt solid #C9B79B; border-radius: 6pt; } .hb-plan .rail li { break-inside: avoid; }
+.hb-plan { margin: 6pt 0 8pt; padding: 0; border: 0; break-inside: avoid; } .hb-plan .np-bar { margin: 0 0 5pt; padding: 5pt 12pt; } .hb-plan .np-when { font-size: 12pt; } .hb-plan .timeline { margin: 0 0 4pt; } .hb-plan .tl-track { height: 112px; } .hb-plan .tl-sleep span { display: none; }
+.hb-plan figcaption { margin: 0 0 4pt; font-size: 8.5pt; color: #6B5B51; }
+.fig-grid { display: grid; grid-template-columns: 62mm 1fr; column-gap: 8mm; align-items: start; margin-bottom: 8pt; }
+.fig-side { break-inside: avoid; } .fig-text > :first-child { margin-top: 0; }
+.compact .rail { margin: 0; } .compact .rl-row, .compact .rl-gap { grid-template-columns: 44px 14px 1fr; column-gap: 4px; }
+.compact .rl-gap { height: auto !important; min-height: 12px; } .compact .rl-night { display: none; }
+.compact .rl-time, .compact .rl-wait, .compact .rl-day { font-size: 7pt; } .compact .rl-label { font-size: 8.5pt; line-height: 1.25; }
+.compact .rl-day { padding: 7px 0 2px; } .compact .rl-day::after { top: 3px; }
+.compact .rl-dot { width: 10px; height: 10px; border-width: 1.5px; margin-top: 2px; } .compact .rl-time { padding-top: 1px; white-space: nowrap; }
 `;
 
 const chapterHeading = (c: Chapter): string => (/^\d|^A\d/.test(c.number) ? `${c.number}. ${c.title}` : c.title);
 
-function renderChapter(c: Chapter, heading: 'h1' | 'h2', withHeading: boolean): string {
-    const sections = c.sections.map((s) => `<h3 id="${c.id}--${s.id}">${s.number ? `<span class="num">${s.number}</span> ` : ''}${escape(s.title)}</h3>\n${s.html}`).join('\n');
+function renderChapter(c: Chapter, heading: 'h1' | 'h2', withHeading: boolean, render?: PrintOptions['renderFigure']): string {
+    const sections = c.sections.map((s) => `<h3 id="${c.id}--${s.id}">${s.number ? `<span class="num">${s.number}</span> ` : ''}${escape(s.title)}</h3>\n${drawFigure(s.html, render)}`).join('\n');
     return `<section class="chapter" id="${c.id}">${withHeading ? `<${heading}>${escape(chapterHeading(c))}</${heading}>` : ''}\n${c.introHtml}\n${sections}\n</section>`;
 }
 
-function renderPart(part: Part, chapters: Chapter[]): string {
+function renderPart(part: Part, chapters: Chapter[], render?: PrintOptions['renderFigure']): string {
     if (chapters.length === 0) return '';
     // A part with a single chapter (the worked example, the quick answers) is that chapter: one heading, not two.
     if (chapters.length === 1) {
         const c = chapters[0]!;
-        return `<div class="part" id="part-${part.id}"><h1>Part ${part.id}: ${escape(c.title)}</h1>\n${renderChapter(c, 'h2', false)}</div>`;
+        return `<div class="part" id="part-${part.id}"><h1>Part ${part.id}: ${escape(c.title)}</h1>\n${renderChapter(c, 'h2', false, render)}</div>`;
     }
-    return `<div class="part" id="part-${part.id}"><h1>Part ${part.id}: ${escape(part.title)}</h1><p>${escape(part.intro)}</p>\n${chapters.map((c) => renderChapter(c, 'h2', true)).join('\n')}</div>`;
+    return `<div class="part" id="part-${part.id}"><h1>Part ${part.id}: ${escape(part.title)}</h1><p>${escape(part.intro)}</p>\n${chapters.map((c) => renderChapter(c, 'h2', true, render)).join('\n')}</div>`;
 }
 
-const drawFigures = (html: string, render?: (spec: string) => string): string =>
-    render ? html.replace(/<div class="hb-figure" data-plan="([^"]+)"><\/div>/g, (_all, spec: string) => render(spec)) : html;
+const FIGURE = /<div class="hb-figure" data-plan="([^"]+)"><\/div>/;
+
+/** A section with a worked example: text, then the bar across the page, then the rail down the left with the rest of the text beside it. */
+function drawFigure(html: string, render?: (spec: string) => { top: string; side: string }): string {
+    const m = render ? FIGURE.exec(html) : null;
+    if (!render || !m) return html;
+    const { top, side } = render(m[1]!);
+    const before = html.slice(0, m.index);
+    const after = html.slice(m.index + m[0].length);
+    return `${before}<figure class="hb-plan">${top}</figure><div class="fig-grid"><div class="fig-side compact">${side}</div><div class="fig-text">${after}</div></div>`;
+}
 
 export function buildPrintHtml(book: Handbook, options: PrintOptions): string {
     const chapters = book.chapters.filter((c) => options.edition === 'ai' || c.audience === 'all');
@@ -80,7 +100,7 @@ export function buildPrintHtml(book: Handbook, options: PrintOptions): string {
 ${boxes}
 <p class="meta">From the Loaf O'Clock app. Compiled ${escape(options.date)}. All times and temperatures are estimates: judge by the dough, not the clock.</p></div>
 <div class="toc"><h2>Contents</h2>\n${toc}</div>
-${drawFigures(parts.map((p) => renderPart(p.part, p.chapters)).join('\n'), options.renderFigure)}
+${parts.map((p) => renderPart(p.part, p.chapters, options.renderFigure)).join('\n')}
 </body></html>
 `;
 }
