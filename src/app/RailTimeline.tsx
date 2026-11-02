@@ -21,7 +21,7 @@ const rowsOf = (plan: Plan): Row[] => plan.steps.map((s) => ({ key: s.id, label:
 function waitAt(plan: Plan, mid: number): Wait {
     const b = plan.byId;
     if (mid >= b.feed && mid < b.starterIn) return 'rising';
-    if (mid >= b.starterIn && mid < plan.bulkEnd) return 'bulk';
+    if (mid >= b.salt && mid < plan.bulkEnd) return 'bulk'; // bulk is counted from the salt going in
     // The dough stays in the fridge while the oven heats up, until it goes in.
     if (mid >= b.fridge && mid < b.bake) return plan.levers.fridge.kind === 'none' ? 'proof' : 'fridge';
     if (mid >= b.bake && mid < b.out) return 'bake';
@@ -34,7 +34,7 @@ function totalOf(plan: Plan, wait: Wait): number {
     const b = plan.byId;
     switch (wait) {
         case 'rising': return b.starterIn - b.feed;
-        case 'bulk': return plan.bulkEnd - b.starterIn;
+        case 'bulk': return plan.bulkEnd - b.salt;
         case 'fridge': case 'proof': return b.bake - b.fridge;
         case 'bake': return b.out - b.bake;
         case 'cool': return b.carve - b.out;

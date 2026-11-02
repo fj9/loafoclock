@@ -96,7 +96,6 @@ export function bakePlan(bake: { size?: string }): { duration: string; totalMinu
         instructions: [
             `Preheat oven and Dutch oven to ${OVEN_C.lidOn}°C`,
             'Place dough directly from fridge into hot Dutch oven',
-            'Add ice to Dutch oven for steam',
             `Bake at ${OVEN_C.lidOn}°C for ${t.lidOn} minutes (lid on)`,
             `Reduce to ${OVEN_C.lidOff}°C and bake ${t.lidOff === '25' ? '25 more' : `${t.lidOff} more`} minutes (lid off)`
         ]

@@ -38,7 +38,7 @@ describe('the printed handbook', () => {
     });
 
     it('quotes the same bulk chart as the app', () => {
-        expect(html('reader')).toContain('<td>5h 30m</td>');
+        expect(html('reader')).toContain('<td>3–5</td>');
         expect(html('reader')).toContain('<td>75%</td>');
     });
 });

@@ -2,7 +2,7 @@
 // The markdown names them as {{name}} or {{name value}}.
 import { FEEDING_RATIOS, ASSUMED_RATIO_N, feedAt, findRatio } from '../domain/feeding';
 import { BAKE_TIMES, LOAF_SIZES, OVEN_C, DEFAULT_HYDRATION, recipeFor, type LoafSize } from '../domain/recipe';
-import { BULK_TABLE, COOLING_CHOICES, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bulkFor } from '../domain/plan';
+import { BULK_TABLE, BULK_TOO_COOL, BULK_TOO_WARM, COOLING_CHOICES, FINAL_PROOF_TABLE, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bulkFor, finalProofFor, hoursRangeText } from '../domain/plan';
 import { KEEP_BACK_G } from '../domain/stepGuide';
 import { REST_DEFAULT, REST_MAX, REST_MIN } from '../domain/timing';
 import type { Facts } from './compile';
@@ -11,16 +11,9 @@ import { exampleFor, exampleLength, exampleSpec, exampleStepAt, exampleTimeAt } 
 const table = (head: string[], rows: string[][]): string =>
     [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.join(' | ')} |`)].join('\n');
 
-const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? '' : 's'}`;
-
-/** 5.5 is "5 and a half hours", 7 is "7 hours". */
-function hoursText(h: number): string {
-    const whole = Math.floor(h);
-    return h === whole ? plural(h, 'hour') : `${whole} and a half hours`;
-}
-
-/** 5.5 is "5h 30m", the style the bulk chart has always used. */
-const hm = (h: number): string => `${Math.floor(h)}h ${String(Math.round((h % 1) * 60)).padStart(2, '0')}m`;
+/** 1.5 and 2 are "1.5–2", the style the tables use for a range. */
+const dashRange = (r: { minHours: number; maxHours: number }): string =>
+    r.minHours === r.maxHours ? `${r.maxHours}` : `${r.minHours}–${r.maxHours}`;
 
 const sizes = Object.keys(LOAF_SIZES) as LoafSize[];
 const ratioOf = (arg: string) => {
@@ -31,7 +24,8 @@ const ratioOf = (arg: string) => {
 
 export const FACTS: Facts = {
     // ---- Tables ----
-    bulkTable: table(['Dough temperature', 'Bulk time', 'Target rise'], BULK_TABLE.map((r) => [`${r.temp}°C`, hm(r.hours), `${r.rise}%`])),
+    bulkTable: table(['Dough temperature', 'Bulk time (hours)', 'Target rise'], BULK_TABLE.map((r) => [`${r.temp}°C`, dashRange(r), `${r.rise}%`])),
+    finalProofTable: table(['Room temperature', 'Final proof (hours)'], FINAL_PROOF_TABLE.map((r) => [`${r.temp}°C`, dashRange(r)])),
     feedTable: table(['Feed (starter : flour : water)', 'Ready after'], FEEDING_RATIOS.map((r) => [r.ratio, `${r.minHours} to ${r.maxHours} hours`])),
     recipeTable: table(
         ['Ingredient', ...sizes.map((s) => `${LOAF_SIZES[s].label} loaf (${LOAF_SIZES[s].note})`)],
@@ -47,8 +41,10 @@ export const FACTS: Facts = {
     /** {{bulk 24}}: the bulk for a dough at 24°C. */
     bulk: (arg) => {
         const row = bulkFor(Number(arg));
-        return `about ${hoursText(row.hours)}, until the dough has risen by about ${row.rise}%`;
+        return `about ${hoursRangeText(row)} hours, until the dough has risen by about ${row.rise}%`;
     },
+    /** {{finalProof 24}}: the final proof at room temperature for a room at 24°C. */
+    finalProof: (arg) => `about ${hoursRangeText(finalProofFor(Number(arg)))} hours`,
     /** {{feedWindow 6}}: how long a 1:6:6 feed takes to be ready. */
     /** {{amountsTable 2}}: the amounts for one regular loaf and for that many. */
     amountsTable: (arg) => {
@@ -96,6 +92,10 @@ export const FACTS: Facts = {
     feedWindow: (arg) => `${ratioOf(arg).minHours} to ${ratioOf(arg).maxHours} hours`,
 
     // ---- Single values ----
+    bulkTooCool: BULK_TOO_COOL,
+    bulkTooWarm: BULK_TOO_WARM,
+    bulkCoolest: `${BULK_TABLE[BULK_TABLE.length - 1]!.temp}`,
+    bulkWarmest: `${BULK_TABLE[0]!.temp}`,
     standardFeed: `1:${ASSUMED_RATIO_N}:${ASSUMED_RATIO_N}`,
     keepBack: `${KEEP_BACK_G}`,
     hydration: `${DEFAULT_HYDRATION}`,

@@ -1,0 +1,15 @@
+{
+    "status": "draft, not yet verified against test bakes",
+    "note": "Room temperature (°C) to hours of final proof for shaped dough that skips the fridge. For a ripe, active starter. Much shorter than bulk: check early. Cue first (puffy, and the poke test springs back slowly), clock second.",
+    "rows": [
+        { "temp": 32, "minHours": 0.5, "maxHours": 1 },
+        { "temp": 30, "minHours": 0.5, "maxHours": 1 },
+        { "temp": 28, "minHours": 1, "maxHours": 1.5 },
+        { "temp": 26, "minHours": 1, "maxHours": 1.5 },
+        { "temp": 24, "minHours": 1, "maxHours": 2 },
+        { "temp": 22, "minHours": 1.5, "maxHours": 2.5 },
+        { "temp": 20, "minHours": 1.5, "maxHours": 3 },
+        { "temp": 18, "minHours": 2, "maxHours": 3.5 },
+        { "temp": 16, "minHours": 2.5, "maxHours": 4 }
+    ]
+}

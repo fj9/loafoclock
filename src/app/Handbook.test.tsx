@@ -25,7 +25,7 @@ describe('the Handbook page', () => {
         expect(await screen.findByRole('link', { name: '6. The process, step by step' })).toBeTruthy();
         expect(screen.queryByText(/Briefing for the AI assistant/)).toBeNull();
         window.location.hash = '#/handbook/levers';
-        expect(await screen.findByRole('heading', { name: '7. The three levers: feed ratio, temperature, cold retard' })).toBeTruthy();
+        expect(await screen.findByRole('heading', { name: '7. The three levers: feed ratio, temperature, fridge proof' })).toBeTruthy();
         expect(screen.getByRole('link', { name: 'All of the handbook' })).toBeTruthy();
     });
 
@@ -33,7 +33,7 @@ describe('the Handbook page', () => {
         window.location.hash = '#/handbook/process/bulk';
         render(<App />);
         expect(await screen.findByRole('heading', { name: 'Step 5: Bulk fermentation (the first rise)' })).toBeTruthy();
-        expect(screen.getAllByText('5h 30m', { selector: 'td' }).length).toBe(2); // 26 and 27°C
+        expect(screen.getAllByText('3–5', { selector: 'td' }).length).toBe(1); // 24°C
     });
 
     it('takes its address with it when you leave', async () => {

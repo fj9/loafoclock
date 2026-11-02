@@ -1,5 +1,5 @@
 // The plan: a chain of steps on real moments, built forward from the levers.
-import { STEP_MINUTES, bakeMinutesFor, bulkFor, ratioFor, type Levers } from './levers';
+import { STEP_MINUTES, bakeMinutesFor, bulkFor, counterProofMinutes, ratioFor, type Levers } from './levers';
 import { HOUR, MINUTE } from './time';
 
 export type StepId =
@@ -80,9 +80,9 @@ export function buildPlan(levers: Levers, actuals: Actuals = {}): Plan {
     const fold3 = actuals.fold3 ?? fold2 + gap;
     const fold4 = actuals.fold4 ?? fold3 + gap;
 
-    // Bulk is counted from the starter going in. A late fold moves the later folds, not the end of bulk
-    // (unless the last fold is so late that bulk would end before it has had its half hour).
-    const bulkEnd = Math.max(starterIn + bulk.hours * HOUR, fold4 + gap);
+    // Bulk is counted from the salt going in, for the longer end of the range. A late fold moves the later folds,
+    // not the end of bulk (unless the last fold is so late that bulk would end before it has had its half hour).
+    const bulkEnd = Math.max(salt + bulk.hours * HOUR, fold4 + gap);
     const preShape = actuals.preShape ?? bulkEnd;
     const finalShape = actuals.finalShape ?? preShape + STEP_MINUTES.preShape * MINUTE;
     const fridge = actuals.fridge ?? finalShape + STEP_MINUTES.finalShape * MINUTE;
@@ -91,7 +91,7 @@ export function buildPlan(levers: Levers, actuals: Actuals = {}): Plan {
     let bake: number;
     if (actuals.bake !== undefined) bake = actuals.bake;
     else if (actuals.ovenOn !== undefined) bake = actuals.ovenOn + STEP_MINUTES.preheat * MINUTE;
-    else bake = fridge + (noFridge ? STEP_MINUTES.counterProof * MINUTE : (levers.fridge as { hours: number }).hours * HOUR);
+    else bake = fridge + (noFridge ? counterProofMinutes(levers.doughTemp) * MINUTE : (levers.fridge as { hours: number }).hours * HOUR);
     const ovenOn = actuals.ovenOn ?? bake - STEP_MINUTES.preheat * MINUTE;
     const out = actuals.out ?? bake + bakeMinutesFor(levers.size) * MINUTE;
     const carve = out + levers.cooling * MINUTE;

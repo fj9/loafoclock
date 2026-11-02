@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import bake from '../../data/bake.json';
 import bulk from '../../data/bulk.json';
+import finalProof from '../../data/final-proof.json';
 import feeding from '../../data/feeding-ratios.json';
 import recipe from '../../data/recipe.json';
 import timing from '../../data/timing.json';
@@ -23,9 +24,32 @@ describe('data tables', () => {
         const temps = bulk.rows.map((r) => r.temp);
         expect(temps).toEqual([...temps].sort((a, b) => b - a));
         expect(new Set(temps).size).toBe(temps.length);
-        expect(rising(bulk.rows.map((r) => r.hours))).toBe(true);
+        expect(rising(bulk.rows.map((r) => r.minHours))).toBe(true);
+        expect(rising(bulk.rows.map((r) => r.maxHours))).toBe(true);
         expect(rising(bulk.rows.map((r) => r.rise))).toBe(true);
-        for (const r of bulk.rows) expect(r.hours).toBeGreaterThan(0);
+        for (const r of bulk.rows) {
+            expect(r.minHours).toBeGreaterThan(0);
+            expect(r.maxHours).toBeGreaterThanOrEqual(r.minHours);
+        }
+        expect(bulk.tooCool).not.toBe('');
+        expect(bulk.tooWarm).not.toBe('');
+    });
+
+    it('final proof rows go from warm to cool and take longer as the room cools, and are shorter than bulk', () => {
+        const temps = finalProof.rows.map((r) => r.temp);
+        expect(temps).toEqual([...temps].sort((a, b) => b - a));
+        expect(new Set(temps).size).toBe(temps.length);
+        expect(rising(finalProof.rows.map((r) => r.minHours))).toBe(true);
+        expect(rising(finalProof.rows.map((r) => r.maxHours))).toBe(true);
+        for (const r of finalProof.rows) {
+            expect(r.minHours).toBeGreaterThan(0);
+            expect(r.maxHours).toBeGreaterThanOrEqual(r.minHours);
+        }
+    });
+
+    it('both tables are marked as drafts until they are checked against test bakes', () => {
+        expect(bulk.status).toMatch(/draft/);
+        expect(finalProof.status).toMatch(/draft/);
     });
 
     it('recipe sizes, hydrations and rounding are usable', () => {

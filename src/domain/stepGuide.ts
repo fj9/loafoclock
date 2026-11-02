@@ -3,7 +3,7 @@ import recipeData from '../../data/recipe.json';
 import { feedAt } from './feeding';
 import { OVEN_C, bakePlan, recipeFor } from './recipe';
 import type { TipKey } from './tips';
-import { STEP_MINUTES, type Levers, type Plan, type StepId } from './plan';
+import { STEP_MINUTES, bulkFor, counterProofMinutes, finalProofFor, hoursRangeText, type Levers, type Plan, type StepId } from './plan';
 
 export interface Guide {
     title: string;
@@ -56,13 +56,13 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
             return {
                 title: 'Add the starter', ingredients: [`${r.starter}g active starter`],
                 instructions: ['Add the active starter to the dough', 'Mix until fully incorporated', `Rest for ${rest(l.fermentolyseMin)}`],
-                note: 'This marks the start of bulk fermentation.', timerMinutes: l.fermentolyseMin, tip: 'fermentolyse'
+                timerMinutes: l.fermentolyseMin, tip: 'fermentolyse'
             };
         case 'salt':
             return {
                 title: 'Add salt, honey and oil', ingredients: [`${r.salt}g salt`, `${r.honey}g honey`, `${r.oil}g extra virgin olive oil`],
                 instructions: ['Add the salt, honey and olive oil', 'Work them into the dough until evenly distributed', `Rest the dough for ${STEP_MINUTES.saltRest} minutes`],
-                timerMinutes: STEP_MINUTES.saltRest, tip: 'enrichments'
+                note: 'This marks the start of bulk fermentation.', timerMinutes: STEP_MINUTES.saltRest, tip: 'enrichments'
             };
         case 'fold1': case 'fold2': case 'fold3': case 'fold4': {
             const n = Number(id.slice(4));
@@ -80,7 +80,7 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
                     `Check the dough has risen about ${plan.bulkRise}% and looks puffy, wobbly and bubbly`,
                     'Pre-shape it into a loose round to build structure', `Let it rest on the bench for ${STEP_MINUTES.preShape} minutes`
                 ],
-                note: `At ${l.doughTemp}°C bulk takes about ${plan.bulkHours} hours from adding the starter. Go by the dough, not the clock.`,
+                note: `At ${l.doughTemp}°C bulk takes roughly ${hoursRangeText(bulkFor(l.doughTemp))} hours from adding the salt. Go by the dough, not the clock.`,
                 timerMinutes: STEP_MINUTES.preShape, tip: 'preShape'
             };
         case 'finalShape':
@@ -92,8 +92,8 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
             return l.fridge.kind === 'none'
                 ? {
                     title: 'Proof on the counter', ingredients: [],
-                    instructions: ['Leave the shaped dough on the counter for about 2 to 3 hours', 'Poke it gently: it should spring back slowly'],
-                    note: 'Skipping the fridge is quicker but gives a less sourdough loaf.', timerMinutes: STEP_MINUTES.counterProof
+                    instructions: [`Leave the shaped dough on the counter for about ${hoursRangeText(finalProofFor(l.doughTemp))} hours, and check it early`, 'It should look puffy, and when you poke it gently it should spring back slowly'],
+                    note: 'Skipping the fridge is quicker but gives a less sourdough loaf. Go by the dough first and the clock second.', timerMinutes: counterProofMinutes(l.doughTemp)
                 }
                 : {
                     title: 'Into the fridge', ingredients: [],

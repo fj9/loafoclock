@@ -9,11 +9,12 @@ const LONDON = 'Europe/London';
 const at = (mo: number, d: number, h: number, m = 0) => zonedToMs({ year: 2026, month: mo, day: d, hour: h, minute: m }, LONDON);
 
 describe('carve range', () => {
-    it('the fastest is about 20 hours and skipping the fridge saves about 14', () => {
+    it('the fastest is about 17 and a half hours and skipping the fridge saves about 7', () => {
         const r = carveRange(0, { cooling: 30 });
-        expect(totalHours(r.fastest)).toBeCloseTo(19.5, 6);
+        // 4 h feed + 1 h fermentolyse + 2.5 h to the end of the folds (a 32°C bulk is shorter than the folds) + 45 min shaping + 8 h fridge + 45 min bake + 30 min cooling
+        expect(totalHours(r.fastest)).toBeCloseTo(17.5, 6);
         const saved = totalHours(r.fastest) - totalHours(r.noFridge);
-        expect(saved).toBeCloseTo(8 - 2.5, 6);
+        expect(saved).toBeCloseTo(8 - 1, 6); // the fastest dough is 32°C, so its counter proof is 1 hour
         expect(totalHours(r.slowest)).toBeGreaterThan(totalHours(r.fastest) + 50);
     });
     it('nothing is faster than the fastest with the fridge', () => {

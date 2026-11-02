@@ -1,6 +1,6 @@
 import { DEFAULT_HYDRATION, HYDRATIONS, LOAF_SIZES, type LoafSize } from '../domain/recipe';
 import {
-    COOLING_CHOICES, COOLEST_TEMP, WAIT_MAX_HOURS, WAIT_MIN_HOURS, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, bulkFor, isQuickFeed, ratioFor,
+    COOLING_CHOICES, COOLEST_TEMP, WAIT_MAX_HOURS, WAIT_MIN_HOURS, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, WARMEST_TEMP, bulkFor, finalProofFor, hoursRangeText, isQuickFeed, ratioFor,
     buildPlan, feedForWait, nudgeFridge, waitHoursOf, type Levers as LeverSet, type Zone
 } from '../domain/plan';
 import { useRef } from 'preact/hooks';
@@ -62,9 +62,9 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
 
             <div class="lever">
                 <div class="lever-head"><label for="lv-temp">Dough temperature</label> <Tip name="doughTemp" /></div>
-                <input id="lv-temp" type="range" min={COOLEST_TEMP} max={WARMEST_TEMP} step={0.5} value={levers.doughTemp} disabled={locked.doughTemp}
+                <input id="lv-temp" type="range" min={COOLEST_TEMP} max={WARMEST_TEMP} step={1} value={levers.doughTemp} disabled={locked.doughTemp}
                     onInput={(e) => set({ doughTemp: Number((e.target as HTMLInputElement).value) })} />
-                <output>{levers.doughTemp}°C: bulk takes about {hoursText(bulk.hours)}</output>
+                <output>{levers.doughTemp}°C: bulk takes about {hoursRangeText(bulk)} hours from the salt, until it has risen {bulk.rise}%</output>
             </div>
 
             <div class="lever">
@@ -88,7 +88,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
                         </button>
                     </p>
                 )}
-                {skipped && <p class="hint">No fridge: shape, then bake after about 2 to 3 hours. It saves a lot of time but makes a less sourdough loaf.</p>}
+                {skipped && <p class="hint">No fridge: shape, then proof on the counter for about {hoursRangeText(finalProofFor(levers.doughTemp))} hours (check early; the dough temperature stands in for your room temperature), then bake. It saves a lot of time but makes a less sourdough loaf.</p>}
             </div>
 
             </>)}

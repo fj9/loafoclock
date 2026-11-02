@@ -102,7 +102,7 @@ export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props
     const carveW = labelWidth('Bake', false);
     wanted.push({ text: 'Bake', left: x(b.carve) + 7 - carveW, width: carveW });
     const bars: Array<[number, number, string, string]> = [
-        [b.feed, b.starterIn, 'Starter rising', 'rising'], [b.starterIn, plan.bulkEnd, 'Bulk', 'bulk'],
+        [b.feed, b.starterIn, 'Starter rising', 'rising'], [b.salt, plan.bulkEnd, 'Bulk', 'bulk'],
         [b.fridge, b.ovenOn, noFridge ? 'Proof' : 'Fridge', noFridge ? 'proof' : 'fridge']
     ];
     for (const [from, to, text, swatch] of bars) {
@@ -128,7 +128,7 @@ export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props
                         <div class="tl-day" style={{ left: `${left}px` }}>{dayLabel ? dayLabel(localDayNumber(d + 12 * HOUR, zone) - localDayNumber(b.feed, zone)) : `${weekdayOf(d + 12 * HOUR, zone)} ${partsOf(d + 12 * HOUR, zone).day}`}</div>
                     ))}
                     {seg(b.feed, b.starterIn, 'rising', 'Starter rising')}
-                    {seg(b.starterIn, plan.bulkEnd, 'bulk', 'Bulk fermentation')}
+                    {seg(b.salt, plan.bulkEnd, 'bulk', 'Bulk fermentation')}
                     {noFridge ? seg(b.fridge, b.ovenOn, 'proof', 'Proofing') : brk ? (
                         <div class="tl-break" style={{ left: `${brk.x0}px`, width: `${brk.x1 - brk.x0}px` }} title="In the fridge">
                             <span class="tl-break-time">{lengthOf(b.ovenOn - b.fridge)}</span>

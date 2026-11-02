@@ -40,7 +40,7 @@ describe('rail timeline', () => {
 
     it('draws the night as a band with bedtime and getting up at its edges', () => {
         // A shorter stay in the fridge makes the wait, and so the night inside it, tall enough for both labels.
-        const short = buildPlan(leversAt(Date.UTC(2026, 9, 23, 5, 25), { fridge: { kind: 'hours', hours: 8.75 } }));
+        const short = buildPlan(leversAt(Date.UTC(2026, 9, 23, 6, 25), { fridge: { kind: 'hours', hours: 8.75 } }));
         const { container } = render(<RailTimeline plan={short} zone="UTC" />);
         const fridge = container.querySelector('.rl-bar.fridge')!.closest('.rl-gap')!;
         const band = fridge.querySelector('.rl-night')!;
@@ -52,7 +52,7 @@ describe('rail timeline', () => {
 
     it('keeps the night in one block: a day heading is tinted only when the step under it is in the night', () => {
         // The night falls inside the fridge wait and the heading under it is for 6 am, so it is not part of the band.
-        const plan = buildPlan(leversAt(Date.UTC(2026, 9, 23, 5, 25), { fridge: { kind: 'hours', hours: 8.75 } }));
+        const plan = buildPlan(leversAt(Date.UTC(2026, 9, 23, 6, 25), { fridge: { kind: 'hours', hours: 8.75 } }));
         const fine = render(<RailTimeline plan={plan} zone="UTC" />);
         const days = Array.from(fine.container.querySelectorAll('.rl-day'));
         expect(days.length).toBeGreaterThanOrEqual(2);
@@ -85,7 +85,7 @@ describe('rail timeline', () => {
 
     it('leaves out a sliver of night too short to hold a rounded corner, and the step beside it closes the band', () => {
         // The loaf goes in at 5:40 am, twenty minutes before getting up: the wait after it has only a sliver of night.
-        const plan = buildPlan(leversAt(Date.UTC(2026, 9, 23, 9, 55), { ratioN: 1, fridge: { kind: 'hours', hours: 8 } }));
+        const plan = buildPlan(leversAt(Date.UTC(2026, 9, 23, 10, 55), { ratioN: 1, fridge: { kind: 'hours', hours: 8 } }));
         const { container } = render(<RailTimeline plan={plan} zone="UTC" />);
         const heights = Array.from(container.querySelectorAll('.rl-night')).map((n) => parseFloat((n as HTMLElement).style.height));
         expect(heights.length).toBeGreaterThan(0);

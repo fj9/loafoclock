@@ -6,8 +6,7 @@
         "foldCount": 4,
         "preShape": 30,
         "finalShape": 15,
-        "preheat": 45,
-        "counterProof": 150
+        "preheat": 45
     },
     "rest": { "min": 30, "max": 60, "default": 60 },
     "foldDelayAfterRestMin": 30,
