@@ -2,6 +2,7 @@ import { guideFor } from '../domain/stepGuide';
 import type { Plan, StepId, Zone } from '../domain/plan';
 import { TIPS } from '../domain/tips';
 import { clockOf } from './format';
+import { LearnMore } from './LearnMore';
 
 interface Props {
     id: StepId;
@@ -23,6 +24,7 @@ export function StepDetail({ id, plan, zone }: Props) {
             )}
             <ol class="instructions">{guide.instructions.map((i) => <li>{i}</li>)}</ol>
             {guide.note && <p class="hint">{guide.note}</p>}
+            <LearnMore step={id} />
         </div>
     );
 }

@@ -20,6 +20,9 @@ export function FinishForm({ entry, onSave, onSkip }: Props) {
                     <button type="button" class={`chip${outcome === o ? ' on' : ''}`} aria-pressed={outcome === o} onClick={() => setOutcome(outcome === o ? undefined : o)}>{o}</button>
                 ))}
             </div>
+            {(outcome === 'Fair' || outcome === 'Poor') && (
+                <p class="hint">Not the loaf you hoped for? <a href="#/handbook/troubleshooting">The troubleshooting guide</a> matches what you saw to a likely cause. Note what you saw below.</p>
+            )}
             <div class="lever">
                 <label for="log-notes">Notes</label>
                 <textarea id="log-notes" rows={3} value={notes} onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)} />

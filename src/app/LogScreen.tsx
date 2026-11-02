@@ -54,6 +54,7 @@ export function LogScreen({ entries, onRepeat, onRemove, onAdd, oldCount, onImpo
                             {e.fridgeHours ? ` · fridge ${Math.round(e.fridgeHours * 10) / 10} h` : ''}
                         </p>
                         {e.notes && <p>{e.notes}</p>}
+                        {(e.outcome === 'Fair' || e.outcome === 'Poor') && <p class="hint">Not the loaf you hoped for? <a href="#/handbook/troubleshooting">The troubleshooting guide</a> matches what you saw to a likely cause.</p>}
                         <div class="actions-row">
                             <button type="button" class="btn outline" onClick={() => onRepeat(e)}>Repeat this bake</button>
                             <button type="button" class="btn outline danger" onClick={() => setRemoving(i)}>Remove</button>

@@ -49,7 +49,7 @@ When a baker wants to plan a bake, work backwards from when they want to eat or 
 
 **Safety (always mention when relevant)**
 
-- A lidded cast-iron pot at 240 to 250°C causes serious burns. Remind the baker to use thick oven gloves and have a heat-safe surface ready.
+- A lidded cast-iron pot at 240°C causes serious burns. Remind the baker to use thick oven gloves and have a heat-safe surface ready.
 - Fuzzy mould of any colour, or pink or orange streaks, on a starter means throw it all away and start again. Grey or dark liquid (hooch) and a dark skin are harmless.
 - Do not eat raw dough, and wash hands and surfaces after handling raw flour or dough.
 - Do not screw the starter jar lid on tightly, because gas pressure can crack glass.
@@ -64,7 +64,7 @@ When a baker wants to plan a bake, work backwards from when they want to eat or 
 | Ingredients and equipment | [[ingredients|Section 2]] |
 | Making and looking after a starter; feed ratios; ready-to-use signs; starter problems | [[starter|Section 3]] (3.2 to 3.8) |
 | Baker's percentages and hydration | [[percentages|Section 4]] |
-| A reliable base recipe | [[recipe|Section 5]] |
+| The recipe the app uses | [[recipe|Section 5]] |
 | The process, step by step, including bulk fermentation and proofing | [[process|Section 6]] |
 | Feed ratio, temperature and fridge (the three levers); dough temperature formula | [[levers|Section 7]] |
 | Example timelines; planning backwards | [[timelines|Section 8]] |
@@ -79,5 +79,3 @@ When a baker wants to plan a bake, work backwards from when they want to eat or 
 | Quick reference numbers and pre-bake checklist | [[quick-reference|Section 17]] |
 | Worked example: overnight levain and bulk fermentation, with the bulk time chart | [[worked-example]] |
 | Short answers to common questions | Part D |
-
-A practical reference for making sourdough bread, from first starter to troubleshooting a bad loaf. Figures are typical ranges, not laws: every kitchen, flour and starter behaves a little differently, so treat the dough (not the clock) as the final judge.
