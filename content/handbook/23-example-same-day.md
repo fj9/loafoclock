@@ -1,7 +1,7 @@
 ---
 id: example-same-day
 number: C3
-title: Same day, no fridge
+title: All in a day, low sour
 part: C
 ---
 

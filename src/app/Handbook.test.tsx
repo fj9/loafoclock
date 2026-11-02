@@ -61,7 +61,7 @@ describe('the worked examples', () => {
     it('are drawn as the planner draws a plan, with days counted from Day 1', async () => {
         window.location.hash = '#/handbook/example-two-day';
         render(<App />);
-        await screen.findByRole('heading', { name: 'C2. Two days, everything in one day' });
+        await screen.findByRole('heading', { name: 'C2. Two days, all work on Day 1, bake Day 2' });
         await waitFor(() => expect(document.querySelectorAll('.hb-plan').length).toBeGreaterThanOrEqual(1));
         const days = Array.from(document.querySelectorAll('.hb-plan .rl-day')).map((e) => e.textContent);
         expect(days).toContain('Day 2');

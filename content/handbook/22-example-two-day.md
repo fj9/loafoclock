@@ -1,7 +1,7 @@
 ---
 id: example-two-day
 number: C2
-title: Two days, everything in one day
+title: Two days, all work on Day 1, bake Day 2
 part: C
 ---
 
