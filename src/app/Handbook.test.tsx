@@ -49,8 +49,9 @@ describe('the PDF downloads', () => {
     it('suggest the handbook\'s own file names', async () => {
         render(<App />);
         menu('Handbook');
+        await screen.findByRole('link', { name: '1. The big picture' }); // the handbook has loaded
         for (const name of ['Loaf-o-clock-sourdough-handbook.pdf', 'Loaf-o-clock-sourdough-handbook-for-ai.pdf']) {
-            const link = (await screen.findAllByRole('link')).find((a) => a.getAttribute('href') === name)!;
+            const link = screen.getAllByRole('link').find((a) => a.getAttribute('href') === name)!;
             expect(link.getAttribute('download')).toBe(name);
         }
     });
