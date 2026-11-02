@@ -1,5 +1,7 @@
 // Starter feeding maths. Ratios are starter : flour : water by weight, e.g. 1:6:6.
-// Rise times are hours to peak at about 21-22°C.
+// Rise times are hours to peak at about 21-22°C. The numbers are in data/feeding-ratios.json.
+import feedingData from '../../data/feeding-ratios.json';
+import timing from '../../data/timing.json';
 
 export interface FeedingRatio {
     n: number;
@@ -8,21 +10,10 @@ export interface FeedingRatio {
     maxHours: number;
 }
 
-export const FEEDING_RATIOS: readonly FeedingRatio[] = [
-    { n: 1, ratio: '1:1:1', minHours: 4, maxHours: 6 },
-    { n: 2, ratio: '1:2:2', minHours: 5, maxHours: 7 },
-    { n: 3, ratio: '1:3:3', minHours: 6, maxHours: 8 },
-    { n: 4, ratio: '1:4:4', minHours: 7, maxHours: 9 },
-    { n: 5, ratio: '1:5:5', minHours: 8, maxHours: 10 },
-    { n: 6, ratio: '1:6:6', minHours: 9, maxHours: 11 },
-    { n: 7, ratio: '1:7:7', minHours: 10, maxHours: 12 },
-    { n: 8, ratio: '1:8:8', minHours: 11, maxHours: 13 },
-    { n: 9, ratio: '1:9:9', minHours: 12, maxHours: 14 },
-    { n: 10, ratio: '1:10:10', minHours: 13, maxHours: 16 }
-];
+export const FEEDING_RATIOS: readonly FeedingRatio[] = feedingData.ratios.map((r) => ({ ...r, ratio: `1:${r.n}:${r.n}` }));
 
 // The standard feed: the one to prefer, and the one a small amount of starter is stretched with
-export const ASSUMED_RATIO_N = 6;
+export const ASSUMED_RATIO_N = feedingData.standardN;
 
 export const findRatio = (ratio: string): FeedingRatio | undefined => FEEDING_RATIOS.find((r) => r.ratio === ratio);
 export const riseLabel = (r: FeedingRatio): string => `${r.minHours}-${r.maxHours} hrs`;
@@ -178,8 +169,8 @@ export function planAlreadyFed({ feedTime, ratio }: { feedTime: string; ratio: s
 }
 
 // Hours when most people would rather be asleep: 23:00 up to (not including) 06:00
-export const AWKWARD_FROM = 23 * 60;
-export const AWKWARD_TO = 6 * 60;
+export const AWKWARD_FROM = timing.awkwardHours.from * 60;
+export const AWKWARD_TO = timing.awkwardHours.to * 60;
 export function isAwkwardHour(time: string): boolean {
     const m = parseClock(time);
     return m >= AWKWARD_FROM || m < AWKWARD_TO;

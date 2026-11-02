@@ -1,0 +1,16 @@
+{
+    "note": "Starter feeds as 1:N:N (starter : flour : water by weight). Hours are the time to peak at about 21-22°C.",
+    "standardN": 6,
+    "ratios": [
+        { "n": 1, "minHours": 4, "maxHours": 6 },
+        { "n": 2, "minHours": 5, "maxHours": 7 },
+        { "n": 3, "minHours": 6, "maxHours": 8 },
+        { "n": 4, "minHours": 7, "maxHours": 9 },
+        { "n": 5, "minHours": 8, "maxHours": 10 },
+        { "n": 6, "minHours": 9, "maxHours": 11 },
+        { "n": 7, "minHours": 10, "maxHours": 12 },
+        { "n": 8, "minHours": 11, "maxHours": 13 },
+        { "n": 9, "minHours": 12, "maxHours": 14 },
+        { "n": 10, "minHours": 13, "maxHours": 16 }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "note": "Dough temperature (°C) to hours of bulk fermentation, counted from the moment the starter goes in, and the rise (%) to look for.",
+    "rows": [
+        { "temp": 27, "hours": 5.5, "rise": 50 },
+        { "temp": 26, "hours": 5.5, "rise": 50 },
+        { "temp": 25.5, "hours": 6, "rise": 50 },
+        { "temp": 25, "hours": 6, "rise": 50 },
+        { "temp": 24.5, "hours": 7, "rise": 50 },
+        { "temp": 24, "hours": 7, "rise": 50 },
+        { "temp": 23, "hours": 8, "rise": 50 },
+        { "temp": 22.5, "hours": 9, "rise": 50 },
+        { "temp": 22, "hours": 10, "rise": 50 },
+        { "temp": 21.5, "hours": 11, "rise": 50 },
+        { "temp": 21, "hours": 12, "rise": 75 },
+        { "temp": 20.5, "hours": 13, "rise": 75 },
+        { "temp": 20, "hours": 14, "rise": 75 },
+        { "temp": 19.5, "hours": 15, "rise": 75 },
+        { "temp": 19, "hours": 16, "rise": 75 },
+        { "temp": 18, "hours": 16, "rise": 75 }
+    ]
+}

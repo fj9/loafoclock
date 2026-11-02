@@ -2,20 +2,13 @@
 import { findRatio, type FeedingRatio } from '../feeding';
 import { bakePlan, type LoafSize } from '../recipe';
 import { HOUR, MINUTE } from './time';
+import bulkData from '../../../data/bulk.json';
+import timing from '../../../data/timing.json';
 
 /** Dough temperature (°C) to hours of bulk fermentation and the rise to look for. */
-export const BULK_TABLE: ReadonlyArray<{ temp: number; hours: number; rise: number }> = [
-    { temp: 27, hours: 5.5, rise: 50 }, { temp: 26, hours: 5.5, rise: 50 },
-    { temp: 25.5, hours: 6, rise: 50 }, { temp: 25, hours: 6, rise: 50 },
-    { temp: 24.5, hours: 7, rise: 50 }, { temp: 24, hours: 7, rise: 50 },
-    { temp: 23, hours: 8, rise: 50 }, { temp: 22.5, hours: 9, rise: 50 },
-    { temp: 22, hours: 10, rise: 50 }, { temp: 21.5, hours: 11, rise: 50 },
-    { temp: 21, hours: 12, rise: 75 }, { temp: 20.5, hours: 13, rise: 75 },
-    { temp: 20, hours: 14, rise: 75 }, { temp: 19.5, hours: 15, rise: 75 },
-    { temp: 19, hours: 16, rise: 75 }, { temp: 18, hours: 16, rise: 75 }
-];
-export const WARMEST_TEMP = 27;
-export const COOLEST_TEMP = 18;
+export const BULK_TABLE: ReadonlyArray<{ temp: number; hours: number; rise: number }> = bulkData.rows;
+export const WARMEST_TEMP = Math.max(...BULK_TABLE.map((r) => r.temp));
+export const COOLEST_TEMP = Math.min(...BULK_TABLE.map((r) => r.temp));
 
 /** The row for the closest temperature in the table. */
 export function bulkFor(temp: number): { temp: number; hours: number; rise: number } {
@@ -25,22 +18,18 @@ export function bulkFor(temp: number): { temp: number; hours: number; rise: numb
 }
 
 /** Fixed lengths of the steps in between, in minutes. */
-export const STEP_MINUTES = {
-    saltRest: 30,     // fermentolyse ends, salt goes in, then this long to the first fold
-    foldGap: 30,
-    foldCount: 4,
-    preShape: 30,     // bench rest between pre-shape and final shape
-    finalShape: 15,   // final shape to the dough going in the fridge
-    preheat: 45,
-    counterProof: 150 // proofing on the counter when the fridge is skipped (about 2 to 3 hours)
-} as const;
+export const STEP_MINUTES = timing.stepMinutes;
+// saltRest: fermentolyse ends, salt goes in, then this long to the first fold
+// preShape: bench rest between pre-shape and final shape
+// finalShape: final shape to the dough going in the fridge
+// counterProof: proofing on the counter when the fridge is skipped (about 2 to 3 hours)
 
-export const FRIDGE_MIN_HOURS = 8;
-export const FRIDGE_MAX_HOURS = 72;
-export const COOLING_CHOICES = [30, 60] as const;
-export type Cooling = (typeof COOLING_CHOICES)[number];
+export const FRIDGE_MIN_HOURS = timing.fridgeHours.min;
+export const FRIDGE_MAX_HOURS = timing.fridgeHours.max;
+export const COOLING_CHOICES = timing.coolingChoices as readonly Cooling[];
+export type Cooling = 30 | 60;
 /** At or below this many parts a feed counts as a quick feed. */
-export const QUICK_FEED_MAX_N = 3;
+export const QUICK_FEED_MAX_N = timing.quickFeedMaxN;
 
 export type Fridge = { kind: 'hours'; hours: number } | { kind: 'none' };
 
@@ -84,9 +73,9 @@ export const hours = (n: number): number => n * HOUR;
 
 // ---- One slider for the feed: hours from feeding to adding the starter ----
 /** The shortest and longest wait the chart covers: 1:1:1 is ready at 4 hours, 1:10:10 is still good at 16. */
-export const WAIT_MIN_HOURS = 4;
-export const WAIT_MAX_HOURS = 16;
-const WAIT_STEP_MIN = 15;
+export const WAIT_MIN_HOURS = timing.waitHours.min;
+export const WAIT_MAX_HOURS = timing.waitHours.max;
+const WAIT_STEP_MIN = timing.waitHours.stepMin;
 
 /** Hours from the feed to the starter going into the dough. */
 export const waitHoursOf = (l: Pick<Levers, 'ratioN' | 'starterDelayMin'>): number => ratioFor(l.ratioN).minHours + l.starterDelayMin / 60;

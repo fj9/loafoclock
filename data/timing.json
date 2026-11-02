@@ -1,0 +1,21 @@
+{
+    "note": "Step lengths and limits. Minutes unless the name says hours.",
+    "stepMinutes": {
+        "saltRest": 30,
+        "foldGap": 30,
+        "foldCount": 4,
+        "preShape": 30,
+        "finalShape": 15,
+        "preheat": 45,
+        "counterProof": 150
+    },
+    "rest": { "min": 30, "max": 60, "default": 60 },
+    "foldDelayAfterRestMin": 30,
+    "fridgeHours": { "min": 8, "max": 72 },
+    "coolingChoices": [30, 60],
+    "maxRestBeforeCarvingHours": 16,
+    "quickFeedMaxN": 3,
+    "waitHours": { "min": 4, "max": 16, "stepMin": 15 },
+    "wakingHours": { "from": 6, "to": 23 },
+    "awkwardHours": { "from": 23, "to": 6 }
+}

@@ -1,4 +1,5 @@
 // What to do at each step: the amounts, the instructions and any timer.
+import recipeData from '../../data/recipe.json';
 import { feedAt } from './feeding';
 import { OVEN_C, bakePlan, recipeFor } from './recipe';
 import type { TipKey } from './tips';
@@ -19,7 +20,7 @@ export interface Guide {
 export const recipeOf = (l: Levers) => recipeFor({ loaves: l.loaves ?? 1, size: l.size, hydration: l.hydration });
 
 /** Starter to keep back in the jar as the next starter. */
-export const KEEP_BACK_G = 30;
+export const KEEP_BACK_G = recipeData.keepBackG;
 
 const FOLD_INSTRUCTIONS = [
     'Wet your hand, lift one edge of the dough, stretch it up and fold it over the middle',
