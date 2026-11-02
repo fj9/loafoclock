@@ -13,7 +13,7 @@ A bake can fit around sleep and work in several ways. Each of these has a full w
 - **Three days, overnight levain** ([[example-overnight-levain|section C1]]). Feed in the evening, mix first thing the next morning, shape in the afternoon and bake from the fridge on the third day.
 - **Same day, no fridge** ([[example-same-day|section C3]]). The quickest, with a warm dough and a counter proof. A less sour loaf.
 - **After work, bake the next evening** ([[example-after-work|section C4]]). Feed before you leave, mix after you are home, and bake the next evening. The most "life-friendly" approach.
-- **Two loaves, 24 hours apart** ([[example-two-loaves|section C5]]). One batch, two loaves, one baked after 12 hours in the fridge and one after 36.
+- **Two loaves, 24 hours apart** ([[example-two-loaves|section C5]]). The overnight levain timeline with one batch, two loaves, one baked after 16 hours in the fridge and one after 40.
 
 [[example-temperature|Section C6]] says how a warmer or cooler dough or kitchen moves any of them.
 
