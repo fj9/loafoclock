@@ -44,8 +44,8 @@ export function Handbook() {
                 <p>{book.subtitle}</p>
                 <p class="hint">Every time in this handbook is an estimate. Judge each stage by the dough, the starter and the thermometer, not the clock.</p>
                 <p class="hb-pdf">
-                    Take it with you: <a href="Loaf-o-clock-sourdough-handbook.pdf" download>download the handbook as a PDF</a>, or{' '}
-                    <a href="Loaf-o-clock-sourdough-handbook-for-ai.pdf" download>the edition for an AI assistant</a>, to attach to a chat so you can ask questions as you bake.
+                    Take it with you: <a href="Loaf-o-clock-sourdough-handbook.pdf" download="Loaf-o-clock-sourdough-handbook.pdf">download the handbook as a PDF</a>, or{' '}
+                    <a href="Loaf-o-clock-sourdough-handbook-for-ai.pdf" download="Loaf-o-clock-sourdough-handbook-for-ai.pdf">the edition for an AI assistant</a>, to attach to a chat so you can ask questions as you bake.
                 </p>
                 {book.parts.map((part) => {
                     const chapters = book.chapters.filter((c) => c.part === part.id);

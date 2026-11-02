@@ -44,3 +44,14 @@ describe('the Handbook page', () => {
         expect(window.location.hash).toBe('');
     });
 });
+
+describe('the PDF downloads', () => {
+    it('suggest the handbook\'s own file names', async () => {
+        render(<App />);
+        menu('Handbook');
+        for (const name of ['Loaf-o-clock-sourdough-handbook.pdf', 'Loaf-o-clock-sourdough-handbook-for-ai.pdf']) {
+            const link = (await screen.findAllByRole('link')).find((a) => a.getAttribute('href') === name)!;
+            expect(link.getAttribute('download')).toBe(name);
+        }
+    });
+});
