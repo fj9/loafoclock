@@ -11,7 +11,7 @@ import { FACTS } from '../src/handbook/facts';
 import { buildPrintHtml, printHref, type Edition } from '../src/handbook/print';
 
 const root = resolve(import.meta.dirname, '..');
-const OUTPUT: Record<Edition, string> = { reader: 'sourdough-handbook.pdf', ai: 'sourdough-handbook-for-ai.pdf' };
+const OUTPUT: Record<Edition, string> = { reader: 'Loaf-o-clock-sourdough-handbook.pdf', ai: 'Loaf-o-clock-sourdough-handbook-for-ai.pdf' };
 
 function findChrome(): string | undefined {
     const candidates = [
