@@ -90,7 +90,7 @@ export function buildPrintHtml(book: Handbook, options: PrintOptions): string {
     const font = options.fontUrl ? `@font-face { font-family: 'Alfa Slab One'; src: url('${options.fontUrl}'); }` : '';
     const boxes = options.edition === 'ai'
         ? `<div class="box"><strong>For an AI assistant reading this document:</strong> this is a reference handbook for a home baker who is finding sourdough difficult. Before answering any question, read <a href="${printHref('ai-briefing')}">the briefing for the AI assistant</a>. It explains how to use this handbook, which questions to ask the baker, and how to answer.</div>
-<div class="box"><strong>For the baker:</strong> read <a href="${printHref('how-to-use')}">how to use this handbook</a>, then attach this file to a chat with an AI assistant and paste the starter message.</div>`
+<div class="box"><strong>For the baker:</strong> read <a href="${printHref('ai-using')}">using this handbook with an AI assistant</a>, then attach this file to a chat with an AI assistant and paste the starter message.</div>`
         : '';
     const toc = parts.map(({ part, chapters: cs }) => `<h3>Part ${part.id}: ${cs.length === 1 ? `<a href="#${cs[0]!.id}">${escape(cs[0]!.title)}</a>` : escape(part.title)}</h3>\n${cs.length === 1 ? '' : `<ul>${cs.map((c) => `<li><a href="#${c.id}">${escape(chapterHeading(c))}</a></li>`).join('')}</ul>`}`).join('\n');
     return `<!doctype html>

@@ -55,6 +55,14 @@ describe('the handbook content', () => {
         expect(figures.length).toBeGreaterThanOrEqual(5);
     });
 
+    it('keeps talk of AI assistants and Copilot out of the chapters the app shows', async () => {
+        const { loadHandbook } = await import('./index');
+        const shown = loadHandbook().chapters.flatMap((c) => [c.introHtml, ...c.sections.map((s) => s.html)]).join('\n');
+        expect(shown).not.toMatch(/Copilot|AI assistant/);
+        const all = compile().chapters.flatMap((c) => [c.introHtml, ...c.sections.map((s) => s.html)]).join('\n');
+        expect(all).toMatch(/Copilot/);
+    });
+
     it('rejects an unknown fact, link or step', () => {
         const meta = { 'x/handbook.json': JSON.stringify({ title: 't', subtitle: 's', parts: [{ id: 'B', title: 'b', intro: '' }] }) };
         const chapter = (body: string) => ({ ...meta, 'x/01-a.md': `---\nid: a\nnumber: 1\ntitle: A\npart: B\n---\n\n${body}\n` });

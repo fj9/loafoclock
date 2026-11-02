@@ -1,6 +1,6 @@
 ---
 id: ai-briefing
-number: A3
+number: A4
 title: Briefing for the AI assistant
 part: A
 audience: ai
@@ -59,7 +59,7 @@ When a baker wants to plan a bake, work backwards from when they want to eat or 
 
 | Looking for | Where |
 |---|---|
-| How to use this handbook, and what to note while baking | Part A (A1, A2) |
+| How to use this handbook, what to note while baking, and using it with an AI assistant | Part A (A1 to A3) |
 | What sourdough is, and the stages in order | [[big-picture|Section 1]] |
 | Ingredients and equipment | [[ingredients|Section 2]] |
 | Making and looking after a starter; feed ratios; ready-to-use signs; starter problems | [[starter|Section 3]] (3.2 to 3.8) |
