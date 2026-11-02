@@ -43,6 +43,18 @@ describe('the handbook content', () => {
         expect(loadHandbook().chapters.some((c) => c.id === 'ai-briefing')).toBe(false);
     });
 
+    it('has no dates or days of the week: examples count Day 1, Day 2', () => {
+        const dated = /\b(Mon|Tues?|Wed(nes)?|Thu(rs)?|Fri|Sat(ur)?|Sun)(day)?\b|\b(January|February|March|April|June|July|August|September|October|November|December)\b|\b\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/;
+        const bad = Object.entries(HANDBOOK_FILES).flatMap(([file, text]) => text.split('\n').filter((l) => dated.test(l)).map((l) => `${file}: ${l.slice(0, 80)}`));
+        expect(bad).toEqual([]);
+    });
+
+    it('draws each worked example, all within waking hours', () => {
+        const all = compile().chapters.flatMap((c) => [c.introHtml, ...c.sections.map((s) => s.html)]).join('\n');
+        const figures = [...all.matchAll(/class="hb-figure" data-plan="([^"]+)"/g)];
+        expect(figures.length).toBeGreaterThanOrEqual(7);
+    });
+
     it('rejects an unknown fact, link or step', () => {
         const meta = { 'x/handbook.json': JSON.stringify({ title: 't', subtitle: 's', parts: [{ id: 'B', title: 'b', intro: '' }] }) };
         const chapter = (body: string) => ({ ...meta, 'x/01-a.md': `---\nid: a\nnumber: 1\ntitle: A\npart: B\n---\n\n${body}\n` });

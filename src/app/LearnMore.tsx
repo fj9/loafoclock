@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { StepId } from '../domain/plan';
 import type { Chapter, Section } from '../handbook';
+import { HtmlBody } from './HtmlBody';
 
 type Help = Array<{ chapter: Chapter; section: Section }>;
 
@@ -30,7 +31,7 @@ export function LearnMore({ step }: { step: StepId }) {
                     {first && (
                         <>
                             <h4>{first.section.title}</h4>
-                            <div class="hb-body" dangerouslySetInnerHTML={{ __html: first.section.html }} />
+                            <HtmlBody html={first.section.html} />
                             <p><a href={linkTo(first.chapter, first.section)}>Read the full section</a></p>
                             {help.length > 1 && (
                                 <p class="lm-more">

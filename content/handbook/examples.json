@@ -1,0 +1,9 @@
+{
+    "earlyStart": "feed=08:00 wait=6 temp=24 fridge=10",
+    "lateFeed": "feed=21:00 wait=11 temp=24 fridge=16",
+    "sameDay": "feed=06:00 ratio=2 delay=0 temp=27 fridge=none",
+    "afterWork": "feed=07:00 ratio=6 delay=0 temp=26 fridge=19.75",
+    "longAndSlow": "feed=07:00 ratio=6 delay=0 temp=26 fridge=36",
+    "overnightLevain": "feed=21:00 wait=11 temp=24 fridge=16",
+    "coolDough": "feed=21:00 wait=11 temp=22 fridge=12"
+}

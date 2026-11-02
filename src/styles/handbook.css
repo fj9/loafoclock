@@ -36,3 +36,9 @@
 .learn-more .lm-more a { display: inline-block; margin-right: 10px; }
 .handbook .hb-pdf { padding: 10px 14px; background: var(--info-bg); color: var(--info-ink); border-radius: var(--radius-sm); font-size: var(--fs-sm); }
 .learn-more svg { flex: none; } .learn-more svg.lm-open { transform: rotate(180deg); }
+
+/* A worked example drawn like a plan in the app, without the levers. */
+.hb-plan { margin: 0 0 16px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.hb-plan .np-bar { position: static; margin: 0 0 8px; }
+.hb-plan figcaption { margin: 10px 0 0; }
+.hb-plan .rail { margin: 8px 0 0; }

@@ -6,6 +6,10 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFil
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { h } from 'preact';
+import { renderToString } from 'preact-render-to-string';
+import { setClock12 } from '../src/domain/clock';
+import { PlanFigure } from '../src/app/PlanFigure';
 import { compileHandbook } from '../src/handbook/compile';
 import { FACTS } from '../src/handbook/facts';
 import { buildPrintHtml, printHref, type Edition } from '../src/handbook/print';
@@ -22,6 +26,7 @@ function findChrome(): string | undefined {
     return candidates.find((c): c is string => !!c && existsSync(c));
 }
 
+setClock12(true); // times in the examples are written as the app writes them by default: 7:45 pm
 const chrome = findChrome();
 if (!chrome) {
     const message = 'No Chrome found for the handbook PDFs (set CHROME_PATH).';
@@ -34,13 +39,15 @@ const dir = join(root, 'content/handbook');
 const files = Object.fromEntries(readdirSync(dir).map((f) => [`content/handbook/${f}`, readFileSync(join(dir, f), 'utf8')]));
 const book = compileHandbook(files, { facts: FACTS, href: printHref });
 const fontFile = join(root, 'node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff');
+const appCss = ['tokens', 'plan', 'rail', 'handbook'].map((f) => readFileSync(join(root, `src/styles/${f}.css`), 'utf8')).join('\n');
+const renderFigure = (spec: string) => renderToString(h(PlanFigure, { spec, width: 600 }));
 const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
 const work = mkdtempSync(join(tmpdir(), 'handbook-'));
 mkdirSync(join(root, 'public'), { recursive: true });
 for (const edition of ['reader', 'ai'] as const) {
     const page = join(work, `${edition}.html`);
-    writeFileSync(page, buildPrintHtml(book, { edition, date, fontUrl: existsSync(fontFile) ? pathToFileURL(fontFile).href : undefined }));
+    writeFileSync(page, buildPrintHtml(book, { edition, date, renderFigure, appCss, fontUrl: existsSync(fontFile) ? pathToFileURL(fontFile).href : undefined }));
     const out = join(root, 'public', OUTPUT[edition]);
     execFileSync(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--no-pdf-header-footer', '--generate-pdf-document-outline', `--user-data-dir=${join(work, `profile-${edition}`)}`, `--print-to-pdf=${out}`, pathToFileURL(page).href], { stdio: 'ignore' });
     console.log(`Wrote ${out}`);

@@ -5,31 +5,37 @@ title: Timelines that fit around a life
 part: B
 ---
 
-These examples are worked out by the app's planner, so every step falls in waking hours (6:00 am to 11:00 pm). Use the planner to adjust them to your own kitchen.
+These examples are worked out by the app's planner, so every step that needs you falls in waking hours (6:00 am to 11:00 pm). Days are called Day 1, Day 2 and so on, because the bake can start on any day. Use the planner to fit them to your own kitchen and day. Each one shows when the loaf is ready to carve, the whole bake on one bar, and the steps in order.
 
-## Mix after work, bake the next morning
+## Two days, early start
 
-Feed in the morning, mix in the afternoon, shape before bed and bake from the fridge the next morning.
+Feed in the morning, mix in the early afternoon, shape in the evening and bake from the fridge the next morning. The dough is only in the fridge for the final proof.
 
-{{timeline 07:00 6 26 12}}
+{{planFigure earlyStart}}
 
-## Mix after work, bake the next evening
+## Three days, late feed
 
-The same day, but with the dough in the fridge until after work the next day. This is the most "life-friendly" approach: you only need ten minutes here and there.
+Feed in the evening, mix first thing the next morning, shape in the afternoon and bake from the fridge on the third day. A bigger feed (1:7:7 here) gives the starter the night to rise. A 1:6:6 would be ready an hour earlier, so the whole of Day 2 would start an hour earlier too.
 
-{{timeline 07:00 6 26 19.75}}
+{{planFigure lateFeed}}
 
 ## Same-day bake, no fridge
 
 A quick feed, a warm dough and 2 to 3 hours of proofing on the counter. It is quicker but gives a less sour loaf.
 
-{{timeline 06:00 2 27 none}}
+{{planFigure sameDay}}
 
-## Weekend long and slow
+## After work, bake the next evening
 
-Shape on Monday night and leave the dough in the fridge for a day and a half for a tangier loaf. Use whichever days suit you.
+Feed in the morning and mix in the afternoon, so the dough is shaped at bedtime and goes in the fridge until you are home the next day. This is the most "life-friendly" approach: you only need ten minutes here and there.
 
-{{timeline 07:00 6 26 36}}
+{{planFigure afterWork}}
+
+## Long and slow
+
+The same dough, kept in the fridge for a day and a half for a tangier loaf and a bake that suits a weekend.
+
+{{planFigure longAndSlow}}
 
 ## Working backwards
 
@@ -42,3 +48,5 @@ To plan any bake:
 - Subtract the bulk, counted from when the starter goes in (see [[process#bulk|section 6, step 5]]).
 - Subtract the fermentolyse and the autolyse before it ({{restMin}} to {{restMax}} minutes each).
 - Subtract the starter build, so that the starter is ready when it goes in (see [[starter#feeding-and-ratios|section 3.3]]).
+
+[[worked-example#working-backwards|A worked example of working backwards]] follows these steps with real times.

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { Chapter, Handbook as Book } from '../handbook';
+import { HtmlBody } from './HtmlBody';
 
 interface Route {
     chapter?: string;
@@ -69,11 +70,11 @@ export function Handbook() {
         <div class="handbook">
             <p class="hb-back"><a href="#/handbook">All of the handbook</a></p>
             <h2>{heading(chapter)}</h2>
-            {chapter.introHtml && <div class="hb-body" dangerouslySetInnerHTML={{ __html: chapter.introHtml }} />}
+            {chapter.introHtml && <HtmlBody html={chapter.introHtml} />}
             {chapter.sections.map((s) => (
                 <section class="hb-section" id={`${chapter.id}-${s.id}`}>
                     <h3>{s.number ? `${s.number} ` : ''}{s.title}</h3>
-                    <div class="hb-body" dangerouslySetInnerHTML={{ __html: s.html }} />
+                    <HtmlBody html={s.html} />
                 </section>
             ))}
             <nav class="hb-pager" aria-label="Chapters">

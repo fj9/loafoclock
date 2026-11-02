@@ -66,6 +66,8 @@ interface Props {
     state?: (id: StepId) => StepState;
     /** Replaces what is written beside a step, so the caller can make a row open in place. Return nothing to keep the usual name. */
     renderLabel?: (step: Step) => ComponentChildren | undefined;
+    /** Name the days by how many days after the first feed they are, instead of by date. 0 is the day of the first feed. */
+    dayLabel?: (daysAfterFeed: number) => string;
 }
 
 export type StepState = 'done' | 'next' | 'overdue' | 'upcoming';
@@ -74,7 +76,7 @@ export type StepState = 'done' | 'next' | 'overdue' | 'upcoming';
  * The bake as a list down the page: the time on the left, a rail of coloured waits in the middle and what to do
  * on the right. Days are named where they start, and the night is a tinted band behind the waits that run into it.
  */
-export function RailTimeline({ plan, zone, now, state, renderLabel }: Props) {
+export function RailTimeline({ plan, zone, now, state, renderLabel, dayLabel }: Props) {
     const rows = rowsOf(plan);
     const first = rows[0]!.at;
     const showNow = now !== undefined && now > first && now < plan.readyToCarve;
@@ -115,7 +117,7 @@ export function RailTimeline({ plan, zone, now, state, renderLabel }: Props) {
                 const nowAt = showNow && nextRow && now! >= r.at && now! < nextRow.at ? Math.round(((now! - r.at) / length) * height) : null;
                 return (
                     <li key={r.key} class={r.key === 'carve' ? 'rl-end' : ''}>
-                        {newDay && <p class={`rl-day${headerTint[i] ? ` in-night${edges(i > 0 && gapBottomTint(i - 1), true)}` : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
+                        {newDay && <p class={`rl-day${headerTint[i] ? ` in-night${edges(i > 0 && gapBottomTint(i - 1), true)}` : ''}`}>{dayLabel ? dayLabel(localDayNumber(r.at, zone) - localDayNumber(first, zone)) : shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
                         <div class={`rl-row${rowTint[i] ? ` in-night${edges(newDay ? headerTint[i]! : i > 0 && gapBottomTint(i - 1), nextRow ? gapTopTint(i) : false)}` : ''}`}>
                             <span class="rl-time">{clockOf(r.at, zone)}</span>
                             <span class="rl-node">

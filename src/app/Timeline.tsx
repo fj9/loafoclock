@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { isAwake, addLocalDays, startOfLocalDay, partsOf, HOUR, type Plan, type Zone } from '../domain/plan';
+import { isAwake, addLocalDays, localDayNumber, startOfLocalDay, partsOf, HOUR, type Plan, type Zone } from '../domain/plan';
 import { clockOf, lengthOf, weekdayOf } from './format';
 import { asleepLabel, bedLabel, nightsIn, wakeLabel } from './night';
 import { layoutTimeline } from './timelineLayout';
@@ -27,25 +27,29 @@ interface Props {
     zone?: Zone;
     /** Show a Now marker when it falls inside the timeline. */
     now?: number;
+    /** Name the days by how many days after the first feed they are, instead of by date. 0 is the day of the first feed. */
+    dayLabel?: (daysAfterFeed: number) => string;
+    /** Draw at this width instead of fitting the space it is in. */
+    width?: number;
 }
 
 /**
  * The whole bake on one bar, from the first feed to ready to carve. It always fits the width:
  * a long stay in the fridge is folded into a labelled break, so the busy hours keep their detail.
  */
-export function Timeline({ plan, zone, now }: Props) {
+export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props) {
     const frame = useRef<HTMLDivElement>(null);
-    const [width, setWidth] = useState(340);
+    const [width, setWidth] = useState(fixedWidth ?? 340);
     useEffect(() => {
         const el = frame.current;
-        if (!el) return;
+        if (!el || fixedWidth) return;
         const measure = () => setWidth(Math.max(240, el.clientWidth || 340));
         measure();
         if (typeof ResizeObserver === 'undefined') return;
         const ro = new ResizeObserver(measure);
         ro.observe(el);
         return () => ro.disconnect();
-    }, []);
+    }, [fixedWidth]);
 
     const { start, end, pieces, x } = layoutTimeline(plan, width);
     const b = plan.byId;
@@ -121,7 +125,7 @@ export function Timeline({ plan, zone, now }: Props) {
                 <div class="tl-track" role="img" aria-label="The bake from the first feed to ready to carve. The steps are listed below." style={{ width: `${width}px` }}>
                     {nightBands}
                     {dayLabels.map(({ d, left }) => (
-                        <div class="tl-day" style={{ left: `${left}px` }}>{weekdayOf(d + 12 * HOUR, zone)} {partsOf(d + 12 * HOUR, zone).day}</div>
+                        <div class="tl-day" style={{ left: `${left}px` }}>{dayLabel ? dayLabel(localDayNumber(d + 12 * HOUR, zone) - localDayNumber(b.feed, zone)) : `${weekdayOf(d + 12 * HOUR, zone)} ${partsOf(d + 12 * HOUR, zone).day}`}</div>
                     ))}
                     {seg(b.feed, b.starterIn, 'rising', 'Starter rising')}
                     {seg(b.starterIn, plan.bulkEnd, 'bulk', 'Bulk fermentation')}

@@ -2,10 +2,11 @@
 // The markdown names them as {{name}} or {{name value}}.
 import { FEEDING_RATIOS, ASSUMED_RATIO_N, findRatio } from '../domain/feeding';
 import { BAKE_TIMES, LOAF_SIZES, OVEN_C, DEFAULT_HYDRATION, recipeFor, type LoafSize } from '../domain/recipe';
-import { BULK_TABLE, COOLING_CHOICES, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, STEP_ORDER, bulkFor, buildPlan, fitsWakingHours, leversAt, stepLabel } from '../domain/plan';
+import { BULK_TABLE, COOLING_CHOICES, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bulkFor } from '../domain/plan';
 import { KEEP_BACK_G } from '../domain/stepGuide';
 import { REST_DEFAULT, REST_MAX, REST_MIN } from '../domain/timing';
 import type { Facts } from './compile';
+import { exampleFor, exampleSpec, exampleStepAt } from './example';
 
 const table = (head: string[], rows: string[][]): string =>
     [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.join(' | ')} |`)].join('\n');
@@ -28,26 +29,6 @@ const ratioOf = (arg: string) => {
     return r;
 };
 
-const two = (n: number): string => String(n).padStart(2, '0');
-
-/**
- * {{timeline 07:00 6 26 12}}: the plan for a starter fed at 07:00 on a Monday at 1:6:6, with dough at 26°C and 12 hours in
- * the fridge (or "none"). Worked out by the planner itself, and it must fit waking hours, so an example can never be one the app would refuse.
- */
-function timeline(arg: string): string {
-    const [clock = '', ratio = '', temp = '', fridge = ''] = arg.split(/\s+/);
-    const [h = 0, m = 0] = clock.split(':').map(Number);
-    const feed = new Date(2026, 0, 5, h, m).getTime(); // a Monday, outside any clock change
-    const levers = leversAt(feed, { ratioN: Number(ratio), doughTemp: Number(temp), fridge: fridge === 'none' ? { kind: 'none' } : { kind: 'hours', hours: Number(fridge) } });
-    const plan = buildPlan(levers);
-    if (!fitsWakingHours(plan)) throw new Error(`the timeline "${arg}" has a step in the sleeping hours`);
-    const noFridge = levers.fridge.kind === 'none';
-    return table(['Step', 'When'], STEP_ORDER.map((id) => {
-        const d = new Date(plan.byId[id]);
-        return [stepLabel(id, noFridge), `${d.toLocaleDateString('en-GB', { weekday: 'long' })} ${two(d.getHours())}:${two(d.getMinutes())}`];
-    }));
-}
-
 export const FACTS: Facts = {
     // ---- Tables ----
     bulkTable: table(['Dough temperature', 'Bulk time', 'Target rise'], BULK_TABLE.map((r) => [`${r.temp}°C`, hm(r.hours), `${r.rise}%`])),
@@ -69,7 +50,17 @@ export const FACTS: Facts = {
         return `about ${hoursText(row.hours)}, until the dough has risen by about ${row.rise}%`;
     },
     /** {{feedWindow 6}}: how long a 1:6:6 feed takes to be ready. */
-    timeline,
+    /** {{planFigure afterWork}}: a worked example (named in examples.json) drawn as the app draws a plan. */
+    planFigure: (arg) => {
+        const spec = exampleSpec(arg);
+        exampleFor(spec); // an example with a step in the sleeping hours stops the build
+        return `<div class="hb-figure" data-plan="${spec}"></div>`;
+    },
+    /** {{at afterWork ovenOn}}: when a step of a worked example happens, as "Day 2, 5:15 pm". */
+    at: (arg) => {
+        const [name = '', step = ''] = arg.split(/\s+/);
+        return exampleStepAt(name, step);
+    },
     feedWindow: (arg) => `${ratioOf(arg).minHours} to ${ratioOf(arg).maxHours} hours`,
 
     // ---- Single values ----

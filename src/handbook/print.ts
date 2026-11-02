@@ -13,6 +13,10 @@ export interface PrintOptions {
     date: string;
     /** Where the heading font can be read from, as a URL. Left out, the headings use a serif. */
     fontUrl?: string;
+    /** Draws a worked example (as HTML) from its settings. Left out, examples are left as they are. */
+    renderFigure?: (spec: string) => string;
+    /** The app's own styles, so the examples look as they do in the app. */
+    appCss?: string;
 }
 
 const escape = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -21,7 +25,7 @@ const CSS = `
 @page { size: A4; margin: 18mm 16mm 20mm; @bottom-center { content: counter(page); font: 9pt sans-serif; color: #6B5B51; } }
 @page :first { @bottom-center { content: none; } }
 * { box-sizing: border-box; }
-body { margin: 0; font-variant-ligatures: none; font: 10.5pt/1.5 -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2B211C; }
+body { margin: 0; font: 10.5pt/1.5 -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-variant-ligatures: none; color: #2B211C; }
 h1, h2, h3 { font-family: 'Alfa Slab One', Georgia, 'Times New Roman', serif; font-weight: 400; color: #9A4A22; break-after: avoid; }
 h1 { font-size: 22pt; margin: 0 0 6pt; } h2 { font-size: 16pt; margin: 18pt 0 6pt; } h3 { font-size: 12pt; margin: 14pt 0 4pt; }
 a { color: #9A4A22; text-decoration: none; }
@@ -37,6 +41,7 @@ th, td { border: 0.5pt solid #C9B79B; padding: 3pt 6pt; text-align: left; vertic
 .toc ul { list-style: none; padding: 0; } .toc li { margin: 0; }
 .part { break-before: page; } .chapter { margin-top: 10pt; }
 .num { color: #6B5B51; }
+.hb-plan { break-inside: auto; margin: 6pt 0 12pt; padding: 8pt; border: 0.5pt solid #C9B79B; border-radius: 6pt; } .hb-plan .rail li { break-inside: avoid; }
 `;
 
 const chapterHeading = (c: Chapter): string => (/^\d|^A\d/.test(c.number) ? `${c.number}. ${c.title}` : c.title);
@@ -56,6 +61,9 @@ function renderPart(part: Part, chapters: Chapter[]): string {
     return `<div class="part" id="part-${part.id}"><h1>Part ${part.id}: ${escape(part.title)}</h1><p>${escape(part.intro)}</p>\n${chapters.map((c) => renderChapter(c, 'h2', true)).join('\n')}</div>`;
 }
 
+const drawFigures = (html: string, render?: (spec: string) => string): string =>
+    render ? html.replace(/<div class="hb-figure" data-plan="([^"]+)"><\/div>/g, (_all, spec: string) => render(spec)) : html;
+
 export function buildPrintHtml(book: Handbook, options: PrintOptions): string {
     const chapters = book.chapters.filter((c) => options.edition === 'ai' || c.audience === 'all');
     const parts = book.parts.map((p) => ({ part: p, chapters: chapters.filter((c) => c.part === p.id) })).filter((p) => p.chapters.length > 0);
@@ -66,13 +74,13 @@ export function buildPrintHtml(book: Handbook, options: PrintOptions): string {
         : '';
     const toc = parts.map(({ part, chapters: cs }) => `<h3>Part ${part.id}: ${cs.length === 1 ? `<a href="#${cs[0]!.id}">${escape(cs[0]!.title)}</a>` : escape(part.title)}</h3>\n${cs.length === 1 ? '' : `<ul>${cs.map((c) => `<li><a href="#${c.id}">${escape(chapterHeading(c))}</a></li>`).join('')}</ul>`}`).join('\n');
     return `<!doctype html>
-<html lang="en-GB"><head><meta charset="utf-8"><title>${escape(book.title)}${options.edition === 'ai' ? ' (for an AI assistant)' : ''}</title>
-<style>${font}${CSS}</style></head><body>
+<html lang="en-GB" data-theme="light"><head><meta charset="utf-8"><title>${escape(book.title)}${options.edition === 'ai' ? ' (for an AI assistant)' : ''}</title>
+<style>${font}${options.appCss ?? ''}${CSS}</style></head><body>
 <div class="cover"><h1>${escape(book.title)}</h1><p class="sub">${escape(book.subtitle)}</p>
 ${boxes}
 <p class="meta">From the Loaf O'Clock app. Compiled ${escape(options.date)}. All times and temperatures are estimates: judge by the dough, not the clock.</p></div>
 <div class="toc"><h2>Contents</h2>\n${toc}</div>
-${parts.map((p) => renderPart(p.part, p.chapters)).join('\n')}
+${drawFigures(parts.map((p) => renderPart(p.part, p.chapters)).join('\n'), options.renderFigure)}
 </body></html>
 `;
 }

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/preact';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './App';
 import { handbookRoute } from './Handbook';
@@ -54,5 +54,18 @@ describe('the PDF downloads', () => {
             const link = screen.getAllByRole('link').find((a) => a.getAttribute('href') === name)!;
             expect(link.getAttribute('download')).toBe(name);
         }
+    });
+});
+
+describe('the worked examples', () => {
+    it('are drawn as the planner draws a plan, with days counted from Day 1', async () => {
+        window.location.hash = '#/handbook/timelines';
+        render(<App />);
+        await screen.findByRole('heading', { name: '8. Timelines that fit around a life' });
+        await waitFor(() => expect(document.querySelectorAll('.hb-plan').length).toBeGreaterThanOrEqual(5));
+        const days = Array.from(document.querySelectorAll('.hb-plan .rl-day')).map((e) => e.textContent);
+        expect(days).toContain('Day 2');
+        expect(days.some((d) => /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/.test(d ?? ''))).toBe(false);
+        expect(document.querySelector('.hb-plan .np-when')!.textContent).toMatch(/^Day \d, \d{1,2}:\d{2} (am|pm)$/);
     });
 });

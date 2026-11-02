@@ -31,6 +31,12 @@ describe('the printed handbook', () => {
         }
     });
 
+    it('draws the worked examples when it is given the means to', () => {
+        const page = buildPrintHtml(book, { edition: 'reader', date: 'today', renderFigure: (spec) => `<figure data-drawn="${spec.length}">drawn</figure>` });
+        expect(page).not.toContain('class="hb-figure"');
+        expect((page.match(/<figure data-drawn/g) ?? []).length).toBeGreaterThanOrEqual(7);
+    });
+
     it('quotes the same bulk chart as the app', () => {
         expect(html('reader')).toContain('<td>5h 30m</td>');
         expect(html('reader')).toContain('<td>75%</td>');
