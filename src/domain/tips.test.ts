@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { STEP_COUNT } from './steps';
 import { STEP_TIPS, TIPS } from './tips';
 
 describe('tips', () => {
@@ -10,7 +11,7 @@ describe('tips', () => {
         }
     });
     it('every step has a tip, and every step tip exists', () => {
-        expect(Object.keys(STEP_TIPS)).toHaveLength(10);
+        expect(Object.keys(STEP_TIPS)).toHaveLength(STEP_COUNT);
         for (const key of Object.values(STEP_TIPS)) expect(TIPS[key]).toBeTruthy();
     });
 });

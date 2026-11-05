@@ -19,12 +19,12 @@ describe('bulk table', () => {
 });
 
 describe('forward planner', () => {
-    it('the fastest bake: 18 h 30 m with 30 minute cooling, 19 h with 60', () => {
+    it('the fastest bake: 17 h 30 m with 30 minute cooling, 18 h with 60', () => {
         const p = buildPlan(leversAt(0, { ratioN: 1, doughTemp: 27, cooling: 60, fridge: { kind: 'hours', hours: 8 } }));
-        // 4 h feed + 1 h fermentolyse + 3.5 h bulk (27°C, from the salt) + 30 + 15 min shaping + 8 h fridge + 45 min bake + 60 min cooling
-        expect(totalHours(p)).toBeCloseTo(4 + 1 + 3.5 + 0.5 + 0.25 + 8 + 0.75 + 1, 6);
+        // 4 h feed + 3.5 h bulk (27°C, from the starter going in, with the fermentolyse inside it) + 30 + 15 min shaping + 8 h fridge + 45 min bake + 60 min cooling
+        expect(totalHours(p)).toBeCloseTo(4 + 3.5 + 0.5 + 0.25 + 8 + 0.75 + 1, 6);
         const p45 = buildPlan(leversAt(0, { ratioN: 1, doughTemp: 27, cooling: 30, fridge: { kind: 'hours', hours: 8 } }));
-        expect(totalHours(p45)).toBeCloseTo(18.5, 6);
+        expect(totalHours(p45)).toBeCloseTo(17.5, 6);
     });
 
     it('puts the steps in order', () => {
@@ -32,9 +32,9 @@ describe('forward planner', () => {
         for (let i = 1; i < p.steps.length; i++) expect(p.steps[i]!.at).toBeGreaterThanOrEqual(p.steps[i - 1]!.at);
     });
 
-    it('counts bulk from the salt going in, for the longer end of the range', () => {
+    it('counts bulk from the starter going in, for the longer end of the range', () => {
         const p = buildPlan(leversAt(0, { doughTemp: 24, autolyseMin: 30, fermentolyseMin: 30 }));
-        expect(p.bulkEnd - p.byId.salt).toBe(5 * HOUR);
+        expect(p.bulkEnd - p.byId.starterIn).toBe(5 * HOUR);
         expect(p.byId.autolyse).toBe(p.byId.starterIn - 30 * MINUTE);
         expect(p.byId.salt).toBe(p.byId.starterIn + 30 * MINUTE);
     });
@@ -91,15 +91,17 @@ describe('re-anchoring on what really happened', () => {
         const early = buildPlan(leversAt(0), { autolyse: base.byId.autolyse - 15 * MINUTE });
         expect(early.byId.starterIn).toBe(base.byId.starterIn);
     });
-    it('the starter going in for real moves the salt, and so the start of bulk, with it', () => {
+    it('the starter going in for real moves the salt, and the start of bulk, with it', () => {
         const base = buildPlan(leversAt(0));
         const p = buildPlan(leversAt(0), { starterIn: base.byId.starterIn + 40 * MINUTE });
-        expect(p.bulkEnd - (base.byId.salt + 40 * MINUTE)).toBe(5 * HOUR);
+        expect(p.byId.salt - base.byId.salt).toBe(40 * MINUTE);
+        expect(p.bulkEnd - (base.byId.starterIn + 40 * MINUTE)).toBe(5 * HOUR);
     });
-    it('the salt going in for real sets the start of bulk', () => {
+    it('the salt going in late moves the folds but not the start or end of bulk', () => {
         const base = buildPlan(leversAt(0));
         const p = buildPlan(leversAt(0), { salt: base.byId.salt + 20 * MINUTE });
-        expect(p.bulkEnd - (base.byId.salt + 20 * MINUTE)).toBe(5 * HOUR);
+        expect(p.byId.fold1 - base.byId.fold1).toBe(20 * MINUTE);
+        expect(p.bulkEnd).toBe(base.bulkEnd);
     });
     it('a late fold moves later folds but not the end of bulk', () => {
         const base = buildPlan(leversAt(0));
@@ -168,5 +170,14 @@ describe('one slider for the feed', () => {
     it('clamps outside the range', () => {
         expect(feedForWait(1).ratioN).toBe(1);
         expect(waitHoursOf(feedForWait(99))).toBe(16);
+    });
+});
+
+describe('bulk length', () => {
+    it('never ends before the last fold has had its half hour, even for the shortest range', () => {
+        for (const rest of [30, 60]) {
+            const p = buildPlan(leversAt(0, { doughTemp: 32, fermentolyseMin: rest }));
+            expect(p.bulkEnd - p.byId.fold4).toBeGreaterThanOrEqual(30 * MINUTE);
+        }
     });
 });

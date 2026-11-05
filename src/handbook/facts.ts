@@ -2,9 +2,10 @@
 // The markdown names them as {{name}} or {{name value}}.
 import { FEEDING_RATIOS, ASSUMED_RATIO_N, feedAt, findRatio } from '../domain/feeding';
 import { BAKE_TIMES, LOAF_SIZES, OVEN_C, DEFAULT_HYDRATION, recipeFor, type LoafSize } from '../domain/recipe';
-import { BULK_TABLE, BULK_TOO_COOL, BULK_TOO_WARM, COOLING_CHOICES, FINAL_PROOF_TABLE, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bulkFor, finalProofFor, hoursRangeText } from '../domain/plan';
+import { BULK_TABLE, BULK_TOO_COOL, BULK_TOO_WARM, COOLING_CHOICES, FINAL_PROOF_TABLE, FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bulkFor, finalProofFor, hoursRangeProse } from '../domain/plan';
 import { KEEP_BACK_G } from '../domain/stepGuide';
 import { REST_DEFAULT, REST_MAX, REST_MIN } from '../domain/timing';
+import { NUMBERED_STEPS, STEP_COUNT, phaseOf, stepName, stepNumber } from '../domain/steps';
 import type { Facts } from './compile';
 import { exampleFor, exampleLength, exampleSpec, exampleStepAt, exampleTimeAt } from './example';
 
@@ -41,10 +42,10 @@ export const FACTS: Facts = {
     /** {{bulk 24}}: the bulk for a dough at 24°C. */
     bulk: (arg) => {
         const row = bulkFor(Number(arg));
-        return `about ${hoursRangeText(row)} hours, until the dough has risen by about ${row.rise}%`;
+        return `about ${hoursRangeProse(row)}, until the dough has risen by about ${row.rise}%`;
     },
     /** {{finalProof 24}}: the final proof at room temperature for a room at 24°C. */
-    finalProof: (arg) => `about ${hoursRangeText(finalProofFor(Number(arg)))} hours`,
+    finalProof: (arg) => `about ${hoursRangeProse(finalProofFor(Number(arg)))}`,
     /** {{feedWindow 6}}: how long a 1:6:6 feed takes to be ready. */
     /** {{amountsTable 2}}: the amounts for one regular loaf and for that many. */
     amountsTable: (arg) => {
@@ -72,6 +73,8 @@ export const FACTS: Facts = {
         const [name = '', step = ''] = arg.split(/\s+/);
         return exampleStepAt(name, step);
     },
+    /** {{fridgeHours twoLoavesFirst}}: the hours the dough spends in the fridge in a worked example, "18". */
+    fridgeHours: (arg) => `${exampleFor(exampleSpec(arg)).fridgeHours}`,
     /** {{fromFeed afterWork}}: how long the example takes from the first feed to ready to carve, "36 h 30 min". */
     fromFeed: (arg) => exampleLength(arg),
     /** {{feedChoices 6 7 8}}: the feed for each ratio, with the starter chosen so each makes the same amount: one regular loaf plus the starter to keep. */
@@ -91,7 +94,19 @@ export const FACTS: Facts = {
     },
     feedWindow: (arg) => `${ratioOf(arg).minHours} to ${ratioOf(arg).maxHours} hours`,
 
+    /** {{stepNumber preShape}}: the number of a step, "6". An unknown key stops the build. */
+    stepNumber: (arg) => `${stepNumber(arg)}`,
+    /** {{stepName finalProof}}: the name of a step, "Final proof". */
+    stepName: (arg) => stepName(arg),
+    /** {{phase bulk}}: the steps a phase runs across, "steps 3 to 6". */
+    phase: (arg) => {
+        const p = phaseOf(arg);
+        return `steps ${stepNumber(p.from)} to ${stepNumber(p.to)}`;
+    },
+
     // ---- Single values ----
+    stepList: NUMBERED_STEPS.map((s) => `${s.number}. ${s.name}`).join('\n'),
+    stepCount: `${STEP_COUNT}`,
     bulkTooCool: BULK_TOO_COOL,
     bulkTooWarm: BULK_TOO_WARM,
     bulkCoolest: `${BULK_TABLE[BULK_TABLE.length - 1]!.temp}`,

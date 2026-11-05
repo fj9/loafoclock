@@ -32,5 +32,5 @@ export const restEnd = (startTime: string, minutes: number): ClockResult => cloc
 /** Minutes from the start of fermentolyse until the first fold: the rest, then 30 min for the salt. */
 export const FOLD_DELAY_AFTER_REST_MIN = timing.foldDelayAfterRestMin;
 export const firstFoldMinutes = (fermentolyseMinutes: number): number => fermentolyseMinutes + FOLD_DELAY_AFTER_REST_MIN;
-/** Hours of bulk already done by the end of the folds: rest + salt rest + the 4 folds (1.5h). */
+/** Hours of bulk already done by the end of the folds, counted from the starter going in: rest + salt rest + the 4 folds (1.5h). */
 export const bulkHoursBeforeRemaining = (fermentolyseMinutes: number): number => (firstFoldMinutes(fermentolyseMinutes) + 90) / 60;

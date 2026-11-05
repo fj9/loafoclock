@@ -1,5 +1,5 @@
 // The plan: a chain of steps on real moments, built forward from the levers.
-import { STEP_MINUTES, bakeMinutesFor, bulkFor, counterProofMinutes, ratioFor, type Levers } from './levers';
+import { STEP_MINUTES, bakeMinutesFor, bulkFor, bulkMinutesFor, counterProofMinutes, ratioFor, type Levers } from './levers';
 import { HOUR, MINUTE } from './time';
 
 export type StepId =
@@ -80,9 +80,10 @@ export function buildPlan(levers: Levers, actuals: Actuals = {}): Plan {
     const fold3 = actuals.fold3 ?? fold2 + gap;
     const fold4 = actuals.fold4 ?? fold3 + gap;
 
-    // Bulk is counted from the salt going in, for the longer end of the range. A late fold moves the later folds,
-    // not the end of bulk (unless the last fold is so late that bulk would end before it has had its half hour).
-    const bulkEnd = Math.max(salt + bulk.hours * HOUR, fold4 + gap);
+    // Bulk is counted from the starter going in, for the longer end of the range. The autolyse ends and the fermentolyse,
+    // salt rest and folds all happen inside it. A late fold moves the later folds, not the end of bulk (unless the last
+    // fold is so late that bulk would end before it has had its half hour).
+    const bulkEnd = Math.max(starterIn + bulkMinutesFor(levers.doughTemp, levers.fermentolyseMin) * MINUTE, fold4 + gap);
     const preShape = actuals.preShape ?? bulkEnd;
     const finalShape = actuals.finalShape ?? preShape + STEP_MINUTES.preShape * MINUTE;
     const fridge = actuals.fridge ?? finalShape + STEP_MINUTES.finalShape * MINUTE;
