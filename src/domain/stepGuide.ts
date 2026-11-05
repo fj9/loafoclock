@@ -61,8 +61,8 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
             };
         case 'salt':
             return {
-                title: 'Add salt, honey and oil', ingredients: [`${r.salt}g salt`, `${r.honey}g honey`, `${r.oil}g extra virgin olive oil`],
-                instructions: ['Add the salt, honey and olive oil', 'Work them into the dough until evenly distributed', `Rest the dough for ${STEP_MINUTES.saltRest} minutes`],
+                title: 'Add salt, honey and oil', ingredients: [`${r.salt}g salt`, `${r.honey}g honey (optional; not for babies under 12 months)`, `${r.oil}g extra virgin olive oil (optional)`],
+                instructions: ['Add the salt, and the honey and olive oil if you use them', 'Work them into the dough until evenly distributed', `Rest the dough for ${STEP_MINUTES.saltRest} minutes`],
                 timerMinutes: STEP_MINUTES.saltRest, tip: 'enrichments'
             };
         case 'fold1': case 'fold2': case 'fold3': case 'fold4': {
@@ -110,7 +110,7 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
         case 'bake': {
             const b = bakePlan({ size: l.size });
             return {
-                title: 'Bake', ingredients: [], instructions: b.instructions.slice(1),
+                title: 'Bake', ingredients: [], instructions: [...b.instructions.slice(1), 'The loaf is done when the base sounds hollow when tapped. A probe reading of 96 to 99°C is a good check if you have one (optional)'],
                 note: `${b.duration}. Bake straight from the fridge: no need to bring it to room temperature.`, tip: 'baking'
             };
         }

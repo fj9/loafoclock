@@ -64,7 +64,7 @@ export const TIPS = {
     },
     enrichments: {
         label: 'salt and enrichments',
-        text: 'Salt adds flavour and strength. Honey and olive oil make the loaf softer. They go in after the starter has had a head start.'
+        text: 'Salt adds flavour and strength. Honey and olive oil are optional and make the loaf softer (no honey for babies under 12 months). They go in after the starter has had a head start.'
     },
     folds: {
         label: 'stretch and folds',
@@ -76,7 +76,7 @@ export const TIPS = {
     },
     doughTemp: {
         label: 'dough temperature',
-        text: 'Warmer dough rises faster. A thermometer in the middle of the dough is best. No thermometer? Tap the option closest to your kitchen.'
+        text: 'Warmer dough rises faster. Measure just after the starter is mixed in, with a probe in the middle of the dough. No thermometer? Tap the option closest to your kitchen.'
     },
     targetRise: {
         label: 'target rise',
