@@ -32,7 +32,7 @@ describe('the Handbook page', () => {
     it('opens straight to a section from a link, and shows the planner\'s own numbers', async () => {
         window.location.hash = '#/handbook/process/bulk';
         render(<App />);
-        expect(await screen.findByRole('heading', { name: 'Step 5: Bulk fermentation (the first rise)' })).toBeTruthy();
+        expect(await screen.findByRole('heading', { name: 'Bulk fermentation (the first rise)' })).toBeTruthy();
         expect(screen.getAllByText('3–5', { selector: 'td' }).length).toBe(1); // 24°C
     });
 

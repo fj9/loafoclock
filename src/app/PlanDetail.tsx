@@ -4,6 +4,7 @@ import { buildPlan, violations, type Levers as LeverSet, type Plan, type Violati
 import { planToIcs } from '../domain/ics';
 import { downloadText } from './download';
 import { Levers } from './Levers';
+import { StepNo } from './StepNo';
 import { Timeline } from './Timeline';
 import { clockOf, dayTime } from './format';
 
@@ -60,7 +61,7 @@ export function PlanDetail({ levers, onChange, now, zone, carveAt, onStart, quic
                 <ol>
                     {plan.steps.map((s) => (
                         <li class={problems.some((v) => v.kind === 'asleep' && v.stepId === s.id) ? 'asleep' : ''}>
-                            <span class="when">{dayTime(s.at, now, zone)}</span> {s.label}
+                            <span class="when">{dayTime(s.at, now, zone)}</span> {s.label} <StepNo id={s.id} />
                         </li>
                     ))}
                 </ol>

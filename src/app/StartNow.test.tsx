@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/preact';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { StartNow } from './StartNow';
 import { lengthOf, dayLabel, clockOf, dayTime, dayInSentence, shortDate, signedMin } from './format';
 import { zonedToMs } from '../domain/plan';
@@ -130,6 +130,8 @@ describe('Start now', () => {
 
 describe('reminders on the plan page', () => {
     it('downloads a calendar file for the plan under Start this plan', () => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(friday9);
         let saved = '';
         const realBlob = globalThis.Blob;
         globalThis.Blob = class extends realBlob { constructor(parts: BlobPart[], o?: BlobPropertyBag) { super(parts, o); saved = String(parts[0]); } } as typeof Blob;
@@ -138,6 +140,7 @@ describe('reminders on the plan page', () => {
         render(<StartNow now={friday9} zone={LONDON} onStart={() => {}} />);
         fireEvent.click(screen.getByText('Add reminders to my calendar'));
         globalThis.Blob = realBlob;
+        vi.useRealTimers();
         expect(saved).toContain('BEGIN:VCALENDAR');
         expect(saved).toContain('TRIGGER:-PT10M');
     });

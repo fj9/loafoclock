@@ -13,7 +13,7 @@ describe('Learn more under a step', () => {
         expect(button.getAttribute('aria-expanded')).toBe('false');
         expect(screen.queryByText(/Bulk fermentation/)).toBeNull();
         fireEvent.click(button);
-        expect(await screen.findByRole('heading', { name: /Step 5: Bulk fermentation/ })).toBeTruthy();
+        expect(await screen.findByRole('heading', { name: /Bulk fermentation \(the first rise\)/ })).toBeTruthy();
         const link = screen.getByRole('link', { name: 'Read the full section' }) as HTMLAnchorElement;
         expect(link.getAttribute('href')).toBe('#/handbook/process/bulk');
         expect(screen.getByRole('link', { name: /Step 6: Pre-shape/ })).toBeTruthy();
