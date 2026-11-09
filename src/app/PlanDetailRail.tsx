@@ -16,6 +16,9 @@ export function PlanDetailRail({ levers, onChange, now, zone, carveAt, onStart, 
     const plan = useMemo(() => buildPlan(levers), [levers]);
     // A feed that has already happened is not held to waking hours.
     const problems = violations(plan, { zone, carveAt }).filter((v) => !(fed && v.kind === 'asleep' && v.stepId === 'feed'));
+    // The timeline marks each step in the night, so the list here only counts them.
+    const asleep = problems.filter((v) => v.kind === 'asleep').length;
+    const others = problems.filter((v) => v.kind !== 'asleep');
     return (
         <div class="np">
             <div class="np-bar" role="status" aria-live="polite">
@@ -32,9 +35,14 @@ export function PlanDetailRail({ levers, onChange, now, zone, carveAt, onStart, 
                 <div class="np-left">
                     <Levers part="timing" levers={levers} zone={zone} onChange={onChange} quickStreak={quickStreak}
                         locked={fed ? { feedRatio: true } : undefined} minDelayMin={fed?.minDelayMin} />
-                    {problems.length > 0 && (
+                    {asleep > 0 && (
+                        <p class="hint warn" role="status">
+                            {asleep === 1 ? '1 step falls' : `${asleep} steps fall`} in your sleeping hours. {asleep === 1 ? 'It is' : 'They are'} marked on the timeline.
+                        </p>
+                    )}
+                    {others.length > 0 && (
                         <ul class="problems" aria-label="Problems">
-                            {problems.map((v) => <li>{describe(v, plan, zone)}</li>)}
+                            {others.map((v) => <li>{describe(v, plan, zone)}</li>)}
                         </ul>
                     )}
                     <Levers part="cooling" levers={levers} zone={zone} onChange={onChange} />

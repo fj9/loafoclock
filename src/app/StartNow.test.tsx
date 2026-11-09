@@ -103,7 +103,7 @@ describe('Start now', () => {
 
     it('warns about quick feeds', () => {
         render(<StartNow now={friday9} zone={LONDON} />);
-        fireEvent.input(screen.getByLabelText(/^Starter feeding time/), { target: { value: '5' } });
+        fireEvent.input(screen.getByLabelText(/^Wait after feeding/), { target: { value: '5' } });
         expect(screen.getByText(/Quick feeds are fine/)).toBeTruthy();
     });
 
@@ -130,6 +130,7 @@ describe('Start now', () => {
 
 describe('reminders on the plan page', () => {
     it('downloads a calendar file for the plan under Start this plan', () => {
+        // The calendar file leaves out steps before the real "now", so hold the clock at the test's own now.
         vi.useFakeTimers({ toFake: ['Date'] });
         vi.setSystemTime(friday9);
         let saved = '';

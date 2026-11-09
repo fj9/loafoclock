@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { planBackward } from './backward';
+import { planBackward, planBackwardWithReasons } from './backward';
 import { fitsWakingHours, violations } from './rules';
 import { buildPlan } from './steps';
 import { HOUR, zonedToMs } from './time';
@@ -70,5 +70,37 @@ describe('backward planner', () => {
 
     it('gives nothing when there is not enough time', () => {
         expect(planBackward({ carveAt: notBefore + 10 * HOUR, zone: LONDON, notBefore })).toEqual([]);
+    });
+});
+
+describe('why a kind of plan is not offered', () => {
+    const notBefore = at(10, 20, 9);
+    const ask = (carveAt: number) => planBackwardWithReasons({ carveAt, zone: LONDON, notBefore });
+
+    it('every kind of plan is either offered or explained, at every quarter hour of the carve slider', () => {
+        for (let m = 6 * 60; m <= 23 * 60 + 30; m += 15) {
+            const r = ask(at(10, 26, Math.floor(m / 60), m % 60));
+            if (r.candidates.length === 0) { expect(r.missing).toEqual([]); continue; }
+            const hasFresh = r.candidates.some((c) => c.category === 'fresh');
+            // More flavour is a longer-fridge version of baked fresh, so it has nothing to say without one.
+            for (const cat of (hasFresh ? ['fresh', 'moreFlavour', 'bedtime'] : ['fresh', 'bedtime']) as Array<'fresh' | 'moreFlavour' | 'bedtime'>) {
+                const offered = r.candidates.some((c) => c.category === cat);
+                const explained = r.missing.some((x) => x.category === cat);
+                expect(offered !== explained, `${cat} at ${m}`).toBe(true);
+            }
+        }
+    });
+    it('says nothing when there are no plans at all', () => {
+        expect(planBackwardWithReasons({ carveAt: notBefore + 10 * HOUR, zone: LONDON, notBefore })).toEqual({ candidates: [], missing: [] });
+    });
+    it('a supper carve has no bedtime bake, because the loaf would not wait overnight', () => {
+        const r = ask(at(10, 26, 20, 30));
+        expect(r.candidates.some((c) => c.category === 'bedtime')).toBe(false);
+        expect(r.missing).toContainEqual({ category: 'bedtime', why: 'timeOfDay' });
+    });
+    it('baked fresh is explained when the oven would have to go on before you are up, while a bedtime bake works', () => {
+        const r = ask(at(10, 26, 7));
+        expect(r.candidates.some((c) => c.category === 'bedtime')).toBe(true);
+        expect(r.missing).toContainEqual({ category: 'fresh', why: 'noFit' });
     });
 });

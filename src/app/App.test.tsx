@@ -32,7 +32,7 @@ describe('App shell', () => {
         menu('About');
         expect(screen.getByText('Why I made it')).toBeTruthy();
         tab('Plan');
-        expect(screen.getByText('Start a loaf now')).toBeTruthy();
+        expect(screen.getByText('Start now')).toBeTruthy();
     });
 
     it('settings change the theme and the clock, and are remembered', () => {
@@ -100,7 +100,7 @@ describe('the log', () => {
         const q = (date: number) => ({ date, loaves: 1, size: 'regular', ratioN: 2, notes: '' });
         localStorage.setItem(LOG_KEY, JSON.stringify({ v: 1, entries: [q(3), q(2), q(1)] }));
         render(<App classicTabs />);
-        fireEvent.input(screen.getByLabelText(/^Starter feeding time/), { target: { value: '5' } });
+        fireEvent.input(screen.getByLabelText(/^Wait after feeding/), { target: { value: '5' } });
         expect(screen.getByText(/last 3 bakes all used quick feeds/)).toBeTruthy();
     });
 });
@@ -108,10 +108,10 @@ describe('the log', () => {
 describe('already fed', () => {
     it('plans from a feed in the past and starts with the feed ticked', () => {
         render(<App classicTabs />);
-        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        fireEvent.click(screen.getByRole('checkbox', { name: "I've already fed my starter" }));
         expect(screen.getByText('When did you feed your starter?')).toBeTruthy();
         // the feed ratio cannot change: it has already happened, so the slider only covers that ratio's window
-        const wait = screen.getByLabelText(/^Starter feeding time/) as HTMLInputElement;
+        const wait = screen.getByLabelText(/^Wait after feeding/) as HTMLInputElement;
         expect(Number(wait.max)).toBe(11);
         expect(Number(wait.min)).toBeGreaterThanOrEqual(9);
         fireEvent.click(screen.getByText('Start this plan'));
@@ -291,14 +291,14 @@ describe('actions and links', () => {
 describe('time fields follow the Clock setting', () => {
     it('no screen uses the phone\'s own time box', () => {
         render(<App classicTabs />);
-        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        fireEvent.click(screen.getByRole('checkbox', { name: "I've already fed my starter" }));
         expect(document.querySelector('input[type="time"]')).toBeNull();
         expect(screen.getByLabelText('Hour')).toBeTruthy();
     });
 
     it('the already-fed time shows am/pm with the 12-hour setting, and not with the 24-hour one', () => {
         render(<App classicTabs />);
-        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        fireEvent.click(screen.getByRole('checkbox', { name: "I've already fed my starter" }));
         expect(screen.getByLabelText('am or pm')).toBeTruthy(); // 12-hour is the default
         menu('Settings');
         fireEvent.click(screen.getByText('19:30'));
@@ -367,7 +367,7 @@ describe('empty states look the same', () => {
         expect(empty().querySelector('h2')!.textContent).toBe('No bakes yet');
         expect(empty().querySelectorAll('p')).toHaveLength(1);
         fireEvent.click(within(empty() as HTMLElement).getByRole('button', { name: 'Plan a loaf' }));
-        expect(screen.getByText('Start a loaf now')).toBeTruthy(); // now on the Plan tab
+        expect(screen.getByText('Start now')).toBeTruthy(); // now on the Plan tab
     });
 
     it('the empty Bake tab uses the same pattern', () => {
@@ -380,7 +380,7 @@ describe('empty states look the same', () => {
 
     it('"I want bread at…" with no plan that fits uses it too, announced as a status, with no button', () => {
         render(<App classicTabs />);
-        fireEvent.click(screen.getByText('I want bread at…'));
+        fireEvent.click(screen.getByText('Bread at…'));
         fireEvent.click(screen.getByText('Today'));
         const status = screen.getByRole('status');
         expect(status.className).toContain('empty-state');
@@ -439,11 +439,10 @@ describe('the New plan tab', () => {
     it('has the new feed time picker under "I\'ve already fed my starter", and the classic Plan keeps its day chips and time boxes', () => {
         render(<App classicTabs />);
         tab('Plan');
-        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        fireEvent.click(screen.getByRole('checkbox', { name: "I've already fed my starter" }));
         expect(screen.getByRole('group', { name: 'Day' })).toBeTruthy();
         expect(screen.queryByRole('button', { name: 'Adjust' })).toBeNull();
-        tab('New plan');
-        fireEvent.click(screen.getByRole('button', { name: "I've already fed my starter" }));
+        tab('New plan'); // the choice carries over
         expect(screen.getByRole('button', { name: 'Adjust' })).toBeTruthy();
         expect(screen.queryByRole('group', { name: 'Day' })).toBeNull();
         // the default is last night, and the plan still comes out of it
@@ -456,7 +455,7 @@ describe('the New plan tab', () => {
     it('works backwards from a carve time too', () => {
         render(<App classicTabs />);
         tab('New plan');
-        fireEvent.click(screen.getByRole('button', { name: 'I want bread at…' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Bread at…' }));
         fireEvent.click(document.querySelector('.plan-card')!);
         expect(document.querySelector('.rail')).toBeTruthy();
     });
