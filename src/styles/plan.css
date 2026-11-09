@@ -219,3 +219,25 @@
 .fed-check { margin: 0 0 16px; }
 .missing { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
 .your-plan { scroll-margin-top: 8px; }
+
+/* Start at…: the day strip and the option cards */
+.start-at-head { font-family: var(--font-display); font-size: var(--fs-md); font-weight: 400; margin: 16px 0 8px; }
+.carve-strip { background: var(--wash); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px 8px; margin: 0 0 12px; }
+.strip-row { display: grid; grid-template-columns: 72px 1fr; gap: 8px; align-items: center; margin: 0 0 6px; }
+.strip-day { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); text-transform: uppercase; }
+.strip-track { position: relative; height: 30px; border-radius: var(--radius-xs); background: var(--card); border: 1px solid var(--line); }
+.strip-night { position: absolute; top: 0; bottom: 0; background: var(--night-bg); }
+.strip-feed { position: absolute; top: 5px; bottom: 5px; width: 3px; margin-left: -1px; background: var(--good); border-radius: 2px; }
+.strip-dot { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%; background: var(--accent-strong); color: var(--on-accent); font-size: 12px; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--card); }
+.strip-dot.on { box-shadow: 0 0 0 3px var(--glow); }
+.strip-axis > span:last-child { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--muted); }
+.strip-legend { display: flex; gap: 12px; margin: 4px 0 0; font-size: var(--fs-xs); color: var(--muted); }
+.strip-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; }
+.k-feed { background: var(--good); } .k-night { background: var(--night-bg); border: 1px solid var(--night-edge); }
+.plan-card.opt { grid-template-columns: auto 1fr; column-gap: 12px; align-items: start; }
+.opt-when { grid-row: 1 / span 4; display: grid; text-align: center; padding-right: 12px; border-right: 1px solid var(--line); min-width: 78px; }
+.opt-when .eyebrow { font-size: var(--fs-xs); }
+.opt-time { font-family: var(--font-display); font-size: var(--fs-lg); line-height: 1.1; }
+.opt-day { font-size: var(--fs-sm); color: var(--muted); }
+.opt-n { display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 6px; border-radius: 50%; background: var(--accent-strong); color: var(--on-accent); font-family: system-ui, sans-serif; font-size: 12px; vertical-align: 2px; }
+.opt-tag { margin-left: 8px; padding: 1px 8px; border-radius: var(--radius-pill); background: var(--info-bg); color: var(--info-ink); font-family: system-ui, sans-serif; font-size: var(--fs-xs); font-weight: 700; vertical-align: 2px; }

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup: Start at…</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap">
+<style>
+/* Design tokens. Flour (light): flour, crust brown and starter green. Ember (dark): the same, by the oven.
+   Starter green is only for "ready" and success states. Light by default; dark via data-theme or the phone's setting. */
+:root {
+    --ts: 1; /* text size multiplier, see Settings */
+    /* Text sizes: six in all, each scaled by the Settings text size. */
+    --fs-xs: calc(12px * var(--ts, 1));   /* captions, labels on the timeline */
+    --fs-sm: calc(14px * var(--ts, 1));   /* secondary text, hints, small buttons */
+    --fs-base: calc(16px * var(--ts, 1)); /* body text */
+    --fs-md: calc(18px * var(--ts, 1));   /* card titles, big buttons */
+    --fs-lg: calc(22px * var(--ts, 1));   /* headings */
+    --fs-title: calc(28px * var(--ts, 1));/* the app name, big countdowns */
+    /* Corner radii: four sizes and a pill. */
+    --radius-xs: 4px;    /* small bars and swatches */
+    --radius-sm: 8px;    /* buttons, fields, small panels */
+    --radius-md: 12px;   /* cards and panels */
+    --radius-lg: 16px;   /* the app frame and sheets */
+    --radius-pill: 999px;
+    --page-bg: #EEDFC9; --page-dot: #FBF5EA;
+    --card: #FBF5EA; --wash: #F4EBDA; --line: #E4D6BF; --dot: #C98F66;
+    --ink: #2B211C; --label: #3E322B; --muted: #6B5B51;
+    --accent: #9A4A22; --accent-strong: #9A4A22; --accent-hover: #823C19; --on-accent: #FBF5EA;
+    --header-bg: #9A4A22; --header-ink: #FBF5EA; --header-shadow: #2B211C; --header-rule: #D9A67C;
+    --fill-a: #B0652E; --fill-b: #9A4A22;
+    --danger: #B3261E; --good: #5E7F5A; --good-ink: #3C5A39; --good-bg: #E3EBDD;
+    --info: #8A7565; --info-ink: #4A3D34; --info-bg: #EFE5D6;
+    --warn: #C98A1B; --warn-ink: #6E4A07; --warn-bg: #F8E7C1; --calc-bg: #F5E4CC;
+    --cold-fill: #C9DCEB; --cold-edge: #3F6F99; /* the fridge: cold blue */
+    --glow: rgba(154, 74, 34, .25);
+    --night-bg: rgba(127, 119, 221, .13); --night-edge: rgba(127, 119, 221, .4); /* sleeping hours on the rail; a translucent violet reads on both themes */
+    --font-display: 'Alfa Slab One', Georgia, 'Times New Roman', serif;
+    color-scheme: light;
+}
+:root[data-theme="dark"] {
+    --page-bg: #1B1411; --page-dot: #251B16;
+    --card: #2B211C; --wash: #372B24; --line: #4D3D33; --dot: #85553A;
+    --ink: #F5EBDD; --label: #E4D5C3; --muted: #C2B0A0;
+    --accent: #E39A66; --accent-strong: #E39A66; --accent-hover: #EDAE82; --on-accent: #2B211C;
+    --header-bg: #372B24; --header-ink: #E8A272; --header-shadow: #14100D; --header-rule: #9A4A22;
+    --fill-a: #E39A66; --fill-b: #C2703A;
+    --danger: #FF9484; --good: #8FB68A; --good-ink: #BCD8B8; --good-bg: #26332A;
+    --info: #B7A394; --info-ink: #DCCBBB; --info-bg: #3A2F28;
+    --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3C2B20;
+    --cold-fill: #24394B; --cold-edge: #7FB0D8;
+    --glow: rgba(227, 154, 102, .3);
+    color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --page-bg: #1B1411; --page-dot: #251B16;
+        --card: #2B211C; --wash: #372B24; --line: #4D3D33; --dot: #85553A;
+        --ink: #F5EBDD; --label: #E4D5C3; --muted: #C2B0A0;
+        --accent: #E39A66; --accent-strong: #E39A66; --accent-hover: #EDAE82; --on-accent: #2B211C;
+        --header-bg: #372B24; --header-ink: #E8A272; --header-shadow: #14100D; --header-rule: #9A4A22;
+        --fill-a: #E39A66; --fill-b: #C2703A;
+        --danger: #FF9484; --good: #8FB68A; --good-ink: #BCD8B8; --good-bg: #26332A;
+        --info: #B7A394; --info-ink: #DCCBBB; --info-bg: #3A2F28;
+        --warn: #E8B04A; --warn-ink: #F1D5A0; --warn-bg: #3F3016; --calc-bg: #3C2B20;
+        --cold-fill: #24394B; --cold-edge: #7FB0D8;
+        --glow: rgba(227, 154, 102, .3);
+        color-scheme: dark;
+    }
+}
+
+</style>
+<style>
+/* Base styles. Colours come from tokens.css. */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-size: var(--fs-base);
+    color: var(--ink);
+    background-color: var(--page-bg);
+    background-image: radial-gradient(var(--page-dot) 26%, transparent 28%);
+    background-size: 20px 20px;
+}
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0 0 8px; }
+h2 { font-size: var(--fs-lg); }
+h3 { font-size: var(--fs-md); }
+a { color: var(--accent); font-weight: 600; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.app {
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 6px 24px rgba(43, 33, 28, 0.18);
+    overflow: hidden;
+    overflow: clip; /* clips the corners like hidden, but lets pinned bars inside stick to the screen */
+}
+
+.app-header {
+    background: var(--header-bg);
+    color: var(--header-ink);
+    padding: 22px 24px 20px;
+    text-align: center;
+    border-bottom: 5px double var(--header-rule);
+}
+.app-header h1 { font-size: var(--fs-title); letter-spacing: .5px; text-shadow: 2px 2px 0 var(--header-shadow); margin: 0; }
+.app-header .tagline { margin: 4px 0 0; font-size: var(--fs-sm); opacity: .9; }
+.logo { height: 1.1em; width: auto; vertical-align: -0.18em; margin-right: 8px; }
+
+.app-main { padding: 24px; }
+.panel { background: var(--wash); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px 16px; margin: 0 0 16px; }
+.hint { color: var(--muted); font-size: var(--fs-sm); }
+
+.btn { font: inherit; font-weight: 600; padding: 10px 16px; border-radius: var(--radius-sm); border: 2px solid transparent; cursor: pointer; background: var(--accent-strong); color: var(--on-accent); }
+.btn.outline { background: var(--card); color: var(--ink); border-color: var(--line); }
+
+.overlay { position: fixed; inset: 0; background: rgba(10, 12, 20, .55); display: flex; align-items: flex-end; justify-content: center; z-index: 20; }
+.sheet { background: var(--card); color: var(--ink); width: 100%; max-width: 600px; border-radius: var(--radius-lg) 18px 0 0; padding: 20px 24px calc(20px + env(safe-area-inset-bottom)); }
+.btn-row { display: flex; gap: 8px; justify-content: space-between; }
+
+[data-text="large"] { --ts: 1.15; }
+[data-text="larger"] { --ts: 1.3; }
+
+</style>
+<style>
+/* Timeline, levers and the Start now screen. Colours come from tokens.css. */
+.eyebrow { margin: 0; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.big { margin: 2px 0 4px; font-family: var(--font-display); font-size: var(--fs-lg); }
+.result .range { margin: 8px 0 0; }
+.hint.warn, .problems { color: var(--warn-ink); background: var(--warn-bg); border-radius: var(--radius-sm); padding: 8px 12px; }
+.problems { list-style: none; margin: 0 0 16px; display: grid; gap: 4px; }
+
+.timeline { margin: 0 0 16px; }
+.tl-scroll { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--wash); }
+.tl-track { position: relative; height: 150px; }
+/* The same night on the timeline across the top. */
+.tl-sleep { position: absolute; top: 2px; bottom: 2px; z-index: 0; background: var(--night-bg); border: 1px solid var(--night-edge); border-radius: var(--radius-md); }
+.tl-sleep.cut-left { border-left-color: transparent; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.tl-sleep.cut-right { border-right-color: transparent; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.tl-sleep span { position: absolute; bottom: 6px; display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; }
+.tl-sleep .bed { left: 8px; }
+.tl-sleep .wake { right: 8px; }
+.tl-day { position: absolute; top: 4px; padding-left: 6px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); white-space: nowrap; }
+.tl-seg { position: absolute; top: 56px; height: 18px; border-radius: var(--radius-xs); }
+.tl-seg.rising { background: var(--good-bg); border: 1px solid var(--good); }
+.tl-seg.bulk { background: var(--fill-a); }
+.tl-seg.fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
+.tl-break { position: absolute; top: 56px; height: 18px; }
+.tl-split { position: absolute; left: 0; top: 0; }
+.tl-split polygon { fill: var(--cold-fill); stroke: var(--cold-edge); stroke-width: 1.5; stroke-linejoin: round; }
+.tl-break-time { position: absolute; left: -10px; right: -10px; top: -22px; text-align: center; font-size: var(--fs-xs); font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tl-seg.proof { background: var(--warn); }
+.tl-seg.bake { background: var(--fill-b); }
+.tl-seg.cool { background: var(--good); opacity: .6; }
+.tl-tick { position: absolute; top: 75px; width: 1px; height: 6px; background: var(--muted); }
+.tl-tick.mid { height: 11px; width: 2px; margin-left: -1px; background: var(--ink); }
+.tl-clock { position: absolute; top: 84px; transform: translateX(-50%); font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; }
+.tl-clock.mid { color: var(--ink); font-weight: 700; }
+.tl-mark { position: absolute; top: 46px; width: 2px; height: 34px; margin-left: -1px; border-radius: 1px; background: var(--ink); box-shadow: 0 0 0 1px var(--card); }
+.tl-mark.small { top: 53px; height: 20px; }
+.tl-mark.carve { top: 43px; height: 40px; width: 4px; margin-left: -2px; background: var(--good); }
+.tl-mark.asleep { background: var(--danger); }
+.tl-lab { position: absolute; display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: 600; color: var(--ink); white-space: nowrap; }
+.tl-lab .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.tl-lab .rising { background: var(--good-bg); border: 1px solid var(--good); }
+.tl-lab .bulk { background: var(--fill-a); }
+.tl-lab .fridge { background: var(--cold-fill); border: 1.5px solid var(--cold-edge); }
+.tl-lab .proof { background: var(--warn); }
+
+.levers { display: grid; gap: 14px; margin: 0 0 16px; }
+.lever { display: grid; gap: 4px; }
+.lever label, .lever .label { font-weight: 700; }
+.lever-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.lever-head.spaced { margin-top: 8px; }
+.lever select, .lever input[type="range"] { width: 100%; font: inherit; accent-color: var(--accent); }
+.lever select { padding: 8px; border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.lever output { color: var(--muted); font-size: var(--fs-sm); }
+.lever .hint { margin: 2px 0 0; }
+.link { font: inherit; font-weight: 600; background: none; border: 0; padding: 4px 2px; min-height: 24px; color: var(--accent); text-decoration: underline; cursor: pointer; }
+.seg-choice { display: flex; gap: 8px; }
+.seg-choice button { flex: 1; font: inherit; font-weight: 600; padding: 8px; border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); cursor: pointer; }
+.seg-choice button.on { background: var(--accent-strong); color: var(--on-accent); border-color: var(--accent-strong); }
+
+.steps ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.steps .when { font-weight: 700; }
+.steps .asleep { color: var(--danger); }
+.start-now > .btn { margin-bottom: 16px; }
+
+.mode { margin: 0 0 16px; flex-wrap: wrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.chip { font: inherit; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-pill); border: 2px solid var(--info); background: var(--card); color: var(--ink); cursor: pointer; }
+.chip.on { background: var(--accent-strong); color: var(--on-accent); border-color: var(--accent-strong); }
+.carve-picker { margin: 0 0 16px; }
+.cards { display: grid; gap: 10px; margin: 0 0 12px; }
+.plan-card { display: grid; gap: 4px; text-align: left; font: inherit; color: var(--ink); background: var(--wash); border: 2px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px; cursor: pointer; }
+.plan-card.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.card-title { font-family: var(--font-display); font-size: var(--fs-md); }
+.card-line { font-weight: 600; font-size: var(--fs-sm); }
+.card-blurb { color: var(--muted); font-size: var(--fs-sm); }
+.card-warn { color: var(--warn-ink); background: var(--warn-bg); border-radius: var(--radius-sm); padding: 2px 8px; justify-self: start; font-size: var(--fs-sm); }
+
+.big-btn { width: 100%; padding: 14px 16px; font-size: var(--fs-md); margin: 8px 0 0; }
+.next-up { margin: 0 0 16px; }
+.next-up.overdue { border-color: var(--danger); }
+.next-up.due { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.next-up.done { border-color: var(--good); background: var(--good-bg); }
+.folds { display: flex; gap: 10px; list-style: none; padding: 0; margin: 8px 0; }
+.folds li { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--accent); }
+.folds li.done { background: var(--accent); }
+.folds li.now { box-shadow: 0 0 0 3px var(--glow); }
+.free { margin: 8px 0 0; }
+.keep .link { color: inherit; }
+
+
+.step-detail .ingredients { margin: 0 0 8px; padding-left: 20px; font-weight: 700; }
+.step-detail .instructions { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 4px; }
+.step-detail .timer { margin: 8px 0; font-size: var(--fs-md); }
+
+.tabs { display: flex; border-bottom: 1px solid var(--line); background: var(--wash); }
+.tabs button { flex: 1; font: inherit; font-weight: 600; padding: 12px 4px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); cursor: pointer; }
+.tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
+.log-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 10px; }
+.log-list p { margin: 4px 0; }
+.lever textarea { width: 100%; font: inherit; padding: 8px; border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+.faq { border-bottom: 1px solid var(--line); padding: 8px 0; }
+.faq summary { font-weight: 700; cursor: pointer; }
+.lever .sub { font-weight: 600; margin-top: 6px; }
+
+.timers { border-color: var(--accent); }
+.timer-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; }
+.timer-row + .timer-row { margin-top: 8px; }
+.timer-name { font-weight: 700; }
+.timer-time { font-family: var(--font-display); font-size: var(--fs-title); font-variant-numeric: tabular-nums; }
+.timer-row.up { color: var(--accent); }
+.step-detail .btn { margin: 4px 0 8px; }
+
+/* Each slider takes the colour of the bar on the timeline it controls. */
+.lever #lv-feed { accent-color: var(--good); }
+.lever #lv-temp { accent-color: var(--fill-a); }
+.lever #lv-fridge { accent-color: var(--cold-edge); }
+
+/* Footer: name on the left, the tip link in the middle, About on the right, all on one line. */
+.app-footer { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); white-space: nowrap; align-items: center; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: var(--fs-sm); }
+.app-footer > :first-child { justify-self: start; }
+.app-footer > :last-child { justify-self: end; }
+.app-footer a, .app-footer .link { font: inherit; font-weight: 600; line-height: 1.4; padding: 4px 2px; }
+
+/* Tabs, the menu at the top right, and the in-progress dot on Bake. */
+.app-header { position: relative; }
+.menu-btn { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--header-ink); cursor: pointer; }
+.menu-btn:hover, .menu-btn[aria-expanded="true"] { background: rgba(255, 255, 255, .14); }
+.menu-scrim { position: fixed; inset: 0; z-index: 30; }
+.menu { position: absolute; top: 58px; right: 10px; z-index: 31; list-style: none; margin: 0; padding: 6px; min-width: 160px; background: var(--card); color: var(--ink); border: 1px solid var(--info); border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0, 0, 0, .25); text-align: left; }
+.menu button { display: block; width: 100%; text-align: left; font: inherit; font-weight: 600; padding: 10px 12px; border: 0; border-radius: var(--radius-sm); background: none; color: inherit; cursor: pointer; }
+.menu button:hover, .menu button.on { background: var(--wash); }
+.tabs .dot { display: inline-block; width: 8px; height: 8px; margin: 0 0 8px 6px; border-radius: 50%; background: var(--good); }
+.bake-banner { margin: 0 0 16px; }
+.empty-state { margin: 0 0 16px; }
+.empty-state p { margin: 0 0 12px; }
+.empty-state .btn { margin-top: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.reminders { margin: 8px 0 16px; }
+
+/* One card for the step that is next: the how-to opens inside it. */
+.how-toggle { display: flex; align-items: center; gap: 6px; font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 8px 0; min-height: 40px; cursor: pointer; }
+.how-toggle svg { transition: transform var(--dur-fast, .15s); }
+.how-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.next-up .step-detail { border-top: 1px solid var(--line); margin: 0 0 12px; padding-top: 10px; }
+.step-detail .about { margin: 0 0 10px; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--info-bg); color: var(--info-ink); font-size: var(--fs-sm); }
+.next-up .big-btn { margin-top: 4px; }
+
+/* Two matching actions side by side. Stop is the warning red, and so is its confirm button. */
+.actions-row { display: flex; gap: 12px; margin: 0 0 16px; }
+.actions-row .btn { flex: 1; }
+.btn.danger { color: var(--danger); border-color: var(--danger); }
+.btn.danger-fill { background: var(--danger); border-color: var(--danger); color: var(--card); }
+
+/* The (i) tips beside each lever label. */
+.lever-head .tip-wrap { display: contents; }
+.lever-head .tip { flex-basis: 100%; margin-top: 2px; }
+.info-btn { font: inherit; font-size: .7em; font-weight: 700; min-width: 24px; min-height: 24px; width: 1.6em; height: 1.6em; border-radius: 50%; border: 1.5px solid var(--info); background: none; color: var(--muted); cursor: pointer; padding: 0; vertical-align: middle; }
+.info-btn:hover, .info-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.tip { display: block; margin-top: 6px; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--info-bg); color: var(--info-ink); font-family: inherit; font-size: var(--fs-sm); font-weight: 400; }
+.reminders .btn { width: 100%; }
+.keep .btn { margin-top: 8px; }
+
+/* Done, with a clock button beside it for a step you forgot to tick, and the picker inside the card. */
+.done-row { display: flex; gap: 8px; align-items: stretch; margin-top: 4px; }
+.done-row .big-btn { flex: 1; width: auto; margin: 0; }
+.clock-btn { width: 56px; padding: 0; display: grid; place-items: center; }
+.earlier { margin: 10px 0 4px; padding: 12px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--line); }
+.earlier .hint { margin: 0 0 8px; }
+.earlier .btn-row .btn { min-height: 48px; white-space: nowrap; }
+.earlier .btn-row .btn:first-child { flex: 0 0 auto; padding-inline: 20px; }
+.earlier .btn-row .btn:last-child { flex: 1; }
+
+/* A time of day that follows the Clock setting: hour, minute and (in 12-hour mode) am/pm. */
+.time-field { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; }
+.time-field select { font: inherit; font-size: var(--fs-md); min-height: 48px; padding: 4px 6px; border-radius: var(--radius-sm); border: 2px solid var(--info); background: var(--card); color: var(--ink); }
+
+/* A smaller button for a secondary action inside a card, such as stopping a timer. */
+.btn.small { min-height: 40px; padding: 4px 14px; font-size: var(--fs-sm); }
+.timer-row .btn { margin-left: auto; }
+.btn-row .btn { flex: 1; }
+.panel > .btn-row { margin-top: 12px; }
+
+/* A tick box for a simple on/off choice, such as skipping the fridge. */
+.check { display: flex; align-items: center; gap: 8px; min-height: 32px; margin-left: auto; font-weight: 600; font-size: var(--fs-sm); cursor: pointer; }
+.check input { width: 22px; height: 22px; margin: 0; accent-color: var(--cold-edge); }
+.lever input[type="range"]:disabled { opacity: .45; }
+.empty-state h2 { font-size: var(--fs-md); }
+
+/* The progress list: whole-row buttons that open in place. */
+.rows { list-style: none; margin: 0; padding: 0; }
+.rows > li { border-top: 1px solid var(--line); }
+.rows > li:first-child { border-top: 0; }
+.rowbtn { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 2px; font: inherit; color: var(--ink); background: none; border: 0; text-align: left; cursor: pointer; }
+.rowbtn.static { cursor: default; }
+.rowtext { display: block; min-width: 0; }
+.rowbtn .title { display: block; font-weight: 700; }
+.rowbtn .sub { display: block; color: var(--muted); font-size: var(--fs-sm); font-weight: 400; }
+.rowbtn .shift { color: var(--muted); font-weight: 400; font-size: var(--fs-sm); }
+.rowbtn .chev { margin-left: auto; color: var(--muted); transition: transform var(--dur-fast, .15s); flex: none; }
+.rowbtn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.rowbtn .tag { margin-left: auto; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); flex: none; }
+.rows li.done .title { color: var(--muted); text-decoration: line-through; font-weight: 400; }
+.rows li.overdue .title { color: var(--danger); }
+.rows .expand { margin: 0 0 10px; padding: 12px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--line); }
+.rows .expand .step-detail { margin: 0 0 10px; }
+.rows .expand .ingredients { list-style: disc; }
+.rows .expand .done-row { margin-top: 0; }
+
+/* Now: a line through the whole bar, labelled at the bottom. */
+.tl-now { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--accent); z-index: 2; }
+.tl-now span { position: absolute; bottom: 4px; left: 5px; padding: 0 4px; border-radius: var(--radius-xs); background: var(--card); font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
+.tl-now.flip span { left: auto; right: 5px; }
+
+/* "Step N of 10": small and quiet */
+.step-no { color: var(--muted); font-size: var(--fs-xs); font-weight: 400; }
+.step-no-line { margin: 0 0 6px; }
+.rowtext > .step-no { display: block; }
+.rl-label > .step-no { display: block; }
+
+.fed-check { margin: 0 0 16px; }
+.missing { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
+.your-plan { scroll-margin-top: 8px; }
+
+</style>
+<style>
+  body { margin: 0; background: var(--page-bg); color: var(--ink); font-family: system-ui, sans-serif; font-size: var(--fs-base); }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 16px; }
+  .mock-note { font-size: var(--fs-sm); color: var(--muted); border-left: 3px solid var(--dot); padding-left: 10px; margin: 18px 0 8px; }
+  .mock-note b { color: var(--ink); }
+  h3.sec { font-family: var(--font-display); font-size: var(--fs-md); font-weight: 400; margin: 18px 0 8px; }
+  .seg-choice { margin-bottom: 12px; }
+  .seg-choice button { padding: 8px 4px; font-size: var(--fs-sm); }
+  .lever label { display: block; font-weight: 600; margin-bottom: 4px; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+
+  /* The "when could I eat it" strip */
+  .strip { background: var(--wash); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px 10px; margin: 0 0 12px; }
+  .strip .days { display: grid; grid-template-columns: 36px 1fr; gap: 6px 8px; align-items: center; }
+  .strip .dname { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); text-transform: uppercase; }
+  .strip .track { position: relative; height: 30px; border-radius: var(--radius-xs); background: var(--card); border: 1px solid var(--line); overflow: hidden; }
+  .strip .night { position: absolute; top: 0; bottom: 0; background: var(--night-bg); border-inline: 1px solid var(--night-edge); }
+  .strip .feed { position: absolute; top: 5px; bottom: 5px; width: 3px; background: var(--good); border-radius: 2px; }
+  .strip .dot { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%; background: var(--accent-strong); color: var(--on-accent); font-size: 12px; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--card); }
+  .strip .dot.alt { background: var(--cold-edge); }
+  .strip .dot.nf { background: var(--info); }
+  .strip .dot.on { box-shadow: 0 0 0 3px var(--glow); }
+  .strip .axis { display: grid; grid-template-columns: 36px 1fr; gap: 0 8px; margin-top: 2px; }
+  .strip .axis span { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--muted); }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: var(--fs-xs); color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+
+  /* Option cards: lead with the answer (when you eat) */
+  .opt { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; }
+  .opt .when { grid-row: 1 / span 3; text-align: center; padding-right: 12px; border-right: 1px solid var(--line); min-width: 78px; }
+  .opt .when > span { display: block; }
+  .opt .when .eyebrow { font-size: var(--fs-xs); }
+  .opt .when .t { font-family: var(--font-display); font-size: var(--fs-lg); line-height: 1.1; }
+  .opt .when .d { font-size: var(--fs-sm); color: var(--muted); }
+  .opt .tag { font-size: var(--fs-xs); font-weight: 700; padding: 1px 8px; border-radius: var(--radius-pill); justify-self: start; }
+  .tag.cold { background: var(--cold-fill); color: var(--cold-edge); }
+  .tag.warm { background: var(--warn-bg); color: var(--warn-ink); }
+  .tag.good { background: var(--good-bg); color: var(--good-ink); }
+  .tag.plain { background: var(--info-bg); color: var(--info-ink); }
+  .opt .n { display:inline-grid; place-items:center; width:18px; height:18px; border-radius:50%; background: var(--accent-strong); color: var(--on-accent); font-size: 11px; margin-right: 6px; }
+  .plan-card .card-title .n.alt { background: var(--cold-edge); } .plan-card .card-title .n.nf { background: var(--info); }
+  .missing { list-style: none; padding-left: 12px; border-left: 3px solid var(--line); }
+  .missing li { margin: 2px 0; }
+  .your-plan-stub { border: 2px dashed var(--line); border-radius: var(--radius-md); padding: 12px 14px; color: var(--muted); font-size: var(--fs-sm); }
+  .variant { margin-top: 36px; padding-top: 8px; border-top: 2px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="mock-note"><b>Mockup, not wired up.</b> Pretending it is <b>Monday 2:15pm</b>. Uses the app's real styles. The three-way switch replaces today's two-way one.</p>
+
+<div class="seg-choice mode" role="group" aria-label="How do you want to plan?">
+  <button>Start now</button>
+  <button class="on" aria-pressed="true">Start at…</button>
+  <button>Bread at…</button>
+</div>
+
+<section class="carve-picker" aria-label="When will you feed?">
+  <h3 class="sec" style="margin-top:0">When will you feed your starter?</h3>
+  <div class="chips" role="group" aria-label="Day">
+    <button class="chip on">Today</button><button class="chip">Tomorrow</button><button class="chip">Wed</button><button class="chip">Thu</button><button class="chip">Fri</button><button class="chip">Sat</button>
+  </div>
+  <div class="chips" role="group" aria-label="Time of day">
+    <button class="chip">After breakfast</button><button class="chip">Lunchtime</button><button class="chip">After work</button><button class="chip on">Evening</button><button class="chip">Before bed</button>
+  </div>
+  <div class="lever">
+    <label for="t">Time: 6:00pm</label>
+    <input id="t" type="range" min="360" max="1380" step="15" value="1080">
+  </div>
+  <p class="hint">Monday 9 November. Today you have until 10pm to feed; after that it is tomorrow's feed.</p>
+</section>
+
+<h3 class="sec">Feed Monday 6:00pm, and you could have bread…</h3>
+
+<div class="strip" aria-label="When each option is ready to carve">
+  <div class="days">
+    <span class="dname">Mon</span>
+    <div class="track">
+      <div class="night" style="left:0;width:5.9%"></div>
+      <div class="night" style="left:94.1%;right:0"></div>
+      <div class="feed" style="left:70.6%" title="Feed"></div>
+    </div>
+    <span class="dname">Tue</span>
+    <div class="track">
+      <div class="night" style="left:0;width:5.9%"></div>
+      <div class="night" style="left:94.1%;right:0"></div>
+      <span class="dot nf"  style="left:57.4%">3</span>
+      <span class="dot"      style="left:61.8%">1</span>
+      <span class="dot on"   style="left:80.9%">2</span>
+    </div>
+    <span class="dname">Wed</span>
+    <div class="track">
+      <div class="night" style="left:0;width:5.9%"></div>
+      <div class="night" style="left:94.1%;right:0"></div>
+      <span class="dot alt on" style="left:22%">4</span>
+      <span class="dot alt"    style="left:67.6%">5</span>
+    </div>
+  </div>
+  <div class="axis"><span></span><span><span>6am</span><span>12</span><span>6pm</span><span>11pm</span></span></div>
+  <div class="legend"><span><i style="background:var(--good)"></i>your feed</span><span><i style="background:var(--night-bg);border:1px solid var(--night-edge)"></i>sleeping</span><span><i style="background:var(--accent-strong)"></i>same day</span><span><i style="background:var(--cold-edge)"></i>overnight in fridge</span></div>
+</div>
+<p class="hint" style="margin-top:-4px">Numbers match the cards below, soonest first.</p>
+
+<div class="cards">
+  <button class="plan-card opt">
+    <span class="when"><span class="eyebrow">Carve</span><span class="t">4:30pm</span><span class="d">Tue</span></span>
+    <span class="card-title"><span class="n">1</span>Fastest</span>
+    <span class="card-line">Feed 1:10:10 · 26°C dough · 3h fridge</span>
+    <span class="card-blurb">Mix Tue 7:30am, shape 11:30am, bake 2:30pm.</span>
+  </button>
+  <button class="plan-card opt on">
+    <span class="when"><span class="eyebrow">Carve</span><span class="t">7:45pm</span><span class="d">Tue</span></span>
+    <span class="card-title"><span class="n">2</span>Same-day supper <span class="tag good">balanced</span></span>
+    <span class="card-line">Feed 1:10:10 · 24°C dough · 5h fridge</span>
+    <span class="card-blurb">Mix Tue 7:30am, shape 1:30pm, bake 5:30pm. Nothing after 9pm.</span>
+  </button>
+  <button class="plan-card opt">
+    <span class="when"><span class="eyebrow">Carve</span><span class="t">9:45am</span><span class="d">Wed</span></span>
+    <span class="card-title"><span class="n alt">4</span>Overnight fridge <span class="tag cold">more flavour</span></span>
+    <span class="card-line">Feed 1:10:10 · 24°C dough · 14h fridge</span>
+    <span class="card-blurb">Shape Tue 1:30pm, into the fridge by 2pm. Bake Wed 7:45am.</span>
+  </button>
+  <button class="plan-card opt">
+    <span class="when"><span class="eyebrow">Carve</span><span class="t">5:30pm</span><span class="d">Wed</span></span>
+    <span class="card-title"><span class="n alt">5</span>Long cold stay <span class="tag cold">tangiest</span></span>
+    <span class="card-line">Feed 1:10:10 · 24°C dough · 22h fridge</span>
+    <span class="card-blurb">Shape Tue 1:30pm. Bake Wed 3:30pm.</span>
+  </button>
+</div>
+<p class="hint">No fridge also fits: carve <b>Tue 3:45pm</b>, but less sourdough flavour.
+  <button class="link" style="background:none;border:0;color:var(--accent);text-decoration:underline;font:inherit;cursor:pointer">Show that plan</button></p>
+
+<ul class="hint missing" aria-label="Not offered">
+  <li>Fridge stays of 15–21 hours are not offered: the oven would go on before 7am or after 10pm.</li>
+  <li>A quick 1:1:1 feed is not offered: the starter would peak at midnight, while you are asleep.</li>
+</ul>
+
+<p class="hint" style="background:var(--info-bg);color:var(--info-ink);border-radius:var(--radius-sm);padding:8px 12px">
+  <b>Want lunch on Tuesday?</b> Feed at 4:30pm instead: <button class="link" style="background:none;border:0;color:var(--accent);text-decoration:underline;font:inherit;cursor:pointer;padding:0">try 4:30pm</button>
+</p>
+
+<p class="mock-note"><b>Tap a card</b> and "Your plan" opens beneath, exactly as it does for "Bread at…" today: levers, timeline, Start this plan.</p>
+<div class="your-plan-stub">Your plan: Same-day supper (levers, timeline and "Start this plan" go here, unchanged)</div>
+
+<!-- Variant B: early-morning start -->
+<div class="variant">
+<p class="mock-note"><b>Same screen, "Tomorrow morning" feed.</b> Shows the shape when the day gives fewer options.</p>
+<h3 class="sec" style="margin-top:0">Feed Tuesday 7:30am, and you could have bread…</h3>
+<div class="cards">
+  <button class="plan-card opt">
+    <span class="when"><span class="eyebrow">Carve</span><span class="t">6:30pm</span><span class="d">Tue</span></span>
+    <span class="card-title">Fastest</span>
+    <span class="card-line">Feed 1:1:1 · 26°C dough · 3h fridge</span>
+    <span class="card-blurb">Quick feed, mix at 11:30am, bake 4pm.</span>
+    <span class="card-warn" style="grid-column:2">Needs a quick feed</span>
+  </button>
+  <button class="plan-card opt">
+    <span class="when"><span class="eyebrow">Carve</span><span class="t">10:15am</span><span class="d">Wed</span></span>
+    <span class="card-title">Overnight fridge <span class="tag cold">more flavour</span></span>
+    <span class="card-line">Feed 1:5:5 · 24°C dough · 14h fridge</span>
+    <span class="card-blurb">Mix 3pm, shape 8:30pm, bake Wed 8:45am.</span>
+  </button>
+</div>
+<ul class="hint missing"><li>Same-day supper is not offered: a standard feed would not be ready until after 3pm.</li></ul>
+</div>
+
+</div>
+</body>
+</html>
