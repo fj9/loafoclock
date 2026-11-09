@@ -33,7 +33,7 @@ part: B
 | Lame | Blade used to score bread |
 | Laminating fold | A fold where you stretch the dough thin, scatter the inclusions over it and fold it up so they spread evenly |
 | Leaven | Another name for a starter, or for the portion of it used in a bake (see Levain) |
-| Levain | A portion of starter built up in a separate jar for a specific bake |
+| Levain | Not a different thing from a starter: a portion of it built up in a separate jar for a specific bake |
 | Oven spring | The final rise in the oven |
 | Overfermented | Bulk fermentation that has gone on too long: the dough is slack and sticky, and smells sharply sour |
 | Overproofed | A final proof that has gone on too long: the dough stays dented when poked |

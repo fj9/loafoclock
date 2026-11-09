@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { isAwake, addLocalDays, localDayNumber, startOfLocalDay, partsOf, HOUR, type Plan, type Zone } from '../domain/plan';
+import { fmtShort } from '../domain/clock';
 import { clockOf, lengthOf, weekdayOf } from './format';
 import { asleepLabel, bedLabel, nightsIn, wakeLabel } from './night';
 import { stepNoText } from './StepNo';
@@ -93,6 +94,22 @@ export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props
         dayLabels.push({ d, left });
     }
 
+    // Clock times along the bar: 12 am, 6 am, 12 pm and 6 pm wherever they fall inside the bake, so the hours can be read off the bar.
+    // Midnight is placed first and the rest only where they do not crowd what is already there. Times inside the break are left out,
+    // because the break is not drawn to scale.
+    const KEY_GAP = 40 * textScale();
+    const keys: Array<{ t: number; k: number; left: number }> = [];
+    for (const k of [0, 2, 1, 3]) {
+        for (const d of days) {
+            const t = d + k * 6 * HOUR;
+            if (t <= start || t >= end) continue;
+            if (pieces.some((p) => p.collapsed && t > p.from && t < p.to)) continue;
+            const left = x(t);
+            if (left < 14 || left > width - 14) continue;
+            if (keys.every((o) => Math.abs(o.left - left) >= KEY_GAP)) keys.push({ t, k, left });
+        }
+    }
+
     const seg = (from: number, to: number, cls: string, label: string) => (
         <div class={`tl-seg ${cls}`} style={{ left: `${x(from)}px`, width: `${Math.max(0, x(to) - x(from))}px` }} title={label} />
     );
@@ -128,6 +145,12 @@ export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props
                     {dayLabels.map(({ d, left }) => (
                         <div class="tl-day" style={{ left: `${left}px` }}>{dayLabel ? dayLabel(localDayNumber(d + 12 * HOUR, zone) - localDayNumber(b.feed, zone)) : `${weekdayOf(d + 12 * HOUR, zone)} ${partsOf(d + 12 * HOUR, zone).day}`}</div>
                     ))}
+                    {keys.map(({ k, left }) => (
+                        <>
+                            <i class={`tl-tick${k === 0 ? ' mid' : ''}`} style={{ left: `${left}px` }} aria-hidden="true" />
+                            <span class={`tl-clock${k === 0 ? ' mid' : ''}`} style={{ left: `${left}px` }} aria-hidden="true">{fmtShort(`${String(k * 6).padStart(2, '0')}:00`)}</span>
+                        </>
+                    ))}
                     {seg(b.feed, b.starterIn, 'rising', 'Starter rising')}
                     {seg(b.starterIn, plan.bulkEnd, 'bulk', 'Bulk fermentation')}
                     {noFridge ? seg(b.fridge, b.ovenOn, 'proof', 'Proofing') : brk ? (
@@ -151,7 +174,7 @@ export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props
                         );
                     })}
                     {placed.map((l) => (
-                        <span class="tl-lab" style={{ left: `${l.left}px`, top: `${88 + (l.row ?? 0) * 17}px` }}>{l.swatch && <i class={`sw ${l.swatch}`} />}{l.text}</span>
+                        <span class="tl-lab" style={{ left: `${l.left}px`, top: `${106 + (l.row ?? 0) * 17}px` }}>{l.swatch && <i class={`sw ${l.swatch}`} />}{l.text}</span>
                     ))}
                     {now !== undefined && now >= start && now <= end && (
                         <div class={`tl-now${x(now) > width - 52 ? ' flip' : ''}`} style={{ left: `${x(now)}px` }}><span>Now</span></div>

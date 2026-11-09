@@ -1,7 +1,7 @@
 ---
 id: baking
 number: 11
-title: Baking in detail
+title: Baking
 part: B
 ---
 
@@ -50,8 +50,8 @@ If your oven is gas, or cannot reach {{ovenOn}}°C in fan mode (about 260°C con
 
 ## Doneness
 
-- Colour first: deep golden-brown to dark mahogany crust; pale loaves taste flat.
 - Hollow sound when tapped on the base.
+- Colour: deep golden-brown to dark mahogany crust; pale loaves taste flat.
 - Optional: an internal temperature of 96 to 99°C, if you have a probe thermometer.
 
 ## Cooling {steps=out,carve}

@@ -1,11 +1,11 @@
 ---
 id: what-to-note
 number: A2
-title: What to note down while you bake
+title: What to note down
 part: A
 ---
 
-Most sourdough problems come down to three questions (see [[troubleshooting|section 12]]): was the starter ripe (risen to about double, with a domed top) when it was used, was the bulk fermentation (the first rise) long enough, judged by the dough rather than the clock, and was the dough temperature what you thought it was. Noting down the facts below lets you answer those questions afterwards. A short log of every bake, even a line or two, is the fastest way to learn: after a few loaves the patterns in your own kitchen start to show.
+Most sourdough problems come down to three questions (see [[troubleshooting|section 14]]): was the starter ripe (risen to about double, with a domed top) when it was used, was the bulk fermentation (the first rise) long enough, judged by the dough rather than the clock, and was the dough temperature what you thought it was. Noting down the facts below lets you answer those questions afterwards. A short log of every bake, even a line or two, is the fastest way to learn: after a few loaves the patterns in your own kitchen start to show.
 
 | What to note | Why it matters |
 |---|---|

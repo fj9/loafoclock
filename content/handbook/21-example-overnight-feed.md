@@ -1,11 +1,13 @@
 ---
-id: example-overnight-levain
+id: example-overnight-feed
 number: C1
-title: Overnight feed, three days
+title: Overnight feed
 part: C
 ---
 
 Feed the starter in the evening and leave it to rise overnight. Mix the dough first thing the next morning, shape it in the afternoon, and bake from the fridge on the third day. The days are called Day 1, Day 2 and Day 3, because the bake can start on any evening.
+
+{{planSettings threeDay}}
 
 ## The feed
 
@@ -35,6 +37,6 @@ In a cool kitchen, mix the feed with warm water (about 30°C). It starts warm, s
 
 - Evening, Day 1: feed the starter with flour and water, using the amounts above. Mark the jar level with an elastic band.
 - Morning, Day 2: check the jar. It should be domed, bubbly and about double. Start the autolyse an hour before you want to add it.
-- After mixing: measure the dough temperature with a probe, and check the rise against the target in [[process#bulk|section 6, bulk fermentation]].
+- After mixing: measure the dough temperature with a probe, and check the rise against the target in [[process#bulk|section 7, bulk fermentation]].
 
 If the top of the starter has started to fall back, it is past its peak. Use it straight away or feed it again. All times are estimates: use the jar and the thermometer to decide when to move on.

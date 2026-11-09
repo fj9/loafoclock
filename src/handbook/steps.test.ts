@@ -27,7 +27,7 @@ describe('step facts', () => {
 });
 
 describe('the process chapter matches data/steps.json', () => {
-    const file = Object.entries(HANDBOOK_FILES).find(([p]) => p.endsWith('09-process.md'));
+    const file = Object.entries(HANDBOOK_FILES).find(([p]) => p.endsWith('10-process.md'));
     const text = file?.[1] ?? '';
     const headings = [...text.matchAll(/^## Step (\d+): (.+?)(?: \{([^}]*)\})?\s*$/gm)].map((m) => {
         const attrs = m[3] ?? '';
@@ -35,7 +35,7 @@ describe('the process chapter matches data/steps.json', () => {
         return { number: Number(m[1]), name: m[2]!.trim(), steps };
     });
 
-    it('reads 09-process.md', () => expect(text).not.toBe(''));
+    it('reads 10-process.md', () => expect(text).not.toBe(''));
 
     it('every "## Step N: Name" heading has the number, name and planner steps of that step', () => {
         expect(headings.length).toBeGreaterThan(0);

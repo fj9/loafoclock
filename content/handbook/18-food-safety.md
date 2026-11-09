@@ -1,7 +1,7 @@
 ---
 id: food-safety
 number: 15
-title: Food safety notes
+title: Food safety
 part: B
 ---
 

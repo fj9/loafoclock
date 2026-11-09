@@ -2,7 +2,7 @@
     "threeDay": "feed=21:00 wait=11 temp=24 fridge=18",
     "twoDay": "feed=08:00 wait=6 temp=24 fridge=12",
     "sameDay": "feed=06:00 ratio=2 delay=0 temp=27 fridge=none",
-    "afterWork": "feed=07:00 ratio=6 delay=0 temp=26 fridge=19.75",
+    "afterWork": "feed=08:00 wait=10 temp=26 fridge=19 autolyse=0",
     "twoLoavesFirst": "feed=21:00 wait=11 temp=24 fridge=18 loaves=2",
     "twoLoavesSecond": "feed=21:00 wait=11 temp=24 fridge=42 loaves=2"
 }

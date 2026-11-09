@@ -1,7 +1,7 @@
 ---
 id: quick-answers
 number: D
-title: Quick answers to common questions
+title: Quick answers
 part: D
 ---
 
@@ -33,27 +33,27 @@ No. A starter can float and still be weak, and a ripe starter can sink if it has
 
 ## How long should bulk fermentation take?
 
-It depends on the dough temperature, not on the clock. Measure the dough with a probe thermometer just after the starter is mixed in, then look it up in the chart in [[process#bulk|section 6, bulk fermentation]]. Bulk is counted from when the starter goes in. For example, dough at 24°C needs {{bulk 24}}. Warmer dough is quicker and cooler dough is slower, and the chart covers every temperature. These times are guidance for a ripe starter in the app's recipe (about {{starterPercent}}% starter); more starter is quicker and less is slower. Go by the cues first (rise, bubbles, jiggle and domed edges) and the clock second. {{bulkTooCool}} {{bulkTooWarm}} ([[process#bulk|Section 6, bulk fermentation]])
+It depends on the dough temperature, not on the clock. Measure the dough with a probe thermometer just after the starter is mixed in, then look it up in the chart in [[process#bulk|section 7, bulk fermentation]]. Bulk is counted from when the starter goes in. For example, dough at 24°C needs {{bulk 24}}. Warmer dough is quicker and cooler dough is slower, and the chart covers every temperature. These times are guidance for a ripe starter in the app's recipe (about {{starterPercent}}% starter); more starter is quicker and less is slower. Go by the cues first (rise, bubbles, jiggle and domed edges) and the clock second. {{bulkTooCool}} {{bulkTooWarm}} ([[process#bulk|Section 7, bulk fermentation]])
 
 ## How do I know bulk fermentation is finished?
 
-Look for the target rise for your dough temperature (marked on a straight-sided tub), a domed and slightly glossy surface with bubbles, dough that pulls away from the container cleanly, and an airy, jelly-like wobble when you gently shake the tub. ([[process#bulk|Section 6, bulk fermentation]])
+Look for the target rise for your dough temperature (marked on a straight-sided tub), a domed and slightly glossy surface with bubbles, dough that pulls away from the container cleanly, and an airy, jelly-like wobble when you gently shake the tub. ([[process#bulk|Section 7, bulk fermentation]])
 
 ## My dough is sticky, slack and will not hold its shape. Why?
 
-The usual causes are that it is overfermented (it may smell sharply sour) or the hydration is very high. Reduce the water, shorten the bulk, or use stronger flour. ([[troubleshooting|Section 12]])
+The usual causes are that it is overfermented (it may smell sharply sour) or the hydration is very high. Reduce the water, shorten the bulk, or use stronger flour. ([[troubleshooting|Section 14]])
 
 ## My loaf came out flat and spread out. Why?
 
-Common causes are overproofing, dough that is too wet, loose shaping, or weak gluten. Shorten the proof, lower the hydration, shape more tightly, and do more folds early in the bulk. ([[troubleshooting|Section 12]])
+Common causes are overproofing, dough that is too wet, loose shaping, or weak gluten. Shorten the proof, lower the hydration, shape more tightly, and do more folds early in the bulk. ([[troubleshooting|Section 14]])
 
 ## My crumb is dense with tiny holes, or gummy and wet. Why?
 
-Dense, tight crumb with tiny holes usually means the bulk was underfermented, the starter was weak, or the dough was underproofed. Give it a longer bulk judged by volume, use a ripe starter, and keep the dough warmer. A gummy, wet crumb is usually because the loaf was cut too soon, underbaked, or overfermented. Let the loaf cool for at least {{coolingLong}} minutes ({{coolingShort}} if you have no self-control) and bake it longer. ([[process|Sections 6]] and [[troubleshooting|12]])
+Dense, tight crumb with tiny holes usually means the bulk was underfermented, the starter was weak, or the dough was underproofed. Give it a longer bulk judged by volume, use a ripe starter, and keep the dough warmer. A gummy, wet crumb is usually because the loaf was cut too soon, underbaked, or overfermented. Let the loaf cool for at least {{coolingLong}} minutes ({{coolingShort}} if you have no self-control) and bake it longer. ([[process|Sections 7]] and [[troubleshooting|14]])
 
 ## Why did my loaf not rise much in the oven, or have no "ear"?
 
-Likely causes are overproofing, scoring that was too shallow, too little steam, or an oven that was not hot enough. Score deeper (about 0.5 to 1 cm) at a 30 to 45° angle, check the steam and preheat the pot fully, and shorten the proof. ([[baking|Sections 11]] and [[troubleshooting|12]])
+Likely causes are overproofing, scoring that was too shallow, too little steam, or an oven that was not hot enough. Score deeper (about 0.5 to 1 cm) at a 30 to 45° angle, check the steam and preheat the pot fully, and shorten the proof. ([[baking|Sections 11]] and [[troubleshooting|14]])
 
 ## My bread is too sour, or not sour enough. How do I change it?
 
@@ -61,53 +61,53 @@ These tend to help, though starters and kitchens differ. For a milder loaf, use 
 
 ## Can I put my dough in the fridge, and when?
 
-Yes. The most common and predictable method is to shape the dough, cover it and put it in the fridge (3 to 5°C) for the final proof, for {{fridgeMin}} to {{fridgeMax}} hours. Bake it straight from the fridge with no need to warm up. Longer times give more tang. Cold dough is also easier to score and handle. ([[levers|Section 7]], lever 3)
+Yes. The most common and predictable method is to shape the dough, cover it and put it in the fridge (3 to 5°C) for the final proof, for {{fridgeMin}} to {{fridgeMax}} hours. Bake it straight from the fridge with no need to warm up. Longer times give more tang. Cold dough is also easier to score and handle. ([[levers|Section 8]], lever 3)
 
 ## Can I skip the fridge?
 
-Yes. Proof the shaped dough covered at room temperature instead, then bake. It takes much less time than bulk, so check early. At 24°C allow {{finalProof 24}}, and see the full table in [[process#final-proof-no-fridge|section 6, final proof without the fridge]]. Cue first, clock second: the dough looks puffy and the poke test springs back slowly. The house method is still the fridge for the final proof only, which gives more flavour and flexible timing. ([[levers|Section 7]], lever 3)
+Yes. Proof the shaped dough covered at room temperature instead, then bake. It takes much less time than bulk, so check early. At 24°C allow {{finalProof 24}}, and see the full table in [[process#final-proof-no-fridge|section 7, final proof without the fridge]]. Cue first, clock second: the dough looks puffy and the poke test springs back slowly. The house method is still the fridge for the final proof only, which gives more flavour and flexible timing. ([[levers|Section 8]], lever 3)
 
 ## The dough is ready at a bad time. What can I do?
 
-Shape it and put it in the fridge. The fridge proof can run for {{fridgeMin}} to {{fridgeMax}} hours, so a later bake is fine. ([[levers#lever-3-fridge-proof|Section 7, lever 3]])
+Shape it and put it in the fridge. The fridge proof can run for {{fridgeMin}} to {{fridgeMax}} hours, so a later bake is fine. ([[levers#lever-3-fridge-proof|Section 8, lever 3]])
 
 ## The dough has risen faster than the plan. Can I shape it early?
 
-Yes. Judge by the rise, not the clock. Shape the dough when it reaches the target rise, then put it in the fridge and bake earlier. ([[process#bulk|Section 6, bulk fermentation]])
+Yes. Judge by the rise, not the clock. Shape the dough when it reaches the target rise, then put it in the fridge and bake earlier. ([[process#bulk|Section 7, bulk fermentation]])
 
 ## My kitchen is cold. How do I warm the dough?
 
-Use warm water when mixing (see the dough temperature formula in [[levers|section 7]]), and keep the dough somewhere warm: an oven with only the light on, a proving box, near (not on) a radiator, or beside a bowl of warm water in a cooler box. Measure the dough temperature after mixing and use the chart in [[process#bulk|section 6, bulk fermentation]] for the bulk time. ([[levers|Section 7]])
+Use warm water when mixing (see the dough temperature formula in [[levers|section 8]]), and keep the dough somewhere warm: an oven with only the light on, a proving box, near (not on) a radiator, or beside a bowl of warm water in a cooler box. Measure the dough temperature after mixing and use the chart in [[process#bulk|section 7, bulk fermentation]] for the bulk time. ([[levers|Section 8]])
 
 ## How hot should the oven be, and how do I know the bread is done?
 
 Heat the empty lidded pot to {{ovenOn}}°C (fan oven) for {{preheat}} minutes. Bake with the lid on, then lift it off, lower the oven to {{ovenLidOff}}°C and bake until deep golden brown. The times for each loaf size are in the table in [[baking#dutch-oven|section 11]].
 
-The loaf is done when the crust is deep golden brown and the base sounds hollow when tapped. A probe thermometer reading 96 to 99°C inside confirms it, if you have one. Cool it on a wire rack for at least {{coolingLong}} minutes ({{coolingShort}} if you have no self-control). ([[process|Sections 6]] and [[baking|11]])
+The loaf is done when the crust is deep golden brown and the base sounds hollow when tapped. A probe thermometer reading 96 to 99°C inside confirms it, if you have one. Cool it on a wire rack for at least {{coolingLong}} minutes ({{coolingShort}} if you have no self-control). ([[process|Sections 7]] and [[baking|11]])
 
 ## How can I fit sourdough around a working week?
 
-The "After work, bake the next evening" timeline in [[timelines]] is designed for this: feed the starter in the morning ({{standardFeed}}), mix the dough in the afternoon, shape it at about 10 pm and put it in the fridge, then bake straight from the fridge the next day after work. The hands-on time comes in short bursts. ([[timelines|Section 8]])
+The "After work, bake the next evening" timeline in [[timelines]] is designed for this: feed the starter in the morning ({{standardFeed}}), mix the dough in the afternoon, shape it at about 10 pm and put it in the fridge, then bake straight from the fridge the next day after work. The hands-on time comes in short bursts. ([[timelines|Section 9]])
 
 ## What can I do with starter discard?
 
-It is safe to use. It makes good pancakes, waffles, crackers, flatbreads, tortillas, muffins, cakes and brownies. You can keep it in a bowl in the fridge until you have enough. ([[starter#discard|Sections 3.7]] and [[variations|13]])
+It is safe to use. It makes good pancakes, waffles, crackers, flatbreads, tortillas, muffins, cakes and brownies. You can keep it in a bowl in the fridge until you have enough. ([[starter#discard|Sections 3.7]] and [[variations|12]])
 
 ## How do I store, freeze or revive bread?
 
-Keep it cut side down on a board, or in a linen bag, bread bin or paper bag, for 2 to 4 days, and avoid the fridge. Slice before freezing and keep for up to 3 months, toasting slices straight from frozen. To revive a stale loaf, splash the crust lightly with water and bake at about 180°C for 5 to 10 minutes. ([[storing|Section 14]])
+Keep it cut side down on a board, or in a linen bag, bread bin or paper bag, for 2 to 4 days, and avoid the fridge. Slice before freezing and keep for up to 3 months, toasting slices straight from frozen. To revive a stale loaf, splash the crust lightly with water and bake at about 180°C for 5 to 10 minutes. ([[storing|Section 13]])
 
 ## What is a levain, and do I need one?
 
-A levain is a portion of starter built up in a separate jar for one bake, so the main starter jar stays untouched. Many bakers make enough for the recipe plus a spoonful to keep going. You do not need one for the recipes here: you feed the starter from its jar and keep some back. [[example-overnight-levain|Part C]] has a worked example for an overnight feed. ([[process#step-1-feed-the-starter|Section 6, feeding the starter]], and [[example-overnight-levain|section C1]])
+A levain is not a different thing from your starter: it is a portion of it, built up in a separate jar for one bake, so the main starter jar stays untouched. Many bakers make enough for the recipe plus a spoonful to keep going. You do not need one for the recipes here: you feed the starter from its jar and keep some back. [[example-overnight-feed|The overnight feed example]] is a full worked example. ([[process#step-1-feed-the-starter|Section 7, feeding the starter]], and [[example-overnight-feed|section C1]])
 
 ## How do I plan an overnight feed?
 
-[[example-overnight-levain|Section C1]] gives a worked example. Feed {{feedFor 7 1}} (a 1:7:7) at 9 pm and it is ready in {{feedWindow 7}}, so you can mix at about 8 am. In a cooler kitchen it takes a couple of hours longer, and warm water gives it a head start. These are estimates, so check the jar. ([[example-overnight-levain|Section C1]])
+[[example-overnight-feed|Section C1]] gives a worked example. Feed {{feedFor 7 1}} (a 1:7:7) at 9 pm and it is ready in {{feedWindow 7}}, so you can mix at about 8 am. In a cooler kitchen it takes a couple of hours longer, and warm water gives it a head start. These are estimates, so check the jar. ([[example-overnight-feed|Section C1]])
 
 ## Can I just follow the times in the recipe?
 
-Use them as a starting point. Your kitchen, flour and starter will change them, so note what happens and adjust. Check the starter against the ripe signs, judge bulk by the dough's rise and feel, and check the proof with the poke test. If something goes wrong, ask the three questions in [[troubleshooting|section 12]]: was the starter ripe, was bulk long enough judged by the dough, and was the dough temperature what you thought it was.
+Use them as a starting point. Your kitchen, flour and starter will change them, so note what happens and adjust. Check the starter against the ripe signs, judge bulk by the dough's rise and feel, and check the proof with the poke test. If something goes wrong, ask the three questions in [[troubleshooting|section 14]]: was the starter ripe, was bulk long enough judged by the dough, and was the dough temperature what you thought it was.
 
 ## Is sourdough safe for someone with coeliac disease?
 

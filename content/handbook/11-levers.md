@@ -1,7 +1,7 @@
 ---
 id: levers
-number: 7
-title: The three levers: feed ratio, temperature, fridge proof
+number: 8
+title: The three levers
 part: B
 ---
 
@@ -15,7 +15,7 @@ Almost every decision in sourdough comes down to these three. Once you understan
 
 ## Lever 2: Dough temperature (how fast bulk goes)
 
-- Warmer dough ferments faster and cooler dough ferments more slowly. The chart in [[process#bulk|section 6, bulk fermentation]] gives the bulk time for each dough temperature.
+- Warmer dough ferments faster and cooler dough ferments more slowly. The chart in [[process#bulk|section 7, bulk fermentation]] gives the bulk time for each dough temperature.
 - The chart covers dough from {{bulkCoolest}} to {{bulkWarmest}}°C. Outside that, go by the cues rather than the clock.
 - Warm dough (26 to 28°C): faster, milder, more yeasty-sweet.
 - Cool dough (20 to 22°C): slower, tends to be more sour, more flavour development.
@@ -52,7 +52,7 @@ Using the oven as a warm, draught-free box:
 - Longer cold times (24 hours and more, up to {{fridgeMax}}) give more tang and deeper flavour.
 - Very long fridge times, towards {{fridgeMax}} hours, are for the curious. The dough can overproof, so judge it by feel, note what happens and adjust. Finding where your starter and kitchen sit is part of the fun.
 - Cold dough is firmer, so it is easier to handle, score and transfer.
-- Cover the dough for the fridge proof (see [[process#step-8-final-proof|section 6, final proof]]).
+- Cover the dough for the fridge proof (see [[process#step-8-final-proof|section 7, final proof]]).
 - Bake straight from the fridge. No need to let it warm.
 - To skip the fridge, proof at room temperature for a much shorter time instead ([[process#final-proof-no-fridge|Final proof without the fridge]]). The loaf is milder.
 

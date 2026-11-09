@@ -64,10 +64,19 @@ export const FACTS: Facts = {
     },
     /** {{planFigure afterWork}}: a worked example (named in examples.json) drawn as the app draws a plan. */
     planFigure: (arg) => {
-        const spec = exampleSpec(arg);
-        exampleFor(spec); // an example with a step in the sleeping hours stops the build
-        return `<div class="hb-figure" data-plan="${spec}"></div>`;
+        // A second name adds the baking of a second loaf to the end of the steps: {{planFigure twoLoavesFirst twoLoavesSecond}}.
+        const specs = arg.split(/\s+/).filter(Boolean).map(exampleSpec);
+        for (const s of specs) exampleFor(s); // an example with a step in the sleeping hours stops the build
+        return `<div class="hb-figure" data-plan="${specs.join('|')}"></div>`;
     },
+    /** {{planBar twoLoavesSecond}}: just the bar across the page, for an example that is described in the text. */
+    planBar: (arg) => {
+        const spec = exampleSpec(arg);
+        exampleFor(spec);
+        return `<div class="hb-figure" data-plan="bar:${spec}"></div>`;
+    },
+    /** {{planSettings afterWork}}: the choices a worked example is built on, as cards. Drawn by the app; the printed handbook leaves it out. */
+    planSettings: (arg) => `<div class="hb-settings-fig" data-plan="${exampleSpec(arg)}"></div>`,
     /** {{at afterWork ovenOn}}: when a step of a worked example happens, as "Day 2, 5:15 pm". */
     at: (arg) => {
         const [name = '', step = ''] = arg.split(/\s+/);

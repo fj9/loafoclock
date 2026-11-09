@@ -5,6 +5,7 @@
 //   temp      dough temperature in °C
 //   fridge    hours in the fridge, or none
 //   cooling   30 or 60 minutes (60 if left out)
+//   autolyse  minutes of autolyse before the starter goes in; 0 skips it (the usual 60 if left out)
 //   loaves    1 or 2 (1 if left out); only the amounts change
 import { DEFAULT_WAKING, STEP_ORDER, buildPlan, feedForWait, fitsWakingHours, leversAt, localDayNumber, type Levers, type Plan, type StepId } from '../domain/plan';
 import examples from '../../content/handbook/examples.json';
@@ -27,6 +28,7 @@ export function parseExample(spec: string): Levers {
         doughTemp: Number(kv.temp),
         fridge: kv.fridge === 'none' ? { kind: 'none' } : { kind: 'hours', hours: Number(kv.fridge) },
         cooling: kv.cooling === '30' ? 30 : 60,
+        ...(kv.autolyse !== undefined ? { autolyseMin: Number(kv.autolyse) } : {}),
         loaves: kv.loaves === '2' ? 2 : 1
     });
 }
@@ -35,7 +37,8 @@ export function parseExample(spec: string): Levers {
 export function exampleFor(spec: string): Plan {
     const plan = buildPlan(parseExample(spec));
     if (!fitsWakingHours(plan, { waking: DEFAULT_WAKING })) throw new Error(`the example "${spec}" has a step in the sleeping hours`);
-    return plan;
+    // A skipped autolyse is not a step of the example at all.
+    return plan.levers.autolyseMin === 0 ? { ...plan, steps: plan.steps.filter((s) => s.id !== 'autolyse') } : plan;
 }
 
 /** "Day 1", "Day 2": days are counted from the day of the first feed. */

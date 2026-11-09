@@ -12,7 +12,6 @@ import { ConfirmSheet } from './ConfirmSheet';
 import { EmptyState } from './EmptyState';
 import { FinishForm } from './FinishForm';
 import { Handbook } from './Handbook';
-import { Help } from './Help';
 import { LiveView } from './LiveView';
 import { LogScreen } from './LogScreen';
 import { Logo } from './Logo';
@@ -35,10 +34,10 @@ export const SHOW_CLASSIC_TABS = false;
 const HANDBOOK_HASH = '#/handbook';
 
 const tabsFor = (classic: boolean): ReadonlyArray<[Tab, string]> => (classic
-    ? [['plan', 'Plan'], ['plan2', 'New plan'], ['bake', 'Bake'], ['bake2', 'New bake'], ['log', 'Log']]
-    : [['plan2', 'Plan'], ['bake2', 'Bake'], ['log', 'Log']]);
+    ? [['plan', 'Plan'], ['plan2', 'New plan'], ['bake', 'Bake'], ['bake2', 'New bake'], ['log', 'Log'], ['handbook', 'Handbook']]
+    : [['plan2', 'Plan'], ['bake2', 'Bake'], ['log', 'Log'], ['handbook', 'Handbook']]);
 /** The rest live in the menu at the top right. */
-const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['handbook', 'Handbook'], ['help', 'Help'], ['about', 'About']];
+const MENU: ReadonlyArray<[Tab, string]> = [['settings', 'Settings'], ['help', 'Help'], ['about', 'About']];
 
 export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean } = {}) {
     const [now] = useState(startingPoint);
@@ -76,7 +75,11 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
         document.addEventListener('keydown', esc);
         return () => document.removeEventListener('keydown', esc);
     }, [menuOpen]);
-    const go = (t: Tab) => { setTab(t); setMenuOpen(false); };
+    // Help is not a page of its own: it opens the how-to-use-the-app page of the handbook.
+    const go = (t: Tab) => {
+        if (t === 'help') { try { window.location.hash = `${HANDBOOK_HASH}/using-the-app`; } catch { /* no address here */ } setTab('handbook'); } else setTab(t);
+        setMenuOpen(false);
+    };
     // A link to the handbook, from anywhere, opens it. Leaving it takes its place in the address with it.
     useEffect(() => {
         const onHash = () => { if (window.location.hash.startsWith(HANDBOOK_HASH)) setTab('handbook'); };
@@ -186,7 +189,7 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
                     </button>
                 ))}
             </nav>
-            <main class={`app-main${tab === 'plan2' || tab === 'bake2' ? '' : ' narrow'}`}>
+            <main class={`app-main${tab === 'plan2' || tab === 'bake2' || tab === 'handbook' ? '' : ' narrow'}`}>
                 {tab === 'plan' && planPage('classic')}
                 {tab === 'plan2' && planPage('rail')}
                 {tab === 'bake' && bakePage('classic')}
@@ -201,7 +204,6 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
                 )}
                 {tab === 'settings' && <SettingsScreen settings={settings} onChange={change} />}
                 {tab === 'handbook' && <Handbook />}
-                {tab === 'help' && <Help />}
                 {tab === 'about' && <About />}
             </main>
             <footer class="app-footer">

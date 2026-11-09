@@ -1,7 +1,7 @@
 ---
 id: percentages
 number: 4
-title: Baker's percentages and hydration
+title: Percentages
 part: B
 ---
 

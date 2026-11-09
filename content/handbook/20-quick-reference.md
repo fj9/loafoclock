@@ -20,13 +20,13 @@ part: B
 | Stage | Temperature |
 |---|---|
 | Starter | 24–27°C |
-| Bulk | 24–26°C (see the bulk chart in [[process#bulk|section 6, bulk fermentation]]) |
+| Bulk | 24–26°C (see the bulk chart in [[process#bulk|section 7, bulk fermentation]]) |
 | Fridge proof | 3–5°C ({{fridgeMin}} to {{fridgeMax}} hours) |
 | Final proof, no fridge | room temperature (see [[process#final-proof-no-fridge|the final proof table]]) |
 | Preheat | {{ovenOn}}°C |
 | Bake, lid on | {{ovenOn}}°C |
 | Bake, lid off | {{ovenLidOff}}°C |
-| Done | Hollow sound from the base; 96–99°C if you use a probe |
+| Done | Hollow sound from the base; deep golden-brown crust; 96–99°C if you use a probe |
 
 Oven temperatures are for fan ovens. Go by colour as well as the clock.
 
