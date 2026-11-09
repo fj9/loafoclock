@@ -6,7 +6,7 @@ import bulkData from '../../../data/bulk.json';
 import timing from '../../../data/timing.json';
 import finalProofData from '../../../data/final-proof.json';
 
-/** One bulk row: the clock window (hours, from the salt going in) and the rise to look for. `hours` is the longer end, which is what the planner schedules. */
+/** One bulk row: the clock window (hours, from the starter going in) and the rise to look for. `hours` is the longer end, which is what the planner schedules. */
 export interface BulkRow { temp: number; minHours: number; maxHours: number; hours: number; rise: number }
 
 /** Dough temperature (°C) to the hours of bulk fermentation and the rise to look for. */
@@ -27,9 +27,33 @@ export function bulkFor(temp: number): BulkRow {
 /** Minutes of proofing on the counter when the fridge is skipped: the longer end of the final proof range, taking the dough temperature as the room temperature. */
 export const counterProofMinutes = (doughTemp: number): number => Math.round(finalProofFor(doughTemp).maxHours * 60);
 
+/**
+ * Minutes from the starter going in to the end of bulk (the pre-shape): the longer end of the range for the dough
+ * temperature, but never so short that the last fold does not get its half hour before the pre-shape.
+ */
+export function bulkMinutesFor(doughTemp: number, fermentolyseMin: number): number {
+    const lastFoldAndGap = fermentolyseMin + STEP_MINUTES.saltRest + (STEP_MINUTES.foldCount - 1) * STEP_MINUTES.foldGap + STEP_MINUTES.foldGap;
+    return Math.max(bulkFor(doughTemp).hours * 60, lastFoldAndGap);
+}
+
 /** "3 to 5": a range of hours written for text. */
 export const hoursRangeText = (r: { minHours: number; maxHours: number }): string =>
     r.minHours === r.maxHours ? `${r.maxHours}` : `${r.minHours} to ${r.maxHours}`;
+
+/** Hours as handbook prose: whole hours stay as digits, half hours are spelled out ("4 and a half"). */
+const hoursWords = (h: number, alone: boolean): string => {
+    const whole = Math.floor(h);
+    if (h === whole) return `${h}`;
+    if (whole === 0) return alone ? 'half an hour' : 'half';
+    return `${whole} and a half`;
+};
+
+/** "4 and a half to 6 and a half hours": a range of hours written for handbook prose, with its unit. */
+export const hoursRangeProse = (r: { minHours: number; maxHours: number }): string => {
+    if (r.minHours === r.maxHours) return r.maxHours === 1 ? '1 hour' : r.maxHours === 0.5 ? 'half an hour' : `${hoursWords(r.maxHours, true)} hours`;
+    const min = r.minHours === 0.5 ? 'half an hour' : hoursWords(r.minHours, false);
+    return `${min} to ${hoursWords(r.maxHours, false)} ${r.maxHours === 1 ? 'hour' : 'hours'}`;
+};
 
 /** Room temperature (°C) to the hours of final proof at room temperature, for shaped dough that skips the fridge. */
 export const FINAL_PROOF_TABLE: ReadonlyArray<{ temp: number; minHours: number; maxHours: number }> = finalProofData.rows;

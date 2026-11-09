@@ -1,6 +1,6 @@
 {
     "status": "draft, not yet verified against test bakes",
-    "note": "Dough temperature (°C) at the end of mixing to hours of bulk fermentation, counted from the moment the salt goes in, and the rise (%) to look for. For a ripe, active starter: 450 g strong white flour, 150 g starter, 300 g water, 10 g salt (70% hydration). The planner uses maxHours, the longer end of each range.",
+    "note": "Dough temperature (°C), measured just after the starter is mixed in, to hours of bulk fermentation, counted from that same moment, and the rise (%) to look for. For a ripe, active starter: 450 g strong white flour, 150 g starter, 300 g water, 10 g salt (70% hydration). The planner uses maxHours, the longer end of each range.",
     "tooCool": "Below 16°C the dough is too cool to rely on a clock: go by the cues.",
     "tooWarm": "Above 32°C the dough is too warm: cool it first and watch it closely.",
     "rows": [

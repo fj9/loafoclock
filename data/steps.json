@@ -1,0 +1,18 @@
+{
+    "note": "The ten numbered steps, shared by the app and the handbook. Numbers live only here: do not type them into text. 'covers' lists the planner step ids each step takes in. Phases are periods, not numbered steps.",
+    "steps": [
+        { "key": "feed", "number": 1, "name": "Feed the starter", "covers": ["feed"] },
+        { "key": "autolyse", "number": 2, "name": "Autolyse", "covers": ["autolyse"] },
+        { "key": "starterIn", "number": 3, "name": "Add the starter", "alsoCalled": "the fermentolyse", "covers": ["starterIn"] },
+        { "key": "salt", "number": 4, "name": "Add the salt", "covers": ["salt"] },
+        { "key": "folds", "number": 5, "name": "Folds", "covers": ["fold1", "fold2", "fold3", "fold4"] },
+        { "key": "preShape", "number": 6, "name": "Pre-shape", "covers": ["preShape"] },
+        { "key": "finalShape", "number": 7, "name": "Final shape", "covers": ["finalShape"] },
+        { "key": "finalProof", "number": 8, "name": "Final proof", "covers": ["fridge"] },
+        { "key": "bake", "number": 9, "name": "Bake", "covers": ["ovenOn", "bake"] },
+        { "key": "cool", "number": 10, "name": "Cool and carve", "covers": ["out", "carve"] }
+    ],
+    "phases": [
+        { "key": "bulk", "name": "Bulk fermentation", "from": "starterIn", "to": "preShape" }
+    ]
+}

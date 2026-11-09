@@ -64,7 +64,7 @@ export function Levers({ levers, zone, onChange, quickStreak = 0, locked = {}, m
                 <div class="lever-head"><label for="lv-temp">Dough temperature</label> <Tip name="doughTemp" /></div>
                 <input id="lv-temp" type="range" min={COOLEST_TEMP} max={WARMEST_TEMP} step={1} value={levers.doughTemp} disabled={locked.doughTemp}
                     onInput={(e) => set({ doughTemp: Number((e.target as HTMLInputElement).value) })} />
-                <output>{levers.doughTemp}°C: bulk takes about {hoursRangeText(bulk)} hours from the salt, until it has risen {bulk.rise}%</output>
+                <output>{levers.doughTemp}°C: bulk takes about {hoursRangeText(bulk)} hours from adding the starter, until it has risen {bulk.rise}%</output>
             </div>
 
             <div class="lever">

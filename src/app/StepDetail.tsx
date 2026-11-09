@@ -3,6 +3,7 @@ import type { Plan, StepId, Zone } from '../domain/plan';
 import { TIPS } from '../domain/tips';
 import { clockOf } from './format';
 import { LearnMore } from './LearnMore';
+import { StepNo } from './StepNo';
 
 interface Props {
     id: StepId;
@@ -18,6 +19,7 @@ export function StepDetail({ id, plan, zone }: Props) {
     const guide = guideFor(id, plan, (ms) => clockOf(ms, zone));
     return (
         <div class="step-detail">
+            <p class="step-no-line"><StepNo id={id} /></p>
             {guide.tip && <p class="about">{TIPS[guide.tip].text}</p>}
             {guide.ingredients.length > 0 && (
                 <ul class="ingredients" aria-label="You will need">{guide.ingredients.map((i) => <li>{i}</li>)}</ul>

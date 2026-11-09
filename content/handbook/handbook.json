@@ -1,6 +1,6 @@
 {
     "title": "The Sourdough Handbook",
-    "subtitle": "A practical guide to making sourdough bread, from first starter to fixing a bad loaf, with a worked example for planning an overnight levain.",
+    "subtitle": "A practical guide to making sourdough bread, from first starter to fixing a bad loaf, with a worked example for planning an overnight feed.",
     "parts": [
         {
             "id": "A",
@@ -15,12 +15,17 @@
         {
             "id": "C",
             "title": "Worked examples",
-            "intro": "Full bakes from feed to carve, one example each: three days with an overnight levain, two days, the same day, after work and two loaves."
+            "intro": "Full bakes from feed to carve, one example each: three days with an overnight feed, two days, the same day, after work and two loaves."
         },
         {
             "id": "D",
             "title": "Quick answers",
             "intro": "Short answers to common questions."
+        },
+        {
+            "id": "E",
+            "title": "Appendix",
+            "intro": "Conversions and US names for readers who use cups and Fahrenheit."
         }
     ]
 }

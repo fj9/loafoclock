@@ -1,4 +1,5 @@
 // Plain-English explanations for the jargon, shown as (i) tooltips next to the term.
+import { NUMBERED_STEPS } from './steps';
 export interface Tip {
     label: string;
     text: string;
@@ -63,7 +64,7 @@ export const TIPS = {
     },
     enrichments: {
         label: 'salt and enrichments',
-        text: 'Salt adds flavour and strength. Honey and olive oil make the loaf softer. They go in after the starter has had a head start.'
+        text: 'Salt adds flavour and strength. Honey and olive oil are optional and make the loaf softer (no honey for babies under 12 months). They go in after the starter has had a head start.'
     },
     folds: {
         label: 'stretch and folds',
@@ -75,7 +76,7 @@ export const TIPS = {
     },
     doughTemp: {
         label: 'dough temperature',
-        text: 'Warmer dough rises faster. A thermometer in the middle of the dough is best. No thermometer? Tap the option closest to your kitchen.'
+        text: 'Warmer dough rises faster. Measure just after the starter is mixed in, with a probe in the middle of the dough. No thermometer? Tap the option closest to your kitchen.'
     },
     targetRise: {
         label: 'target rise',
@@ -83,7 +84,7 @@ export const TIPS = {
     },
     totalBulk: {
         label: 'total bulk time',
-        text: 'How long, from adding the salt, until the first rise is finished. It is an estimate: go by how the dough looks.'
+        text: 'How long, from adding the starter, until the first rise is finished. It is an estimate: go by how the dough looks.'
     },
     preShape: {
         label: 'pre-shape',
@@ -94,7 +95,7 @@ export const TIPS = {
         text: 'Shape the dough into a tight oval and place it seam side up in a floured banneton (a proving basket).'
     },
     retardation: {
-        label: 'cold retardation',
+        label: 'fridge proof',
         text: 'Leaving the shaped dough in the fridge to rise slowly. It builds flavour and lets you bake when it suits you. Overnight is fine; up to 72 hours works.'
     },
     fridgePlanner: {
@@ -109,8 +110,12 @@ export const TIPS = {
 
 export type TipKey = keyof typeof TIPS;
 
-/** Which tip goes with each step, by step id. */
-export const STEP_TIPS: Record<number, TipKey> = {
-    1: 'starter', 2: 'autolyse', 3: 'fermentolyse', 4: 'enrichments', 5: 'folds',
-    6: 'bulk', 7: 'preShape', 8: 'finalShape', 9: 'retardation', 10: 'baking'
+const STEP_TIP_KEYS: Record<string, TipKey> = {
+    feed: 'starter', autolyse: 'autolyse', starterIn: 'fermentolyse', salt: 'enrichments', folds: 'folds',
+    preShape: 'preShape', finalShape: 'finalShape', finalProof: 'retardation', bake: 'baking', cool: 'cooling'
 };
+
+/** Which tip goes with each numbered step, by step key (see data/steps.json). */
+export const STEP_TIPS: Record<string, TipKey> = Object.fromEntries(
+    NUMBERED_STEPS.map((s) => [s.key, STEP_TIP_KEYS[s.key]!])
+);

@@ -9,6 +9,7 @@ import { EarlierPicker } from './EarlierPicker';
 import { Levers } from './Levers';
 import { RailTimeline, type StepState } from './RailTimeline';
 import { StepDetail } from './StepDetail';
+import { StepNo } from './StepNo';
 import { Timeline } from './Timeline';
 import { clockOf, countdownText, dayTime, lengthOf, signedMin } from './format';
 
@@ -145,6 +146,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
         <section class={`panel next-up ${next.status}`} aria-label="Next up">
             <p class="eyebrow">Next up</p>
             <p class="big">{next.label}</p>
+            <p class="hint"><StepNo id={next.id} /></p>
             <p class="hint">{when(next.at)} · <strong>{countdown(view.untilNext!)}</strong></p>
             {FOLD_IDS.includes(next.id) && (
                 <ol class="folds" aria-label="Folds">
@@ -285,6 +287,7 @@ export function LiveView({ record, onChange, onFinish, onStop = onFinish, clock 
                             <span class="rowtext">
                                 <span class="title">{s.label}{!done && s.shiftMin !== 0 && <span class="shift"> {signedMin(s.shiftMin)}</span>}</span>
                                 <span class="sub">{done ? `Done ${clockOf(s.actualAt!, zone)}` : when(s.at)}</span>
+                                <StepNo id={s.id} />
                             </span>
                         );
                         return (

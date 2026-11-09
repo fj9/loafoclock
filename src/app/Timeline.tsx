@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { isAwake, addLocalDays, localDayNumber, startOfLocalDay, partsOf, HOUR, type Plan, type Zone } from '../domain/plan';
 import { clockOf, lengthOf, weekdayOf } from './format';
 import { asleepLabel, bedLabel, nightsIn, wakeLabel } from './night';
+import { stepNoText } from './StepNo';
 import { layoutTimeline } from './timelineLayout';
 
 /** Roughly how wide a label is, in pixels, at the chosen text size. */
@@ -102,7 +103,7 @@ export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props
     const carveW = labelWidth('Bake', false);
     wanted.push({ text: 'Bake', left: x(b.carve) + 7 - carveW, width: carveW });
     const bars: Array<[number, number, string, string]> = [
-        [b.feed, b.starterIn, 'Starter rising', 'rising'], [b.salt, plan.bulkEnd, 'Bulk', 'bulk'],
+        [b.feed, b.starterIn, 'Starter rising', 'rising'], [b.starterIn, plan.bulkEnd, 'Bulk', 'bulk'],
         [b.fridge, b.ovenOn, noFridge ? 'Proof' : 'Fridge', noFridge ? 'proof' : 'fridge']
     ];
     for (const [from, to, text, swatch] of bars) {
@@ -128,7 +129,7 @@ export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props
                         <div class="tl-day" style={{ left: `${left}px` }}>{dayLabel ? dayLabel(localDayNumber(d + 12 * HOUR, zone) - localDayNumber(b.feed, zone)) : `${weekdayOf(d + 12 * HOUR, zone)} ${partsOf(d + 12 * HOUR, zone).day}`}</div>
                     ))}
                     {seg(b.feed, b.starterIn, 'rising', 'Starter rising')}
-                    {seg(b.salt, plan.bulkEnd, 'bulk', 'Bulk fermentation')}
+                    {seg(b.starterIn, plan.bulkEnd, 'bulk', 'Bulk fermentation')}
                     {noFridge ? seg(b.fridge, b.ovenOn, 'proof', 'Proofing') : brk ? (
                         <div class="tl-break" style={{ left: `${brk.x0}px`, width: `${brk.x1 - brk.x0}px` }} title="In the fridge">
                             <span class="tl-break-time">{lengthOf(b.ovenOn - b.fridge)}</span>
@@ -145,7 +146,7 @@ export function Timeline({ plan, zone, now, dayLabel, width: fixedWidth }: Props
                                 key={s.id}
                                 class={`tl-mark${asleep ? ' asleep' : ''}${isFold ? ' small' : ''}${s.id === 'carve' ? ' carve' : ''}`}
                                 style={{ left: `${x(s.at)}px` }}
-                                title={`${s.label}, ${clockOf(s.at, zone)}`}
+                                title={`${stepNoText(s.id)}: ${s.label}, ${clockOf(s.at, zone)}`}
                             />
                         );
                     })}

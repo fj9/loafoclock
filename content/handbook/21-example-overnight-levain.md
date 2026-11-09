@@ -1,7 +1,7 @@
 ---
 id: example-overnight-levain
 number: C1
-title: Overnight levain, three days
+title: Overnight feed, three days
 part: C
 ---
 
@@ -19,23 +19,22 @@ Overnight, a 1:7:7 is the one to use: fed at 9 pm, it is ready between 7 and 9 a
 
 {{planFigure threeDay}}
 
-**Day 1.** Feed the starter at {{time threeDay feed}} and go to bed. It rises overnight.
+Day 1. Feed the starter at {{time threeDay feed}} and go to bed. It rises overnight.
 
-**Day 2.** The flour and water go together at {{time threeDay autolyse}}, the starter goes in at {{time threeDay starterIn}} and the salt, honey and oil at {{time threeDay salt}}. After four folds the bulk runs on into the afternoon: with dough at 24°C it takes about 7 hours. The dough is shaped at {{time threeDay finalShape}} and goes into the fridge at {{time threeDay fridge}}.
+Day 2. The flour and water go together at {{time threeDay autolyse}}, the starter goes in at {{time threeDay starterIn}} and the salt, honey and oil at {{time threeDay salt}}. After {{foldCount}} folds the bulk, counted from the starter going in, runs on into the afternoon: with dough at 24°C it needs {{bulk 24}}. The dough is shaped at {{time threeDay finalShape}} and goes into the fridge at {{time threeDay fridge}}.
 
-**Day 3.** Turn the oven on at {{time threeDay ovenOn}} and bake at {{time threeDay bake}}. The loaf is ready to carve at {{time threeDay carve}}, {{fromFeed threeDay}} after the first feed.
+Day 3. Turn the oven on at {{time threeDay ovenOn}} and bake at {{time threeDay bake}}. The loaf is ready to carve at {{time threeDay carve}}, {{fromFeed threeDay}} after the first feed.
 
 ## If your kitchen is cooler
 
 The starter takes longer to be ready in a cooler kitchen: a 1:7:7 in an 18°C kitchen needs a couple of hours more, so the dough is mixed later on Day 2. A dough that is cooler also bulks for longer. [[example-temperature|Section C6]] says how much.
 
-If you want the starter ready sooner, mix the feed with warm water (about 30°C). It starts warm, so it is ready several hours earlier even in a cool kitchen. Then feed it later, closer to morning.
+In a cool kitchen, mix the feed with warm water (about 30°C). It starts warm, so the wait is shorter and you can feed later, closer to bedtime.
 
 ## Checklist
 
-- **Evening, Day 1:** feed the starter with flour and water, using the amounts above. Mark the jar level with an elastic band.
-- **Morning, Day 2:** check the jar. It should be domed, bubbly and about double. Start the autolyse an hour before you want to add it.
-- **After mixing:** measure the dough temperature with a probe, and check the rise against the target in [[process#bulk|section 6, step 5]].
-- **Before shaping (optional):** do the windowpane test. The dough should form a thin, translucent membrane.
+- Evening, Day 1: feed the starter with flour and water, using the amounts above. Mark the jar level with an elastic band.
+- Morning, Day 2: check the jar. It should be domed, bubbly and about double. Start the autolyse an hour before you want to add it.
+- After mixing: measure the dough temperature with a probe, and check the rise against the target in [[process#bulk|section 6, bulk fermentation]].
 
 If the top of the starter has started to fall back, it is past its peak. Use it straight away or feed it again. All times are estimates: use the jar and the thermometer to decide when to move on.

@@ -5,21 +5,23 @@ title: The recipe
 part: B
 ---
 
-The app follows one recipe: a white-flour loaf with a little honey and olive oil, baked from cold in a Dutch oven. The flour and starter are fixed for each loaf size. The hydration (the app starts at {{hydration}}%) only changes the water, and the starter counts as half flour, half water. Water is rounded to a tidy amount, so the real hydration can be a point or two from the figure you choose.
+The app follows one recipe: a white-flour loaf, baked from cold in a Dutch oven. The base loaf is flour, water, starter and salt. A little honey and olive oil adds a softer crumb and deeper colour. Leave them out if you like; the dough works either way. The flour and starter are fixed for each loaf size. The hydration (the app starts at {{hydration}}%) only changes the water, and the starter counts as half flour, half water. Water is rounded to a tidy amount, so the real hydration can be a point or two from the figure you choose.
 
 {{recipeTable}}
 
+The recipe began with a sourdough guide tea towel by Stuart Gardiner. It has been reworked and tested a good deal since, but the tea towel got it started. Loaf O'Clock is not affiliated with or endorsed by him.
+
 Multiply by the number of loaves. The starter is about {{starterPercent}}% of the flour weight. The feed makes at least {{keepBack}} g more starter than the dough needs, so you can keep that back in the jar as your next starter.
 
-**Method summary**
+Method summary. The numbers match the steps in [[process|section 6]] and in the app:
 
-- Feed the starter ({{standardFeed}} is the standard) so that it is ripe when you want to mix.
-- Mix the flour and water and rest ({{restMin}} to {{restMax}} minutes, {{restDefault}} is the usual): the autolyse.
-- Add the active starter, mix it in and rest again ({{restMin}} to {{restMax}} minutes): the fermentolyse. Bulk fermentation starts here.
-- Add the salt, honey and olive oil, work them in and rest {{saltRest}} minutes.
-- Do {{foldCount}} sets of stretch and folds, {{foldGap}} minutes apart.
-- Leave the dough to finish its bulk: the time and target rise depend on the dough temperature (see [[process#bulk|section 6, step 5]]).
-- Pre-shape, rest {{benchRest}} minutes, then final shape into a banneton.
-- Proof in the fridge for {{fridgeMin}} to {{fridgeMax}} hours (or 2 to 3 hours on the counter).
-- Heat the Dutch oven to {{ovenOn}}°C ({{preheat}} minutes), then bake straight from the fridge (see [[baking]]).
-- Cool for at least {{coolingShort}} minutes; an hour is better.
+1. Feed the starter ({{standardFeed}} is the standard) so that it is ripe when you want to mix.
+2. Autolyse: mix the flour and water and rest ({{restMin}} to {{restMax}} minutes, {{restDefault}} is the usual).
+3. Add the active starter, mix it in and rest again ({{restMin}} to {{restMax}} minutes). This is the fermentolyse, and bulk fermentation starts here.
+4. Add the salt, and the honey and olive oil if you are using them. Work them in and rest {{saltRest}} minutes.
+5. Do {{foldCount}} sets of stretch and folds, {{foldGap}} minutes apart.
+6. Pre-shape once the bulk is finished, then rest {{benchRest}} minutes. The bulk time and target rise depend on the dough temperature (see [[process#bulk|section 6, bulk fermentation]]).
+7. Shape the dough into its final shape and place it in a banneton.
+8. Cover the dough and proof it in the fridge for {{fridgeMin}} to {{fridgeMax}} hours (or, without the fridge, on the counter for the time in [[process#final-proof-no-fridge|Final proof without the fridge]]).
+9. Heat the Dutch oven to {{ovenOn}}°C (fan oven, {{preheat}} minutes), score the dough, then bake straight from the fridge (see [[baking]]).
+10. Cool for at least {{coolingLong}} minutes ({{coolingShort}} if you have no self-control).

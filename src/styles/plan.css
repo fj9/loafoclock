@@ -206,6 +206,12 @@
 .tl-now span { position: absolute; bottom: 4px; left: 5px; padding: 0 4px; border-radius: var(--radius-xs); background: var(--card); font-size: var(--fs-xs); font-weight: 700; color: var(--accent); }
 .tl-now.flip span { left: auto; right: 5px; }
 
+/* "Step N of 10": small and quiet */
+.step-no { color: var(--muted); font-size: var(--fs-xs); font-weight: 400; }
+.step-no-line { margin: 0 0 6px; }
+.rowtext > .step-no { display: block; }
+.rl-label > .step-no { display: block; }
+
 .fed-check { margin: 0 0 16px; }
 .missing { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
 .your-plan { scroll-margin-top: 8px; }

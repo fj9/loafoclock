@@ -1,7 +1,7 @@
 // Working backwards: give a time to carve and get back plans that land on it.
 import { ASSUMED_RATIO_N } from '../feeding';
 import {
-    FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bakeMinutesFor, bulkFor, counterProofMinutes, isQuickFeed, leversAt, ratioFor,
+    FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bakeMinutesFor, bulkMinutesFor, counterProofMinutes, isQuickFeed, leversAt, ratioFor,
     type Fridge, type Levers
 } from './levers';
 import { fitsWakingHours } from './rules';
@@ -46,7 +46,7 @@ function plansForOut(outAt: number, input: BackwardInput, fridges: Fridge[]): Pl
     const zone = input.zone;
     const base = leversAt(0, input.base);
     const bake = outAt - bakeMinutesFor(base.size) * MINUTE;
-    const bulk = bulkFor(base.doughTemp);
+    const bulkLength = bulkMinutesFor(base.doughTemp, base.fermentolyseMin) * MINUTE;
     const found: Plan[] = [];
     // The oven end of the chain does not depend on the fridge time
     if (!isAwake(bake, zone) || !isAwake(bake - STEP_MINUTES.preheat * MINUTE, zone) || !isAwake(outAt, zone)) return found;
@@ -56,9 +56,10 @@ function plansForOut(outAt: number, input: BackwardInput, fridges: Fridge[]): Pl
         const fridgeIn = bake - proof;
         const finalShape = fridgeIn - STEP_MINUTES.finalShape * MINUTE;
         const preShape = finalShape - STEP_MINUTES.preShape * MINUTE;
-        const salt = preShape - bulk.hours * HOUR;
+        // Bulk runs from the starter going in to the pre-shape
+        const starterIn = preShape - bulkLength;
         if (![fridgeIn, finalShape, preShape].every((t) => isAwake(t, zone))) continue;
-        const starterIn = salt - base.fermentolyseMin * MINUTE;
+        const salt = starterIn + base.fermentolyseMin * MINUTE;
         const fold1 = salt + STEP_MINUTES.saltRest * MINUTE;
         const folds = [fold1, fold1 + 30 * MINUTE, fold1 + 60 * MINUTE, fold1 + 90 * MINUTE];
         if (![starterIn, starterIn - base.autolyseMin * MINUTE, salt, ...folds].every((t) => isAwake(t, zone))) continue;
