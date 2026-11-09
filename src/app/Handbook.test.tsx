@@ -25,7 +25,7 @@ describe('the Handbook page', () => {
         expect(await screen.findByRole('link', { name: '6. The process, step by step' })).toBeTruthy();
         expect(screen.queryByText(/Briefing for the AI assistant/)).toBeNull();
         window.location.hash = '#/handbook/levers';
-        expect(await screen.findByRole('heading', { name: '7. The three levers: feed ratio, temperature, fridge proof' })).toBeTruthy();
+        expect(await screen.findByRole('heading', { name: '7. The three levers: feed ratio, temperature, cold retard' })).toBeTruthy();
         expect(screen.getByRole('link', { name: 'All of the handbook' })).toBeTruthy();
     });
 
