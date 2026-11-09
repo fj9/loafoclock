@@ -1,19 +1,19 @@
 ---
 id: how-to-use
 number: A1
-title: How to use this handbook
+title: How to use the handbook
 part: A
 ---
 
 This handbook has two jobs. You can read it from start to finish, and you can dip into it for the one thing you need while you are baking.
 
-It goes with the Loaf O'Clock app, which plans your bake. The recipe began with a sourdough guide tea towel by Stuart Gardiner (see [[recipe|section 5]]). Nobody gets it perfect the first time, and the first loaf makes excellent toast either way.
+It goes with the Loaf O'Clock app, which plans your bake. The recipe began with a sourdough guide tea towel by Stuart Gardiner (see [[recipe|section 6]]). Nobody gets it perfect the first time, and the first loaf makes excellent toast either way.
 
 Where to look
 
-- Part B, the guide, explains the whole process: the starter, the recipe, each step, the three levers (feed, dough temperature and the fridge), baking and troubleshooting.
-- Part C, the worked examples, follows five complete bakes from feed to carve, drawn as the app draws a plan.
-- Part D, quick answers, gives short answers to the questions that come up most.
+- The guide explains the whole process: the starter, the recipe, each step, the three levers (feed, dough temperature and the fridge), baking and troubleshooting.
+- The worked examples follow five complete bakes from feed to carve, drawn as the app draws a plan.
+- The quick answers give short answers to the questions that come up most.
 - In the app, every step has a "Learn more" row that opens the part of the handbook about it, so the help is there when you need it.
 - The glossary (see [[glossary|section 16]]) explains every term in a line, so dip into it whenever a word is new.
 - The PDF has the same chapters to keep, print or read offline. You can download it from the Handbook page in the app.

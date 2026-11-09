@@ -1,7 +1,7 @@
 ---
 id: storing
-number: 14
-title: Storing, freezing and reviving
+number: 13
+title: Storing and reviving
 part: B
 ---
 

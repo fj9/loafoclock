@@ -1,7 +1,7 @@
 ---
 id: flavour
 number: 10
-title: Flavour: controlling sourness
+title: Flavour
 part: B
 ---
 

@@ -11,7 +11,7 @@ let loaded: Handbook | undefined;
 /** The handbook as the app shows it: chapters for the reader, without the briefing written for an AI assistant. Worked out once. */
 export function loadHandbook(): Handbook {
     if (!loaded) {
-        const book = compileHandbook(HANDBOOK_FILES, { facts: FACTS, href: handbookHref });
+        const book = compileHandbook(HANDBOOK_FILES, { facts: FACTS, href: handbookHref, plainLinks: true });
         loaded = { ...book, chapters: book.chapters.filter((c) => c.audience === 'all') };
     }
     return loaded;

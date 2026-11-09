@@ -92,7 +92,7 @@ Past peak: the dome collapses or flattens, it smells sharply sour or of acetone,
 
 ## Discard
 
-When you feed, you remove most of the old starter to keep the quantity manageable and keep the culture healthy. This is the discard. It is safe to use, and it makes excellent pancakes, crackers, flatbreads, waffles and muffins ([[variations|section 13]]). It can also go into a bowl in the fridge until you have enough.
+When you feed, you remove most of the old starter to keep the quantity manageable and keep the culture healthy. This is the discard. It is safe to use, and it makes excellent pancakes, crackers, flatbreads, waffles and muffins ([[variations|section 12]]). It can also go into a bowl in the fridge until you have enough.
 
 ## Starter troubleshooting
 

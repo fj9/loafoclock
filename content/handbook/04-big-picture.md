@@ -11,7 +11,7 @@ Sourdough is bread leavened by a **starter**: a living culture of wild yeast and
 - Lactic acid bacteria produce lactic and acetic acids, which give the tang and help the bread keep.
 - Time and temperature control how fast all of this happens. This is the whole craft: warm and fast means milder and quicker; cool and slow means more flavour and more flexibility.
 
-The steps in order. The numbers are the ones the app uses, and [[process|section 6]] explains each step:
+The steps in order. The numbers are the ones the app uses, and [[process|section 7]] explains each step:
 
 {{stepList}}
 

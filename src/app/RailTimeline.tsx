@@ -69,6 +69,8 @@ interface Props {
     renderLabel?: (step: Step) => ComponentChildren | undefined;
     /** Name the days by how many days after the first feed they are, instead of by date. 0 is the day of the first feed. */
     dayLabel?: (daysAfterFeed: number) => string;
+    /** Show only the steps from this one on, as the tail of another bake's list. Days are still counted from the first feed. */
+    from?: StepId;
 }
 
 export type StepState = 'done' | 'next' | 'overdue' | 'upcoming';
@@ -77,9 +79,11 @@ export type StepState = 'done' | 'next' | 'overdue' | 'upcoming';
  * The bake as a list down the page: the time on the left, a rail of coloured waits in the middle and what to do
  * on the right. Days are named where they start, and the night is a tinted band behind the waits that run into it.
  */
-export function RailTimeline({ plan, zone, now, state, renderLabel, dayLabel }: Props) {
-    const rows = rowsOf(plan);
-    const first = rows[0]!.at;
+export function RailTimeline({ plan, zone, now, state, renderLabel, dayLabel, from }: Props) {
+    const all = rowsOf(plan);
+    const start = from ? Math.max(0, all.findIndex((r) => r.key === from)) : 0;
+    const rows = all.slice(start);
+    const first = all[0]!.at;
     const showNow = now !== undefined && now > first && now < plan.readyToCarve;
 
     // Which pieces of the night band are drawn where, so that each piece rounds its corners only where the band
@@ -104,13 +108,14 @@ export function RailTimeline({ plan, zone, now, state, renderLabel, dayLabel }: 
             {rows.map((r, i) => {
                 const nextRow = rows[i + 1];
                 const newDay = newDayAt(i);
-                const step = plan.steps[i]!;
+                const step = plan.steps.find((s) => s.id === r.key)!;
                 const st = state?.(r.key);
                 const asleep = r.needsYou && !isAwake(r.at, zone) && st !== 'done';
                 const wait = nextRow ? waitAt(plan, (r.at + nextRow.at) / 2) : 'plain';
                 const length = nextRow ? nextRow.at - r.at : 0;
                 // A wait is named once, on its first stretch, with its whole length.
-                const prevWait = i > 0 ? waitAt(plan, (rows[i - 1]!.at + r.at) / 2) : null;
+                // The first row of a tail carries on a wait that began before it, so the wait is not named again.
+                const prevWait = i > 0 ? waitAt(plan, (rows[i - 1]!.at + r.at) / 2) : start > 0 ? wait : null;
                 const shown = totalOf(plan, wait);
                 const height = heightOf(length);
                 const nights = nightsOf[i]!;

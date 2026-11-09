@@ -44,8 +44,19 @@ th, td { border: 0.5pt solid #C9B79B; padding: 3pt 6pt; text-align: left; vertic
 .toc ul { list-style: none; padding: 0; } .toc li { margin: 0; }
 .part { break-before: page; } .chapter { margin-top: 10pt; }
 .num { color: #6B5B51; }
-.hb-plan { margin: 6pt 0 8pt; padding: 0; border: 0; break-inside: avoid; } .hb-plan .np-bar { margin: 0 0 5pt; padding: 5pt 12pt; } .hb-plan .np-when { font-size: 12pt; } .hb-plan .timeline { margin: 0 0 4pt; } .hb-plan .tl-track { height: 112px; } .hb-plan .tl-sleep span { display: none; }
+.hb-plan { margin: 6pt 0 8pt; padding: 0; border: 0; break-inside: avoid; } .hb-plan .np-bar { margin: 0 0 5pt; padding: 5pt 12pt; } .hb-plan .np-when { font-size: 12pt; } .hb-plan .timeline { margin: 0 0 4pt; } .hb-plan .tl-track { height: 132px; } .hb-plan .tl-sleep span { display: none; }
 .hb-plan figcaption { margin: 0 0 4pt; font-size: 8.5pt; color: #6B5B51; }
+.example { break-before: page; break-after: page; margin-top: 0; } .example h2 { margin: 0 0 4pt; font-size: 14pt; }
+.example > p { margin-bottom: 5pt; }
+.example .fig-grid { grid-template-columns: 56mm minmax(0, 1fr); column-gap: 6mm; margin-bottom: 0; }
+.example .fig-text { font-size: 8.6pt; line-height: 1.32; } .example .fig-text h3 { font-size: 9.5pt; margin: 6pt 0 2pt; } .example .fig-text p, .example .fig-text ul, .example .fig-text ol { margin-bottom: 3pt; } .example .fig-text li { margin-bottom: 1pt; }
+.example .fig-text table { font-size: 8pt; } .example .fig-text th, .example .fig-text td { padding: 1.5pt 4pt; }
+.example .hb-plan { margin: 4pt 0 6pt; } .example .fig-text .hb-plan { margin: 4pt 0; } .example .fig-text figcaption { font-size: 7.5pt; margin: 0 0 2pt; }
+.example .hb-plan .timeline { margin: 0 0 2pt; }
+.example .step-no { display: inline; margin-left: 4px; font-size: 6.5pt; color: #8A7A6E; }
+.example .compact .rl-gap { min-height: 5px; } .example .compact .rl-label { font-size: 8pt; line-height: 1.2; } .example .compact .rl-day { padding: 4px 0 1px; }
+.example > p:first-of-type { font-size: 9.5pt; line-height: 1.4; }
+.part-list { margin: 10pt 0 0; } .part-list li { margin-bottom: 7pt; }
 .fig-grid { display: grid; grid-template-columns: 62mm 1fr; column-gap: 8mm; align-items: start; margin-bottom: 8pt; }
 .fig-side { break-inside: avoid; } .fig-text > :first-child { margin-top: 0; }
 .compact .rail { margin: 0; } .compact .rl-row, .compact .rl-gap { grid-template-columns: 44px 14px 1fr; column-gap: 4px; }
@@ -57,9 +68,31 @@ th, td { border: 0.5pt solid #C9B79B; padding: 3pt 6pt; text-align: left; vertic
 
 const chapterHeading = (c: Chapter): string => (/^[AC]?\d/.test(c.number) ? `${c.number}. ${c.title}` : c.title);
 
+/**
+ * A worked example is laid out to fill one page: the bar across the top, with the choices in a line beneath it, then the steps down the left with all
+ * of the chapter's writing beside them. It starts on a new page.
+ */
+function renderExample(c: Chapter, render: NonNullable<PrintOptions['renderFigure']>, heading: string): string | null {
+    const figs = c.sections.map((s) => { const m = FIGURE.exec(s.html); return m ? { m, r: render(m[1]!) } : null; });
+    const main = figs.findIndex((f) => f && f.r.side);
+    if (main < 0) return null;
+    const text = c.sections.map((s, i) => {
+        const f = figs[i];
+        const html = f ? s.html.replace(f.m[0], i === main ? '' : `<figure class="hb-plan">${f.r.top}</figure>`) : s.html;
+        const title = i === main ? `<a id="${c.id}--${s.id}"></a>` : `<h3 id="${c.id}--${s.id}">${escape(s.title)}</h3>`;
+        return `${title}\n${html}`;
+    }).join('\n');
+    const intro = c.introHtml.replace(SETTINGS_CARDS, '');
+    return `<section class="chapter example" id="${c.id}">${heading}\n${intro}\n<figure class="hb-plan">${figs[main]!.r.top}</figure><div class="fig-grid"><div class="fig-side compact">${figs[main]!.r.side}</div><div class="fig-text">${text}</div></div></section>`;
+}
+
 function renderChapter(c: Chapter, heading: 'h1' | 'h2', withHeading: boolean, render?: PrintOptions['renderFigure']): string {
+    if (render) {
+        const example = renderExample(c, render, withHeading ? `<${heading}>${escape(chapterHeading(c))}</${heading}>` : '');
+        if (example) return example;
+    }
     const sections = c.sections.map((s) => `<h3 id="${c.id}--${s.id}">${s.number ? `<span class="num">${s.number}</span> ` : ''}${escape(s.title)}</h3>\n${drawFigure(s.html, render)}`).join('\n');
-    return `<section class="chapter" id="${c.id}">${withHeading ? `<${heading}>${escape(chapterHeading(c))}</${heading}>` : ''}\n${c.introHtml}\n${sections}\n</section>`;
+    return `<section class="chapter" id="${c.id}">${withHeading ? `<${heading}>${escape(chapterHeading(c))}</${heading}>` : ''}\n${c.introHtml.replace(SETTINGS_CARDS, '')}\n${sections}\n</section>`;
 }
 
 function renderPart(part: Part, chapters: Chapter[], render?: PrintOptions['renderFigure']): string {
@@ -69,9 +102,15 @@ function renderPart(part: Part, chapters: Chapter[], render?: PrintOptions['rend
         const c = chapters[0]!;
         return `<div class="part" id="part-${part.id}"><h1>Part ${part.id}: ${escape(c.title)}</h1>\n${renderChapter(c, 'h2', false, render)}</div>`;
     }
-    return `<div class="part" id="part-${part.id}"><h1>Part ${part.id}: ${escape(part.title)}</h1><p>${escape(part.intro)}</p>\n${chapters.map((c) => renderChapter(c, 'h2', true, render)).join('\n')}</div>`;
+    // A part of worked examples gets a page of its own with a list, and each example starts on a page after it.
+    const isExample = (c: Chapter) => FIGURE.test(c.sections.map((s) => s.html).join(''));
+    const firstSentence = (c: Chapter): string => (/^(.+?[.!?])(?:\s|$)/.exec(c.introHtml.replace(SETTINGS_CARDS, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim())?.[1] ?? '');
+    const list = render && chapters.some(isExample) ? `<ul class="part-list">${chapters.map((c) => `<li><a href="#${c.id}"><strong>${escape(chapterHeading(c))}</strong></a>. ${escape(firstSentence(c))}</li>`).join('')}</ul>` : '';
+    return `<div class="part" id="part-${part.id}"><h1>Part ${part.id}: ${escape(part.title)}</h1><p>${escape(part.intro)}</p>${list}\n${chapters.map((c) => renderChapter(c, 'h2', true, render)).join('\n')}</div>`;
 }
 
+/** The cards of choices at the top of a worked example are for the app: the printed figure has them as a line of text. */
+const SETTINGS_CARDS = /<div class="hb-settings-fig" data-plan="[^"]+"><\/div>\n?/g;
 const FIGURE = /<div class="hb-figure" data-plan="([^"]+)"><\/div>/;
 
 /** A section with a worked example: text, then the bar across the page, then the rail down the left with the rest of the text beside it. */
@@ -81,6 +120,7 @@ function drawFigure(html: string, render?: (spec: string) => { top: string; side
     const { top, side } = render(m[1]!);
     const before = html.slice(0, m.index);
     const after = html.slice(m.index + m[0].length);
+    if (!side) return `${before}<figure class="hb-plan">${top}</figure>${after}`;
     return `${before}<figure class="hb-plan">${top}</figure><div class="fig-grid"><div class="fig-side compact">${side}</div><div class="fig-text">${after}</div></div>`;
 }
 

@@ -20,7 +20,7 @@ describe('App shell', () => {
         expect(screen.getByText("It's always Loaf O'Clock somewhere.")).toBeTruthy();
     });
 
-    it('moves between the sections', () => {
+    it('moves between the sections', async () => {
         render(<App classicTabs />);
         tab('Log');
         expect(screen.getByRole('heading', { name: 'No bakes yet' })).toBeTruthy();
@@ -28,7 +28,7 @@ describe('App shell', () => {
         tab('Bake');
         expect(screen.getByText('No bake running')).toBeTruthy();
         menu('Help');
-        expect(screen.getByText('Keeping a healthy starter')).toBeTruthy();
+        expect(await screen.findByText('Keeping a healthy starter')).toBeTruthy();
         menu('About');
         expect(screen.getByText('Why I made it')).toBeTruthy();
         tab('Plan');
@@ -173,13 +173,13 @@ describe('stopping and removing, without the browser popup', () => {
 describe('footer', () => {
     it('has the Ko-fi link on every page', () => {
         render(<App classicTabs />);
-        for (const name of ['Plan', 'New plan', 'Bake', 'New bake', 'Log']) {
+        for (const name of ['Plan', 'New plan', 'Bake', 'New bake', 'Log', 'Handbook']) {
             tab(new RegExp(`^${name}`));
             const link = screen.getByRole('link', { name: 'Tip me on Ko-fi' }) as HTMLAnchorElement;
             expect(link.href).toBe('https://ko-fi.com/fjnine');
             expect(link.rel).toContain('noopener');
         }
-        for (const name of ['Settings', 'Handbook', 'Help', 'About']) {
+        for (const name of ['Settings', 'Help', 'About']) {
             menu(name);
             expect(screen.getByRole('link', { name: 'Tip me on Ko-fi' })).toBeTruthy();
         }
@@ -189,12 +189,12 @@ describe('footer', () => {
 describe('tabs, the menu and the bake', () => {
     const plant = () => localStorage.setItem(LIVE_KEY, JSON.stringify({ v: 1, rec: lockPlan(leversAt(Date.now() - 3_600_000), 0) }));
 
-    it('has Plan, New plan, Bake, New bake and Log as tabs, with Settings, Handbook, Help and About in the menu', () => {
+    it('has Plan, New plan, Bake, New bake, Log and Handbook as tabs, with Settings, Help and About in the menu', () => {
         render(<App classicTabs />);
-        expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanNew planBakeNew bakeLog$/);
+        expect(screen.getAllByRole('navigation', { name: 'Sections' })[0]!.textContent).toMatch(/^PlanNew planBakeNew bakeLogHandbook$/);
         expect(screen.queryByRole('button', { name: 'Settings' })).toBeNull();
         fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-        expect(screen.getAllByRole('menuitem').map((e) => e.textContent)).toEqual(['Settings', 'Handbook', 'Help', 'About']);
+        expect(screen.getAllByRole('menuitem').map((e) => e.textContent)).toEqual(['Settings', 'Help', 'About']);
         fireEvent.keyDown(document, { key: 'Escape' });
         expect(screen.queryByRole('menu')).toBeNull();
     });
@@ -279,9 +279,10 @@ describe('actions and links', () => {
         expect(screen.getByRole('button', { name: 'Add them to this log' }).className).toContain('outline');
     });
 
-    it('About is in the menu and the footer, not also on the Help page', () => {
+    it('About is in the menu and the footer, not also on the how-to-use-the-app page', async () => {
         render(<App classicTabs />);
         menu('Help');
+        await screen.findByText('Keeping a healthy starter');
         expect(screen.queryByText("About Loaf O'Clock")).toBeNull();
         menu('About');
         expect(screen.getByText('Why I made it')).toBeTruthy();
@@ -466,7 +467,7 @@ describe('the default tabs: one Plan and one Bake', () => {
 
     it('shows Plan, Bake and Log, with the new layouts under those names', () => {
         render(<App />);
-        expect(NAMES()).toEqual(['Plan', 'Bake', 'Log']);
+        expect(NAMES()).toEqual(['Plan', 'Bake', 'Log', 'Handbook']);
         expect(screen.queryByRole('button', { name: /^New/ })).toBeNull();
         // opens on the Plan with the pinned answer and the rail, which is the new layout
         expect(screen.getByRole('button', { name: 'Plan' }).getAttribute('aria-current')).toBe('page');
@@ -534,7 +535,7 @@ describe('the default tabs: one Plan and one Bake', () => {
 
     it('brings the classic tabs back, as Plan and New plan, Bake and New bake, when the switch is on', () => {
         render(<App classicTabs />);
-        expect(NAMES()).toEqual(['Plan', 'New plan', 'Bake', 'New bake', 'Log']);
+        expect(NAMES()).toEqual(['Plan', 'New plan', 'Bake', 'New bake', 'Log', 'Handbook']);
         expect(document.querySelector('.np-bar')).toBeNull(); // opens on the classic Plan
     });
 });

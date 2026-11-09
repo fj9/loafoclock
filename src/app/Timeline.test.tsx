@@ -21,6 +21,16 @@ describe('timeline', () => {
         }
     });
 
+    it('marks 12 am, 6 am, 12 pm and 6 pm along the bar, with midnight stronger', () => {
+        const plan = buildPlan(levers, { feed: 8 * HOUR });
+        const { container } = render(<Timeline plan={plan} zone="UTC" />);
+        const ticks = [...container.querySelectorAll('.tl-clock')];
+        expect(ticks.length).toBeGreaterThan(0);
+        for (const t of ticks) expect(['12 am', '6 am', '12 pm', '6 pm', '00:00', '06:00', '12:00', '18:00']).toContain(t.textContent);
+        expect(container.querySelectorAll('.tl-tick').length).toBe(ticks.length);
+        expect(container.querySelectorAll('.tl-clock.mid, .tl-tick.mid').length % 2).toBe(0); // each midnight has a tick and a label
+    });
+
     it('shows Now as a line with its label inside it, and flips the label near the right edge', () => {
         const plan = buildPlan(levers);
         const mid = render(<Timeline plan={plan} zone="UTC" now={plan.byId.feed + 3 * HOUR} />);

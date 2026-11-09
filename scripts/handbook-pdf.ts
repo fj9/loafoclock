@@ -9,7 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { Fragment, h } from 'preact';
 import { renderToString } from 'preact-render-to-string';
 import { setClock12 } from '../src/domain/clock';
-import { PlanFigureCaption, PlanFigureRail, PlanFigureTop } from '../src/app/PlanFigure';
+import { PlanFigureCaption, PlanFigureRail, PlanFigureTop, SECOND_LOAF_FROM, parseFigure } from '../src/app/PlanFigure';
 import { exampleFor } from '../src/handbook/example';
 import { compileHandbook } from '../src/handbook/compile';
 import { FACTS } from '../src/handbook/facts';
@@ -42,10 +42,12 @@ const book = compileHandbook(files, { facts: FACTS, href: printHref });
 const fontFile = join(root, 'node_modules/@fontsource/alfa-slab-one/files/alfa-slab-one-latin-400-normal.woff');
 const appCss = ['tokens', 'plan', 'rail', 'handbook'].map((f) => readFileSync(join(root, `src/styles/${f}.css`), 'utf8')).join('\n');
 const renderFigure = (spec: string) => {
-    const plan = exampleFor(spec);
+    const { bar, specs } = parseFigure(spec);
+    const plan = exampleFor(specs[0]!);
+    const second = specs[1] ? exampleFor(specs[1]) : null;
     return {
-        top: renderToString(h(Fragment, null, h(PlanFigureTop, { plan, width: 660 }), h(PlanFigureCaption, { plan }))),
-        side: renderToString(h(PlanFigureRail, { plan }))
+        top: renderToString(h(Fragment, null, h(PlanFigureTop, { plan, width: bar ? 425 : 660 }), h(PlanFigureCaption, { plan }))),
+        side: bar ? '' : renderToString(h(Fragment, null, h(PlanFigureRail, { plan }), second ? h(PlanFigureRail, { plan: second, from: SECOND_LOAF_FROM }) : null))
     };
 };
 const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });

@@ -1,6 +1,6 @@
 ---
 id: troubleshooting
-number: 12
+number: 14
 title: Troubleshooting
 part: B
 ---

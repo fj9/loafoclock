@@ -46,6 +46,8 @@ export interface CompileOptions {
     facts: Facts;
     /** Where a link to a chapter, or to a section in it, goes. */
     href: (chapterId: string, sectionId?: string) => string;
+    /** The app shows no chapter numbers, so a link that would read "section 7" reads as the name of what it points to. */
+    plainLinks?: boolean;
 }
 
 interface RawSection { id: string; title: string; steps: StepId[]; markdown: string }
@@ -154,6 +156,10 @@ export function compileHandbook(files: Record<string, string>, options: CompileO
                 text = `section ${numberOf(chapter, index) || chapter.number}`;
             } else {
                 text = /^[AC]?\d/.test(chapter.number) ? `section ${chapter.number}` : `Part ${chapter.number}`;
+            }
+            if (options.plainLinks && (!label || /^(?:sections?\s+)?[A-E]?\d+(?:\.\d+)?\b/i.test(label))) {
+                const target = sid ? chapter.sections.find((s) => s.id === sid)! : chapter;
+                return `[${target.title}](${options.href(cid, sid)})`;
             }
             return `[${label ?? text}](${options.href(cid, sid)})`;
         });

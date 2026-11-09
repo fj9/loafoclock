@@ -22,7 +22,7 @@ Starter message (copy and paste this)
 Tips
 
 - If Copilot seems to forget the handbook, or the chat gets long and muddled, start a new chat, attach the PDF again and paste the starter message again.
-- To make it look something up, name the section: "Using the troubleshooting table in [[troubleshooting|section 12]], why is my loaf flat?"
+- To make it look something up, name the section: "Using the troubleshooting table in [[troubleshooting|section 14]], why is my loaf flat?"
 - If Copilot lets you attach a photo, a picture of your dough, starter jar or sliced loaf can help.
 - Copilot can make mistakes. If it says something that disagrees with this handbook, ask it to check the handbook again. For safety points (hot pots, mould, raw dough) always follow the handbook.
 

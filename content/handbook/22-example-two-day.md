@@ -1,11 +1,13 @@
 ---
 id: example-two-day
 number: C2
-title: Two days, all work on Day 1, bake Day 2
+title: Two days
 part: C
 ---
 
 Do all your doing in one day, pop the shaped dough in the fridge, and bake the next morning. The starter is fed in the morning, the dough is mixed in the afternoon and the whole of the first rise happens before bedtime. Nothing needs you in the night, and the dough is only in the fridge for the final proof.
+
+{{planSettings twoDay}}
 
 ## The plan
 
@@ -22,5 +24,5 @@ For one regular loaf, feed {{feedFor 2 1}}. A 1:2:2 is ready in {{feedWindow 2}}
 ## What to check
 
 - The starter is domed, bubbly and about double when it goes in (see [[starter#is-it-ready-to-use-the-peak|section 3.6]]).
-- The bulk is finished when the dough has risen by the target for its temperature, not when the clock says so ([[process#bulk|section 6, bulk fermentation]]). Mark the level on a straight-sided tub.
+- The bulk is finished when the dough has risen by the target for its temperature, not when the clock says so ([[process#bulk|section 7, bulk fermentation]]). Mark the level on a straight-sided tub.
 - The fridge time is flexible: anything from {{fridgeMin}} to {{fridgeMax}} hours works, so the bake can move to suit you.

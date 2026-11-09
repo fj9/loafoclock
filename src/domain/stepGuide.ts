@@ -110,7 +110,7 @@ export function guideFor(id: StepId, plan: Plan, clock: (ms: number) => string):
         case 'bake': {
             const b = bakePlan({ size: l.size });
             return {
-                title: 'Bake', ingredients: [], instructions: [...b.instructions.slice(1), 'The loaf is done when the base sounds hollow when tapped. A probe reading of 96 to 99°C is a good check if you have one (optional)'],
+                title: 'Bake', ingredients: [], instructions: [...b.instructions.slice(1), 'The loaf is done when the base sounds hollow when tapped and the crust is deep golden-brown. A probe reading of 96 to 99°C is a good check if you have one (optional)'],
                 note: `${b.duration}. Bake straight from the fridge: no need to bring it to room temperature.`, tip: 'baking'
             };
         }
