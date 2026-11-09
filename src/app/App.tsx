@@ -17,13 +17,14 @@ import { LogScreen } from './LogScreen';
 import { Logo } from './Logo';
 import { SettingsScreen } from './SettingsScreen';
 import type { Layout } from './PlanView';
+import { StartAt } from './StartAt';
 import { StartNow } from './StartNow';
 import { UpdatePrompt } from './UpdatePrompt';
 
 /** Round up to the next 5 minutes so the plan does not change every second. */
 const startingPoint = () => Math.ceil(Date.now() / 300_000) * 300_000;
 
-type Mode = 'now' | 'at';
+type Mode = 'now' | 'start' | 'at';
 type Tab = 'plan' | 'plan2' | 'bake' | 'bake2' | 'log' | 'settings' | 'handbook' | 'help' | 'about';
 /**
  * The classic Plan and Bake pages are still in the code but not shown. Switch this on to bring their tabs back beside the
@@ -143,6 +144,7 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
             )}
             <div class="seg-choice mode" role="group" aria-label="How do you want to plan?">
                 <button type="button" class={mode === 'now' ? 'on' : ''} aria-pressed={mode === 'now'} onClick={() => setMode('now')}>Start now</button>
+                <button type="button" class={mode === 'start' ? 'on' : ''} aria-pressed={mode === 'start'} onClick={() => setMode('start')}>Start at…</button>
                 <button type="button" class={mode === 'at' ? 'on' : ''} aria-pressed={mode === 'at'} onClick={() => setMode('at')}>Bread at…</button>
             </div>
             {mode === 'now' && (
@@ -151,7 +153,9 @@ export function App({ classicTabs = SHOW_CLASSIC_TABS }: { classicTabs?: boolean
                     I've already fed my starter
                 </label>
             )}
-            {mode === 'at'
+            {mode === 'start'
+                ? <StartAt key={wakeKey} now={now} onStart={(l) => start(l, {}, layout)} quickStreak={streak} layout={layout} />
+                : mode === 'at'
                 ? <BreadAt key={wakeKey} now={now} onStart={(l) => start(l, {}, layout)} quickStreak={streak} layout={layout} />
                 : alreadyFed
                     ? <AlreadyFed key={wakeKey} now={now} onStart={(l, a) => start(l, a, layout)} quickStreak={streak} layout={layout} />

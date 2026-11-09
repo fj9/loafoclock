@@ -6,3 +6,4 @@ export * from './backward';
 export * from './hints';
 export * from './live';
 export * from './fed';
+export * from './forward';

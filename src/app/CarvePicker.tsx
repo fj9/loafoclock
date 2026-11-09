@@ -19,10 +19,15 @@ interface Props {
     now: number;
     zone?: Zone;
     onChange: (carveAt: number) => void;
+    /** Reads as the heading for screen readers. */
+    label?: string;
+    /** The quick-pick times, if not the meals. */
+    quick?: ReadonlyArray<{ label: string; min: number }>;
+    quickLabel?: string;
 }
 
 /** Pick a day, then a meal or a time, for when you want to carve. */
-export function CarvePicker({ value, now, zone, onChange }: Props) {
+export function CarvePicker({ value, now, zone, onChange, label = 'When do you want to carve?', quick = MEALS, quickLabel = 'Meal' }: Props) {
     const today = startOfLocalDay(now, zone);
     const days = Array.from({ length: DAYS_SHOWN }, (_, i) => addLocalDays(today, i, zone));
     const dayOfValue = startOfLocalDay(value, zone);
@@ -34,7 +39,7 @@ export function CarvePicker({ value, now, zone, onChange }: Props) {
     const shown = drag ?? min;
 
     return (
-        <section class="carve-picker" aria-label="When do you want to carve?">
+        <section class="carve-picker" aria-label={label}>
             <div class="chips" role="group" aria-label="Day">
                 {days.map((d) => (
                     <button type="button" class={`chip${d === dayOfValue ? ' on' : ''}`} aria-pressed={d === dayOfValue} onClick={() => setDay(d)}>
@@ -42,8 +47,8 @@ export function CarvePicker({ value, now, zone, onChange }: Props) {
                     </button>
                 ))}
             </div>
-            <div class="chips" role="group" aria-label="Meal">
-                {MEALS.map((m) => (
+            <div class="chips" role="group" aria-label={quickLabel}>
+                {quick.map((m) => (
                     <button type="button" class={`chip${m.min === min ? ' on' : ''}`} aria-pressed={m.min === min} onClick={() => setMin(m.min)}>
                         {m.label}
                     </button>
