@@ -1,0 +1,44 @@
+/* The handbook pages. Colours and sizes come from tokens.css. */
+.handbook .hb-part { margin-top: 20px; }
+.handbook .hb-part h3 { margin-bottom: 4px; }
+.handbook .hb-toc { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.handbook .hb-toc a {
+    display: block; padding: 10px 14px; background: var(--wash); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); text-decoration: none; color: var(--ink); font-weight: 600;
+}
+.handbook .hb-toc a:hover { border-color: var(--accent); }
+.handbook .hb-back { margin: 0 0 8px; font-size: var(--fs-sm); }
+.handbook .hb-section { margin-top: 20px; scroll-margin-top: 12px; }
+.hb-body { line-height: 1.5; }
+.hb-body p, .hb-body ul, .hb-body ol, .hb-body blockquote { margin: 0 0 10px; }
+.hb-body ul, .hb-body ol { padding-left: 22px; }
+.hb-body li { margin-bottom: 4px; }
+.hb-body blockquote {
+    padding: 8px 12px; background: var(--info-bg); color: var(--info-ink);
+    border-left: 4px solid var(--info); border-radius: var(--radius-xs);
+}
+.hb-body table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: 0 0 12px; font-size: var(--fs-sm); }
+.hb-body th, .hb-body td { padding: 6px 10px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+.hb-body th { background: var(--wash); }
+.handbook .hb-pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; font-size: var(--fs-sm); }
+
+/* "Learn more" under a step: the handbook's words for that step, closed until asked for. */
+.learn-more { margin: 10px 0 0; }
+.learn-more > button {
+    width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left;
+    padding: 9px 12px; background: var(--wash); color: var(--ink); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); font: inherit; font-size: var(--fs-sm); cursor: pointer;
+}
+.learn-more > button:hover { border-color: var(--accent); }
+.learn-more .lm-body { padding: 10px 12px; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-sm) var(--radius-sm); font-size: var(--fs-sm); }
+.learn-more .lm-body h4 { margin: 0 0 6px; font-size: var(--fs-base); font-family: inherit; font-weight: 700; }
+.learn-more .lm-more { margin: 8px 0 0; color: var(--muted); }
+.learn-more .lm-more a { display: inline-block; margin-right: 10px; }
+.handbook .hb-pdf { padding: 10px 14px; background: var(--info-bg); color: var(--info-ink); border-radius: var(--radius-sm); font-size: var(--fs-sm); }
+.learn-more svg { flex: none; } .learn-more svg.lm-open { transform: rotate(180deg); }
+
+/* A worked example drawn like a plan in the app, without the levers. */
+.hb-plan { margin: 0 0 16px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.hb-plan .np-bar { position: static; margin: 0 0 8px; }
+.hb-plan figcaption { margin: 10px 0 0; }
+.hb-plan .rail { margin: 8px 0 0; }

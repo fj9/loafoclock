@@ -83,7 +83,7 @@ export const TIPS = {
     },
     totalBulk: {
         label: 'total bulk time',
-        text: 'How long, from adding the starter, until the first rise is finished. It is an estimate: go by how the dough looks.'
+        text: 'How long, from adding the salt, until the first rise is finished. It is an estimate: go by how the dough looks.'
     },
     preShape: {
         label: 'pre-shape',

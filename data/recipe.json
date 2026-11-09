@@ -1,0 +1,11 @@
+{
+    "note": "Regular fits a 25cm oval banneton (~1kg), large a 30cm one (~1.5kg). Flour and starter are fixed per loaf; hydration only changes the water. Total hydration counts the starter as half flour, half water.",
+    "sizes": {
+        "regular": { "label": "Regular", "flour": 450, "starter": 150, "note": "25cm banneton, ~1kg" },
+        "large": { "label": "Large", "flour": 600, "starter": 200, "note": "30cm banneton, ~1.5kg" }
+    },
+    "hydration": { "choices": [60, 65, 70, 75, 80], "default": 70 },
+    "extrasForRegular": { "salt": 10, "honey": 15, "oil": 20 },
+    "water": { "roundingG": 5, "snapG": 50, "leewayG": 10 },
+    "keepBackG": 30
+}

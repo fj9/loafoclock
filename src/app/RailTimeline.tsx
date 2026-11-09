@@ -21,7 +21,7 @@ const rowsOf = (plan: Plan): Row[] => plan.steps.map((s) => ({ key: s.id, label:
 function waitAt(plan: Plan, mid: number): Wait {
     const b = plan.byId;
     if (mid >= b.feed && mid < b.starterIn) return 'rising';
-    if (mid >= b.starterIn && mid < plan.bulkEnd) return 'bulk';
+    if (mid >= b.salt && mid < plan.bulkEnd) return 'bulk'; // bulk is counted from the salt going in
     // The dough stays in the fridge while the oven heats up, until it goes in.
     if (mid >= b.fridge && mid < b.bake) return plan.levers.fridge.kind === 'none' ? 'proof' : 'fridge';
     if (mid >= b.bake && mid < b.out) return 'bake';
@@ -34,7 +34,7 @@ function totalOf(plan: Plan, wait: Wait): number {
     const b = plan.byId;
     switch (wait) {
         case 'rising': return b.starterIn - b.feed;
-        case 'bulk': return plan.bulkEnd - b.starterIn;
+        case 'bulk': return plan.bulkEnd - b.salt;
         case 'fridge': case 'proof': return b.bake - b.fridge;
         case 'bake': return b.out - b.bake;
         case 'cool': return b.carve - b.out;
@@ -66,6 +66,8 @@ interface Props {
     state?: (id: StepId) => StepState;
     /** Replaces what is written beside a step, so the caller can make a row open in place. Return nothing to keep the usual name. */
     renderLabel?: (step: Step) => ComponentChildren | undefined;
+    /** Name the days by how many days after the first feed they are, instead of by date. 0 is the day of the first feed. */
+    dayLabel?: (daysAfterFeed: number) => string;
 }
 
 export type StepState = 'done' | 'next' | 'overdue' | 'upcoming';
@@ -74,7 +76,7 @@ export type StepState = 'done' | 'next' | 'overdue' | 'upcoming';
  * The bake as a list down the page: the time on the left, a rail of coloured waits in the middle and what to do
  * on the right. Days are named where they start, and the night is a tinted band behind the waits that run into it.
  */
-export function RailTimeline({ plan, zone, now, state, renderLabel }: Props) {
+export function RailTimeline({ plan, zone, now, state, renderLabel, dayLabel }: Props) {
     const rows = rowsOf(plan);
     const first = rows[0]!.at;
     const showNow = now !== undefined && now > first && now < plan.readyToCarve;
@@ -115,7 +117,7 @@ export function RailTimeline({ plan, zone, now, state, renderLabel }: Props) {
                 const nowAt = showNow && nextRow && now! >= r.at && now! < nextRow.at ? Math.round(((now! - r.at) / length) * height) : null;
                 return (
                     <li key={r.key} class={r.key === 'carve' ? 'rl-end' : ''}>
-                        {newDay && <p class={`rl-day${headerTint[i] ? ` in-night${edges(i > 0 && gapBottomTint(i - 1), true)}` : ''}`}>{shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
+                        {newDay && <p class={`rl-day${headerTint[i] ? ` in-night${edges(i > 0 && gapBottomTint(i - 1), true)}` : ''}`}>{dayLabel ? dayLabel(localDayNumber(r.at, zone) - localDayNumber(first, zone)) : shortDate(r.at, now ?? plan.byId.feed, zone)}</p>}
                         <div class={`rl-row${rowTint[i] ? ` in-night${edges(newDay ? headerTint[i]! : i > 0 && gapBottomTint(i - 1), nextRow ? gapTopTint(i) : false)}` : ''}`}>
                             <span class="rl-time">{clockOf(r.at, zone)}</span>
                             <span class="rl-node">

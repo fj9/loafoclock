@@ -9,21 +9,22 @@ const at = (d: number, h: number, m = 0, mo = 10) => zonedToMs({ year: 2026, mon
 
 describe('bulk table', () => {
     it('uses the closest temperature', () => {
-        expect(bulkFor(24).hours).toBe(7);
+        // `hours` is the longer end of the range, which is what the planner schedules
+        expect(bulkFor(24)).toMatchObject({ minHours: 3, maxHours: 5, hours: 5 });
         expect(bulkFor(21).rise).toBe(75);
-        expect(bulkFor(23.4).hours).toBe(8);
-        expect(bulkFor(40).hours).toBe(5.5);
-        expect(bulkFor(5).hours).toBe(16);
+        expect(bulkFor(23.4).hours).toBe(5.5);
+        expect(bulkFor(40).hours).toBe(2);
+        expect(bulkFor(5).hours).toBe(10.5);
     });
 });
 
 describe('forward planner', () => {
-    it('the fastest bake: 19 h 30 m with 30 minute cooling, 20 h with 60', () => {
+    it('the fastest bake: 18 h 30 m with 30 minute cooling, 19 h with 60', () => {
         const p = buildPlan(leversAt(0, { ratioN: 1, doughTemp: 27, cooling: 60, fridge: { kind: 'hours', hours: 8 } }));
-        // 4 h feed + 5.5 h bulk + 30 + 15 min shaping + 8 h fridge + 45 min bake + 60 min cooling
-        expect(totalHours(p)).toBeCloseTo(4 + 5.5 + 0.5 + 0.25 + 8 + 0.75 + 1, 6);
+        // 4 h feed + 1 h fermentolyse + 3.5 h bulk (27°C, from the salt) + 30 + 15 min shaping + 8 h fridge + 45 min bake + 60 min cooling
+        expect(totalHours(p)).toBeCloseTo(4 + 1 + 3.5 + 0.5 + 0.25 + 8 + 0.75 + 1, 6);
         const p45 = buildPlan(leversAt(0, { ratioN: 1, doughTemp: 27, cooling: 30, fridge: { kind: 'hours', hours: 8 } }));
-        expect(totalHours(p45)).toBeCloseTo(19.5, 6);
+        expect(totalHours(p45)).toBeCloseTo(18.5, 6);
     });
 
     it('puts the steps in order', () => {
@@ -31,9 +32,9 @@ describe('forward planner', () => {
         for (let i = 1; i < p.steps.length; i++) expect(p.steps[i]!.at).toBeGreaterThanOrEqual(p.steps[i - 1]!.at);
     });
 
-    it('counts bulk from the starter going in', () => {
+    it('counts bulk from the salt going in, for the longer end of the range', () => {
         const p = buildPlan(leversAt(0, { doughTemp: 24, autolyseMin: 30, fermentolyseMin: 30 }));
-        expect(p.bulkEnd - p.byId.starterIn).toBe(7 * HOUR);
+        expect(p.bulkEnd - p.byId.salt).toBe(5 * HOUR);
         expect(p.byId.autolyse).toBe(p.byId.starterIn - 30 * MINUTE);
         expect(p.byId.salt).toBe(p.byId.starterIn + 30 * MINUTE);
     });
@@ -46,7 +47,8 @@ describe('forward planner', () => {
 
     it('can skip the fridge and bake after a counter proof', () => {
         const p = buildPlan(leversAt(0, { fridge: { kind: 'none' } }));
-        expect(p.byId.bake - p.byId.fridge).toBe(150 * MINUTE);
+        // 24°C: the longer end of the final proof range, 1 to 2 hours
+        expect(p.byId.bake - p.byId.fridge).toBe(120 * MINUTE);
         expect(p.fridgeHours).toBe(0);
         expect(p.steps.find((s) => s.id === 'fridge')!.label).toBe('Proof on the counter');
     });
@@ -89,10 +91,15 @@ describe('re-anchoring on what really happened', () => {
         const early = buildPlan(leversAt(0), { autolyse: base.byId.autolyse - 15 * MINUTE });
         expect(early.byId.starterIn).toBe(base.byId.starterIn);
     });
-    it('the starter going in for real sets the start of bulk', () => {
+    it('the starter going in for real moves the salt, and so the start of bulk, with it', () => {
         const base = buildPlan(leversAt(0));
         const p = buildPlan(leversAt(0), { starterIn: base.byId.starterIn + 40 * MINUTE });
-        expect(p.bulkEnd - (base.byId.starterIn + 40 * MINUTE)).toBe(7 * HOUR);
+        expect(p.bulkEnd - (base.byId.salt + 40 * MINUTE)).toBe(5 * HOUR);
+    });
+    it('the salt going in for real sets the start of bulk', () => {
+        const base = buildPlan(leversAt(0));
+        const p = buildPlan(leversAt(0), { salt: base.byId.salt + 20 * MINUTE });
+        expect(p.bulkEnd - (base.byId.salt + 20 * MINUTE)).toBe(5 * HOUR);
     });
     it('a late fold moves later folds but not the end of bulk', () => {
         const base = buildPlan(leversAt(0));

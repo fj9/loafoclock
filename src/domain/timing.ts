@@ -1,9 +1,10 @@
 // Rest lengths for autolyse and fermentolyse: 30 to 60 minutes, 60 by default.
+import timing from '../../data/timing.json';
 import { clockAfter, parseClock, type ClockResult } from './feeding';
 
-export const REST_MIN = 30;
-export const REST_MAX = 60;
-export const REST_DEFAULT = 60;
+export const REST_MIN = timing.rest.min;
+export const REST_MAX = timing.rest.max;
+export const REST_DEFAULT = timing.rest.default;
 
 export function clampRest(minutes: number | string): number {
     const n = Math.round(Number(minutes));
@@ -29,7 +30,7 @@ export function tidyRest(startTime: string): { minutes: number; end: ClockResult
 export const restEnd = (startTime: string, minutes: number): ClockResult => clockAfter(startTime, minutes / 60);
 
 /** Minutes from the start of fermentolyse until the first fold: the rest, then 30 min for the salt. */
-export const FOLD_DELAY_AFTER_REST_MIN = 30;
+export const FOLD_DELAY_AFTER_REST_MIN = timing.foldDelayAfterRestMin;
 export const firstFoldMinutes = (fermentolyseMinutes: number): number => fermentolyseMinutes + FOLD_DELAY_AFTER_REST_MIN;
 /** Hours of bulk already done by the end of the folds: rest + salt rest + the 4 folds (1.5h). */
 export const bulkHoursBeforeRemaining = (fermentolyseMinutes: number): number => (firstFoldMinutes(fermentolyseMinutes) + 90) / 60;

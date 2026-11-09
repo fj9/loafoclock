@@ -1,7 +1,7 @@
 // Working backwards: give a time to carve and get back plans that land on it.
 import { ASSUMED_RATIO_N } from '../feeding';
 import {
-    FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bakeMinutesFor, bulkFor, isQuickFeed, leversAt, ratioFor,
+    FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, STEP_MINUTES, bakeMinutesFor, bulkFor, counterProofMinutes, isQuickFeed, leversAt, ratioFor,
     type Fridge, type Levers
 } from './levers';
 import { fitsWakingHours } from './rules';
@@ -52,13 +52,13 @@ function plansForOut(outAt: number, input: BackwardInput, fridges: Fridge[]): Pl
     if (!isAwake(bake, zone) || !isAwake(bake - STEP_MINUTES.preheat * MINUTE, zone) || !isAwake(outAt, zone)) return found;
 
     for (const fridge of fridges) {
-        const proof = fridge.kind === 'none' ? STEP_MINUTES.counterProof * MINUTE : fridge.hours * HOUR;
+        const proof = fridge.kind === 'none' ? counterProofMinutes(base.doughTemp) * MINUTE : fridge.hours * HOUR;
         const fridgeIn = bake - proof;
         const finalShape = fridgeIn - STEP_MINUTES.finalShape * MINUTE;
         const preShape = finalShape - STEP_MINUTES.preShape * MINUTE;
-        const starterIn = preShape - bulk.hours * HOUR;
+        const salt = preShape - bulk.hours * HOUR;
         if (![fridgeIn, finalShape, preShape].every((t) => isAwake(t, zone))) continue;
-        const salt = starterIn + base.fermentolyseMin * MINUTE;
+        const starterIn = salt - base.fermentolyseMin * MINUTE;
         const fold1 = salt + STEP_MINUTES.saltRest * MINUTE;
         const folds = [fold1, fold1 + 30 * MINUTE, fold1 + 60 * MINUTE, fold1 + 90 * MINUTE];
         if (![starterIn, starterIn - base.autolyseMin * MINUTE, salt, ...folds].every((t) => isAwake(t, zone))) continue;

@@ -1,10 +1,11 @@
 // The rules a plan has to follow.
 import { FRIDGE_MAX_HOURS, FRIDGE_MIN_HOURS, isQuickFeed } from './levers';
+import timing from '../../../data/timing.json';
 import type { Plan, StepId } from './steps';
 import { HOUR, getWaking, isAwake, type Waking, type Zone } from './time';
 
 /** The longest the loaf may rest between coming out of the oven and being carved. */
-export const MAX_REST_BEFORE_CARVING_HOURS = 16;
+export const MAX_REST_BEFORE_CARVING_HOURS = timing.maxRestBeforeCarvingHours;
 
 export type Violation =
     | { kind: 'asleep'; stepId: StepId; at: number }

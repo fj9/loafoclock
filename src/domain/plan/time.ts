@@ -5,6 +5,8 @@
 // come out right. Everything here takes an optional IANA time zone ("Europe/London"). Leave it out
 // to use this device's zone; tests pass one so they do not depend on the machine.
 
+import timing from '../../../data/timing.json';
+
 export const MINUTE = 60_000;
 export const HOUR = 3_600_000;
 export const DAY = 24 * HOUR;
@@ -114,7 +116,7 @@ export interface Waking {
 }
 
 /** Every moment that needs you must fall between 6:00 am and 11:00 pm, unless the Settings say otherwise. */
-export const DEFAULT_WAKING: Waking = { fromMin: 6 * 60, toMin: 23 * 60 };
+export const DEFAULT_WAKING: Waking = { fromMin: timing.wakingHours.from * 60, toMin: timing.wakingHours.to * 60 };
 
 let current: Waking = DEFAULT_WAKING;
 

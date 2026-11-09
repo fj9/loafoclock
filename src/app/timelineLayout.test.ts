@@ -11,7 +11,7 @@ describe('timeline layout', () => {
         expect(l.pieces.map((q) => q.collapsed)).toEqual([false, true, false]);
         expect(l.x(l.end)).toBeCloseTo(340, 6);
         expect(l.x(l.start)).toBe(0);
-        expect(l.pieces[1]!.x1 - l.pieces[1]!.x0).toBe(BREAK_PX);
+        expect(l.pieces[1]!.x1 - l.pieces[1]!.x0).toBeCloseTo(BREAK_PX, 6);
     });
 
     it('keeps the busy hours at the same scale on both sides of the break', () => {

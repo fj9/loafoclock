@@ -2,45 +2,57 @@
 import { findRatio, type FeedingRatio } from '../feeding';
 import { bakePlan, type LoafSize } from '../recipe';
 import { HOUR, MINUTE } from './time';
+import bulkData from '../../../data/bulk.json';
+import timing from '../../../data/timing.json';
+import finalProofData from '../../../data/final-proof.json';
 
-/** Dough temperature (°C) to hours of bulk fermentation and the rise to look for. */
-export const BULK_TABLE: ReadonlyArray<{ temp: number; hours: number; rise: number }> = [
-    { temp: 27, hours: 5.5, rise: 50 }, { temp: 26, hours: 5.5, rise: 50 },
-    { temp: 25.5, hours: 6, rise: 50 }, { temp: 25, hours: 6, rise: 50 },
-    { temp: 24.5, hours: 7, rise: 50 }, { temp: 24, hours: 7, rise: 50 },
-    { temp: 23, hours: 8, rise: 50 }, { temp: 22.5, hours: 9, rise: 50 },
-    { temp: 22, hours: 10, rise: 50 }, { temp: 21.5, hours: 11, rise: 50 },
-    { temp: 21, hours: 12, rise: 75 }, { temp: 20.5, hours: 13, rise: 75 },
-    { temp: 20, hours: 14, rise: 75 }, { temp: 19.5, hours: 15, rise: 75 },
-    { temp: 19, hours: 16, rise: 75 }, { temp: 18, hours: 16, rise: 75 }
-];
-export const WARMEST_TEMP = 27;
-export const COOLEST_TEMP = 18;
+/** One bulk row: the clock window (hours, from the salt going in) and the rise to look for. `hours` is the longer end, which is what the planner schedules. */
+export interface BulkRow { temp: number; minHours: number; maxHours: number; hours: number; rise: number }
 
-/** The row for the closest temperature in the table. */
-export function bulkFor(temp: number): { temp: number; hours: number; rise: number } {
+/** Dough temperature (°C) to the hours of bulk fermentation and the rise to look for. */
+export const BULK_TABLE: ReadonlyArray<BulkRow> = bulkData.rows.map((r) => ({ ...r, hours: r.maxHours }));
+export const WARMEST_TEMP = Math.max(...BULK_TABLE.map((r) => r.temp));
+export const COOLEST_TEMP = Math.min(...BULK_TABLE.map((r) => r.temp));
+/** What to say below the coolest and above the warmest row, where the table gives no clock time. */
+export const BULK_TOO_COOL = bulkData.tooCool;
+export const BULK_TOO_WARM = bulkData.tooWarm;
+
+/** The row for the closest temperature in the table (the nearest end if the temperature is off the table). */
+export function bulkFor(temp: number): BulkRow {
     let best = BULK_TABLE[0]!;
     for (const row of BULK_TABLE) if (Math.abs(row.temp - temp) < Math.abs(best.temp - temp)) best = row;
     return best;
 }
 
-/** Fixed lengths of the steps in between, in minutes. */
-export const STEP_MINUTES = {
-    saltRest: 30,     // fermentolyse ends, salt goes in, then this long to the first fold
-    foldGap: 30,
-    foldCount: 4,
-    preShape: 30,     // bench rest between pre-shape and final shape
-    finalShape: 15,   // final shape to the dough going in the fridge
-    preheat: 45,
-    counterProof: 150 // proofing on the counter when the fridge is skipped (about 2 to 3 hours)
-} as const;
+/** Minutes of proofing on the counter when the fridge is skipped: the longer end of the final proof range, taking the dough temperature as the room temperature. */
+export const counterProofMinutes = (doughTemp: number): number => Math.round(finalProofFor(doughTemp).maxHours * 60);
 
-export const FRIDGE_MIN_HOURS = 8;
-export const FRIDGE_MAX_HOURS = 72;
-export const COOLING_CHOICES = [30, 60] as const;
-export type Cooling = (typeof COOLING_CHOICES)[number];
+/** "3 to 5": a range of hours written for text. */
+export const hoursRangeText = (r: { minHours: number; maxHours: number }): string =>
+    r.minHours === r.maxHours ? `${r.maxHours}` : `${r.minHours} to ${r.maxHours}`;
+
+/** Room temperature (°C) to the hours of final proof at room temperature, for shaped dough that skips the fridge. */
+export const FINAL_PROOF_TABLE: ReadonlyArray<{ temp: number; minHours: number; maxHours: number }> = finalProofData.rows;
+
+/** The final proof row for the closest room temperature in the table. */
+export function finalProofFor(temp: number): { temp: number; minHours: number; maxHours: number } {
+    let best = FINAL_PROOF_TABLE[0]!;
+    for (const row of FINAL_PROOF_TABLE) if (Math.abs(row.temp - temp) < Math.abs(best.temp - temp)) best = row;
+    return best;
+}
+
+/** Fixed lengths of the steps in between, in minutes. */
+export const STEP_MINUTES = timing.stepMinutes;
+// saltRest: fermentolyse ends, salt goes in, then this long to the first fold
+// preShape: bench rest between pre-shape and final shape
+// finalShape: final shape to the dough going in the fridge
+
+export const FRIDGE_MIN_HOURS = timing.fridgeHours.min;
+export const FRIDGE_MAX_HOURS = timing.fridgeHours.max;
+export const COOLING_CHOICES = timing.coolingChoices as readonly Cooling[];
+export type Cooling = 30 | 60;
 /** At or below this many parts a feed counts as a quick feed. */
-export const QUICK_FEED_MAX_N = 3;
+export const QUICK_FEED_MAX_N = timing.quickFeedMaxN;
 
 export type Fridge = { kind: 'hours'; hours: number } | { kind: 'none' };
 
@@ -84,9 +96,9 @@ export const hours = (n: number): number => n * HOUR;
 
 // ---- One slider for the feed: hours from feeding to adding the starter ----
 /** The shortest and longest wait the chart covers: 1:1:1 is ready at 4 hours, 1:10:10 is still good at 16. */
-export const WAIT_MIN_HOURS = 4;
-export const WAIT_MAX_HOURS = 16;
-const WAIT_STEP_MIN = 15;
+export const WAIT_MIN_HOURS = timing.waitHours.min;
+export const WAIT_MAX_HOURS = timing.waitHours.max;
+const WAIT_STEP_MIN = timing.waitHours.stepMin;
 
 /** Hours from the feed to the starter going into the dough. */
 export const waitHoursOf = (l: Pick<Levers, 'ratioN' | 'starterDelayMin'>): number => ratioFor(l.ratioN).minHours + l.starterDelayMin / 60;

@@ -1,0 +1,8 @@
+{
+    "note": "Dutch oven bake. Minutes are [shortest, longest]; the longest is used for planning. The large loaf needs longer in the pot.",
+    "ovenC": { "lidOn": 240, "lidOff": 230 },
+    "minutes": {
+        "regular": { "lidOn": [20, 20], "lidOff": [20, 25] },
+        "large": { "lidOn": [25, 25], "lidOff": [25, 25] }
+    }
+}
