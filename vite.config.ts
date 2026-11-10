@@ -13,7 +13,11 @@ export default defineConfig({
         preact(),
         VitePWA({
             registerType: 'prompt', // the app asks the user to reload when a new version is cached
-            workbox: { globPatterns: ['**/*.{js,css,html,woff2}'] }, // include the bundled heading font
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,woff2}'], // include the bundled heading font
+                // The handbook PDFs are links to files, not app pages: without this the service worker answers them with index.html
+                navigateFallbackDenylist: [/\.pdf$/]
+            },
             includeAssets: ['favicon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png'],
             manifest: {
                 name: "Loaf O'Clock",
